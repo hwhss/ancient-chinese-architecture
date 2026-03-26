@@ -1,6 +1,12 @@
 {
   "pages": [
     {
+      "path": "pages/map/map",
+      "style": {
+        "navigationBarTitleText": "古建筑导览地图"
+      }
+    },
+    {
       "path": "pages/index/index",
       "style": {
         "navigationBarTitleText": "古建筑AI导览"

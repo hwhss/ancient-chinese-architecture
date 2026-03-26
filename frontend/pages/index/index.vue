@@ -5,12 +5,20 @@
       <text class="title">🏯 古建筑AI导览</text>
     </view>
 
+    <!-- 快捷入口 -->
+    <view v-if="messages.length === 0" class="quick-actions">
+      <button class="quick-btn" @click="goToMap">
+        🗺️ 浏览古建筑地图
+      </button>
+    </view>
+
     <!-- 消息区域 -->
     <scroll-view class="message-area" scroll-y :scroll-into-view="scrollId">
       <!-- 欢迎消息 -->
       <view v-if="messages.length === 0" class="welcome">
         <text class="welcome-text">您好！我是您的古建筑导览助手</text>
         <text class="welcome-sub">可以问我关于故宫的问题，如"太和殿的历史"</text>
+        <text class="welcome-hint">💡 或直接点击上方「浏览古建筑地图」查看全部</text>
       </view>
 
       <!-- 消息列表 -->
@@ -50,8 +58,9 @@
 </template>
 
 <script>
-// 本地关键词映射表（极简版）
+// 本地关键词映射表 - 20个代表性古建筑
 const keywordMapping = {
+  // 皇宫
   '太和殿': 'gugong_01',
   '乾清宫': 'gugong_02',
   '中和殿': 'gugong_03',
@@ -60,6 +69,33 @@ const keywordMapping = {
   '御花园': 'gugong_06',
   '午门': 'gugong_07',
   '天安门': 'gugong_08',
+  '故宫': 'gugong_01',
+  '紫禁城': 'gugong_01',
+  '沈阳故宫': 'shenyang_01',
+  // 桥梁
+  '赵州桥': 'zhaozhou_01',
+  '卢沟桥': 'lugou_01',
+  '广济桥': 'guangji_01',
+  // 园林
+  '拙政园': 'zhuozheng_01',
+  '颐和园': 'yiheyuan_01',
+  '苏州园林': 'zhuozheng_01',
+  // 城防
+  '西安城墙': 'xian_01',
+  '南京城墙': 'nanjing_01',
+  // 民居
+  '福建土楼': 'tulou_01',
+  '土楼': 'tulou_01',
+  '乔家大院': 'qiaojia_01',
+  '平遥古城': 'pingyao_01',
+  '丽江古城': 'lijiang_01',
+  // 楼阁
+  '岳阳楼': 'yueyang_01',
+  '孔庙': 'kongmiao_01',
+  '曲阜孔庙': 'kongmiao_01',
+  // 水利
+  '都江堰': 'dujiangyan_01',
+  '坎儿井': 'kanerjing_01',
 };
 
 // 根据问题匹配materialId
@@ -156,6 +192,12 @@ export default {
     goToDetail(materialId) {
       uni.navigateTo({
         url: `/pages/detail/detail?materialId=${materialId}`
+      });
+    },
+
+    goToMap() {
+      uni.navigateTo({
+        url: '/pages/map/map'
       });
     }
   }
@@ -294,5 +336,32 @@ export default {
 
 .scroll-bottom {
   height: 1rpx;
+}
+
+/* 快捷入口 */
+.quick-actions {
+  padding: 20rpx 30rpx;
+  background: #fff;
+  border-bottom: 1rpx solid #e5e5e5;
+}
+
+.quick-btn {
+  width: 100%;
+  height: 80rpx;
+  line-height: 80rpx;
+  background: linear-gradient(135deg, #2E8B57 0%, #3CB371 100%);
+  color: #fff;
+  font-size: 30rpx;
+  border-radius: 40rpx;
+  border: none;
+}
+
+.welcome-hint {
+  display: block;
+  font-size: 24rpx;
+  color: #8B4513;
+  margin-top: 20rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx dashed #ddd;
 }
 </style>

@@ -57,8 +57,9 @@
 </template>
 
 <script>
-// 素材ID到名称的映射
+// 素材ID到名称的映射 - 20个代表性古建筑
 const materialNames = {
+  // 皇宫
   'gugong_01': '太和殿',
   'gugong_02': '乾清宫',
   'gugong_03': '中和殿',
@@ -67,12 +68,35 @@ const materialNames = {
   'gugong_06': '御花园',
   'gugong_07': '午门',
   'gugong_08': '天安门',
+  'shenyang_01': '沈阳故宫大政殿',
+  // 桥梁
+  'zhaozhou_01': '赵州桥',
+  'lugou_01': '卢沟桥',
+  'guangji_01': '广济桥',
+  // 园林
+  'zhuozheng_01': '拙政园',
+  'yiheyuan_01': '颐和园',
+  // 城防
+  'xian_01': '西安城墙',
+  'nanjing_01': '南京城墙',
+  // 民居
+  'tulou_01': '福建土楼',
+  'qiaojia_01': '乔家大院',
+  'pingyao_01': '平遥古城',
+  'lijiang_01': '丽江古城',
+  // 楼阁
+  'yueyang_01': '岳阳楼',
+  'kongmiao_01': '曲阜孔庙',
+  // 水利
+  'dujiangyan_01': '都江堰',
+  'kanerjing_01': '坎儿井',
 };
 
 export default {
   data() {
     return {
       materialId: '',
+      materialName: '',
       material: {
         url: '',
         type: '',
@@ -86,12 +110,13 @@ export default {
 
   computed: {
     materialTitle() {
-      return materialNames[this.materialId] || '古建筑素材';
+      return this.materialName || materialNames[this.materialId] || '古建筑素材';
     }
   },
 
   onLoad(options) {
     this.materialId = options.materialId || '';
+    this.materialName = options.name ? decodeURIComponent(options.name) : '';
     if (this.materialId) {
       this.loadMaterial();
     }
@@ -127,27 +152,10 @@ export default {
     },
 
     setPlaceholderData() {
-      // 模拟数据，实际项目中会从服务器获取
-      const mockData = {
-        'gugong_01': {
-          url: 'https://picsum.photos/800/600?random=1',
-          type: 'image',
-          source: '故宫博物院官网'
-        },
-        'gugong_02': {
-          url: 'https://picsum.photos/800/600?random=2',
-          type: 'image',
-          source: '故宫博物院官网'
-        },
-        'gugong_03': {
-          url: 'https://picsum.photos/800/600?random=3',
-          type: 'image',
-          source: '故宫博物院官网'
-        }
-      };
-
-      this.material = mockData[this.materialId] || {
-        url: `https://picsum.photos/800/600?random=${Math.floor(Math.random() * 100)}`,
+      // 模拟数据，为每个建筑ID生成对应的图片
+      const randomNum = parseInt(this.materialId.replace(/\D/g, '')) || Math.floor(Math.random() * 100);
+      this.material = {
+        url: `https://picsum.photos/800/600?random=${randomNum}`,
         type: 'image',
         source: '示例图片'
       };
