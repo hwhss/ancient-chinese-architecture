@@ -7,7 +7,7 @@ const path = require('path');
 const { getAIAnswer } = require('./services/aiService');
 
 const app = express();
-const port = 8080;
+const port = 9527;  // 9527 - 唐伯虎点秋香梗，好记不冲突
 
 // 中间件
 app.use(cors());

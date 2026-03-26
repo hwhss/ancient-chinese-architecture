@@ -115,8 +115,8 @@ export default {
       inputText: '',
       scrollId: 'msg-end',
       loading: false,
-      // 后端接口地址
-      apiBaseUrl: 'http://localhost:8080'
+      // 后端接口地址（9527 - 好记不冲突）
+      apiBaseUrl: 'http://localhost:9527'
     };
   },
   methods: {
