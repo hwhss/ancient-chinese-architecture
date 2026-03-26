@@ -116,7 +116,7 @@ export default {
       scrollId: 'msg-end',
       loading: false,
       // 后端接口地址
-      apiBaseUrl: 'http://localhost:3000'
+      apiBaseUrl: 'http://localhost:8080'
     };
   },
   methods: {

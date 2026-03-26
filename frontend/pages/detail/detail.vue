@@ -104,7 +104,7 @@ export default {
       },
       loading: false,
       error: null,
-      apiBaseUrl: 'http://localhost:3000'
+      apiBaseUrl: 'http://localhost:8080'
     };
   },
 

@@ -7,7 +7,7 @@ const path = require('path');
 const { getAIAnswer } = require('./services/aiService');
 
 const app = express();
-const port = 3000;
+const port = 8080;
 
 // 中间件
 app.use(cors());

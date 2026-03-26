@@ -74,7 +74,7 @@ npm install
 npm start
 ```
 
-服务将运行在 `http://localhost:3000`
+服务将运行在 `http://localhost:8080`
 
 **接口列表：**
 | 接口 | 方法 | 说明 |
