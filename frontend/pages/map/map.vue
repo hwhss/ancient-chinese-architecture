@@ -2,8 +2,8 @@
   <view class="container">
     <!-- 顶部标题 -->
     <view class="header">
-      <text class="title">🏯 古建筑导览地图</text>
-      <text class="subtitle">探索中华建筑之美</text>
+      <text class="title">🏯 中华古建筑名录</text>
+      <text class="subtitle">精选20处代表性古建筑</text>
     </view>
 
     <!-- 分类标签 -->

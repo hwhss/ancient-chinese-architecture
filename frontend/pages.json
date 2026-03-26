@@ -3,7 +3,7 @@
     {
       "path": "pages/map/map",
       "style": {
-        "navigationBarTitleText": "古建筑导览地图"
+        "navigationBarTitleText": "古建筑名录"
       }
     },
     {
