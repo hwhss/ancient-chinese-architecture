@@ -2,8 +2,10 @@
   <view class="container">
     <!-- 顶部标题 -->
     <view class="header">
+      <view class="header-decoration top"></view>
       <text class="title">🏯 中华古建筑名录</text>
-      <text class="subtitle">精选20处代表性古建筑</text>
+      <text class="subtitle">精选十七处代表性古建筑</text>
+      <view class="header-decoration bottom"></view>
     </view>
 
     <!-- 分类标签 -->
@@ -27,7 +29,7 @@
         class="building-card"
         @click="goToDetail(building)"
       >
-        <image class="building-image" :src="building.image" mode="aspectFill" />
+        <image class="building-image" :src="building.image" mode="aspectFill" lazy-load="true" />
         <view class="building-info">
           <text class="building-name">{{ building.name }}</text>
           <text class="building-location">📍 {{ building.location }}</text>
@@ -42,14 +44,26 @@
     <!-- 底部按钮 -->
     <view class="bottom-actions">
       <button class="action-btn secondary" @click="goToChat">
-        💬 询问AI
+        💬 返回AI问答
       </button>
     </view>
   </view>
 </template>
 
 <script>
-// 古建筑数据 - 20个代表性建筑
+// 分类配置 - 静态常量
+const categories = [
+  { key: 'all', name: '全部' },
+  { key: 'palace', name: '🏛️ 皇宫' },
+  { key: 'bridge', name: '🌉 桥梁' },
+  { key: 'garden', name: '🌿 园林' },
+  { key: 'defense', name: '🏰 城防' },
+  { key: 'residence', name: '🏠 民居' },
+  { key: 'tower', name: '🏯 楼阁' },
+  { key: 'water', name: '💧 水利' }
+];
+
+// 古建筑数据 - 静态数据保持不变，UniApp兼容处理
 const buildingsData = [
   // 皇宫
   {
@@ -213,18 +227,6 @@ const buildingsData = [
   }
 ];
 
-// 分类配置
-const categories = [
-  { key: 'all', name: '全部' },
-  { key: 'palace', name: '🏛️ 皇宫' },
-  { key: 'bridge', name: '🌉 桥梁' },
-  { key: 'garden', name: '🌿 园林' },
-  { key: 'defense', name: '🏰 城防' },
-  { key: 'residence', name: '🏠 民居' },
-  { key: 'tower', name: '🏯 楼阁' },
-  { key: 'water', name: '💧 水利' }
-];
-
 export default {
   data() {
     return {
@@ -268,13 +270,30 @@ export default {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: linear-gradient(180deg, #f8f4e8 0%, #f5f5f5 100%);
+  background: linear-gradient(180deg, #f8f4e8 0%, #f0e9d8 100%);
 }
 
 .header {
-  background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
-  padding: 40rpx 30rpx;
+  background: #8B4513;
+  padding: 30rpx 30rpx 40rpx;
   text-align: center;
+}
+
+.header-decoration {
+  height: 2rpx;
+  width: 50%;
+  margin: 12rpx auto;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.header-decoration.top {
+  margin-top: 0;
+  margin-bottom: 16rpx;
+}
+
+.header-decoration.bottom {
+  margin-bottom: 0;
+  margin-top: 16rpx;
 }
 
 .title {
@@ -282,36 +301,41 @@ export default {
   color: #fff;
   font-size: 40rpx;
   font-weight: bold;
-  margin-bottom: 10rpx;
+  letter-spacing: 6rpx;
+  margin-bottom: 8rpx;
 }
 
 .subtitle {
   display: block;
   color: rgba(255,255,255,0.8);
   font-size: 26rpx;
+  letter-spacing: 2rpx;
 }
 
 .category-tabs {
   background: #fff;
   padding: 20rpx;
   white-space: nowrap;
-  border-bottom: 1rpx solid #e5e5e5;
+  border-bottom: 1rpx solid #e8dcc8;
 }
 
 .tab {
   display: inline-block;
   padding: 16rpx 32rpx;
   margin-right: 16rpx;
-  background: #f5f5f5;
+  background: #f8f4e9;
   border-radius: 30rpx;
   font-size: 26rpx;
-  color: #666;
+  color: #6b5643;
   transition: all 0.3s;
+  transform: translateZ(0);
+  border: 1rpx solid transparent;
 }
 
 .tab.active {
-  background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+  background: #8B4513;
   color: #fff;
+  border-color: #8B4513;
 }
 
 .building-list {
@@ -321,10 +345,18 @@ export default {
 
 .building-card {
   background: #fff;
-  border-radius: 20rpx;
+  border-radius: 12rpx;
   overflow: hidden;
   margin-bottom: 30rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.08);
+  box-shadow: 0 4rpx 12rpx rgba(139, 69, 19, 0.12);
+  transform: translateZ(0);
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1rpx solid #e8dcc8;
+}
+
+.building-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 8rpx rgba(139, 69, 19, 0.15);
 }
 
 .building-image {
@@ -340,7 +372,7 @@ export default {
   display: block;
   font-size: 36rpx;
   font-weight: bold;
-  color: #333;
+  color: #3c2a1d;
   margin-bottom: 12rpx;
 }
 
@@ -354,7 +386,7 @@ export default {
 .building-desc {
   display: block;
   font-size: 28rpx;
-  color: #666;
+  color: #6b5643;
   line-height: 1.6;
   margin-bottom: 20rpx;
 }
@@ -366,18 +398,19 @@ export default {
 
 .tag {
   padding: 8rpx 20rpx;
-  background: #f0f0f0;
+  background: #f8f4e9;
   border-radius: 20rpx;
   font-size: 24rpx;
-  color: #666;
+  color: #8B4513;
   margin-right: 16rpx;
   margin-bottom: 10rpx;
+  border: 1rpx solid #e8dcc8;
 }
 
 .bottom-actions {
   background: #fff;
   padding: 20rpx 30rpx;
-  border-top: 1rpx solid #e5e5e5;
+  border-top: 1rpx solid #e8dcc8;
   display: flex;
   justify-content: center;
 }
@@ -386,16 +419,22 @@ export default {
   width: 300rpx;
   height: 80rpx;
   line-height: 80rpx;
-  background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+  background: #8B4513;
   color: #fff;
   font-size: 30rpx;
   border-radius: 40rpx;
   border: none;
+  transform: translateZ(0);
+  transition: all 0.2s;
 }
 
 .action-btn.secondary {
-  background: #f5f5f5;
+  background: #fff;
   color: #8B4513;
   border: 2rpx solid #8B4513;
+}
+
+.action-btn:active {
+  transform: scale(0.96);
 }
 </style>

@@ -15,6 +15,12 @@ export default {
 <style>
 /* 全局样式 */
 page {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
+  background-color: #f8f4e9;
+}
+
+/* 优化滚动性能 */
+scroll-view {
+  -webkit-overflow-scrolling: touch;
 }
 </style>

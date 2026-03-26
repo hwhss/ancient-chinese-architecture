@@ -3,14 +3,15 @@
     <!-- 顶部导航 -->
     <view class="header">
       <button class="back-btn" @click="goBack">← 返回</button>
-      <text class="header-title">素材详情</text>
+      <text class="header-title">古建筑详情</text>
+      <view class="placeholder"></view>
     </view>
 
     <!-- 素材展示区域 -->
     <view class="content">
       <!-- 加载中 -->
       <view v-if="loading" class="loading">
-        <text>加载中...</text>
+        <text>正在加载...</text>
       </view>
 
       <!-- 错误提示 -->
@@ -24,6 +25,7 @@
           class="material-image"
           :src="material.url"
           mode="widthFix"
+          lazy-load="true"
           @error="onImageError"
         />
         <view class="material-info">
@@ -57,8 +59,8 @@
 </template>
 
 <script>
-// 素材ID到名称的映射 - 20个代表性古建筑
-const materialNames = {
+// 素材ID到名称的映射 - 静态常量
+const MATERIAL_NAMES = {
   // 皇宫
   'gugong_01': '太和殿',
   'gugong_02': '乾清宫',
@@ -111,7 +113,7 @@ export default {
 
   computed: {
     materialTitle() {
-      return this.materialName || materialNames[this.materialId] || '古建筑素材';
+      return this.materialName || MATERIAL_NAMES[this.materialId] || '古建筑素材';
     }
   },
 
@@ -176,14 +178,14 @@ export default {
 <style>
 .container {
   min-height: 100vh;
-  background-color: #f5f5f5;
+  background-color: #f8f4e9;
 }
 
 .header {
   display: flex;
   align-items: center;
-  background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
-  padding: 40rpx 30rpx 30rpx;
+  background: #8B4513;
+  padding: 30rpx 30rpx 40rpx;
 }
 
 .back-btn {
@@ -194,6 +196,13 @@ export default {
   border-radius: 30rpx;
   border: none;
   margin-right: 20rpx;
+  transform: translateZ(0);
+  transition: all 0.2s;
+}
+
+.back-btn:active {
+  background: rgba(255,255,255,0.35);
+  transform: scale(0.95);
 }
 
 .header-title {
@@ -202,7 +211,12 @@ export default {
   color: #fff;
   font-size: 34rpx;
   font-weight: bold;
-  margin-right: 100rpx;
+  letter-spacing: 4rpx;
+  margin-right: 120rpx;
+}
+
+.placeholder {
+  width: 100rpx;
 }
 
 .content {
@@ -212,17 +226,20 @@ export default {
 .loading, .error {
   text-align: center;
   padding: 100rpx 40rpx;
+  font-size: 32rpx;
+  color: #6b5643;
 }
 
 .error {
-  color: #ff4d4f;
+  color: #b85450;
 }
 
 .material-wrapper {
   background: #fff;
-  border-radius: 20rpx;
+  border-radius: 12rpx;
   overflow: hidden;
-  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.1);
+  box-shadow: 0 4rpx 16rpx rgba(139, 69, 19, 0.12);
+  border: 1rpx solid #e8dcc8;
 }
 
 .material-image {
@@ -243,21 +260,22 @@ export default {
   display: block;
   font-size: 36rpx;
   font-weight: bold;
-  color: #333;
+  color: #3c2a1d;
   margin-bottom: 16rpx;
 }
 
 .material-source {
   display: block;
   font-size: 26rpx;
-  color: #666;
+  color: #6b5643;
 }
 
 .placeholder {
   text-align: center;
   padding: 100rpx 40rpx;
   background: #fff;
-  border-radius: 20rpx;
+  border-radius: 12rpx;
+  border: 1rpx solid #e8dcc8;
 }
 
 .placeholder-icon {
@@ -268,13 +286,13 @@ export default {
 .placeholder-text {
   display: block;
   font-size: 32rpx;
-  color: #333;
+  color: #3c2a1d;
   margin-bottom: 20rpx;
 }
 
 .placeholder-sub {
   display: block;
   font-size: 26rpx;
-  color: #999;
+  color: #8b735c;
 }
 </style>

@@ -2,13 +2,15 @@
   <view class="container">
     <!-- 顶部标题 -->
     <view class="header">
+      <view class="header-decoration"></view>
       <text class="title">🏯 古建筑AI导览</text>
+      <view class="header-decoration"></view>
     </view>
 
     <!-- 快捷入口 -->
     <view v-if="messages.length === 0" class="quick-actions">
       <button class="quick-btn" @click="goToMap">
-        🗺️ 浏览古建筑地图
+        🗺️ 浏览古建筑名录
       </button>
     </view>
 
@@ -16,9 +18,16 @@
     <scroll-view class="message-area" scroll-y :scroll-into-view="scrollId">
       <!-- 欢迎消息 -->
       <view v-if="messages.length === 0" class="welcome">
+        <view class="welcome-divider">
+          <text class="welcome-title">欢迎使用</text>
+        </view>
         <text class="welcome-text">您好！我是您的古建筑导览助手</text>
-        <text class="welcome-sub">可以问我关于故宫的问题，如"太和殿的历史"</text>
-        <text class="welcome-hint">💡 或直接点击上方「浏览古建筑地图」查看全部</text>
+        <text class="welcome-sub">可以问我关于古建筑的问题，例如：</text>
+        <view class="example-questions">
+          <text class="example-item">"太和殿的历史是什么？"</text>
+          <text class="example-item">"赵州桥的建筑特色？"</text>
+        </view>
+        <text class="welcome-hint">💡 或点击上方按钮浏览全部古建筑</text>
       </view>
 
       <!-- 消息列表 -->
@@ -26,7 +35,7 @@
         <view class="message" :class="msg.role">
           <text class="message-text">{{ msg.content }}</text>
           <button v-if="msg.materialId" class="view-btn" @click="goToDetail(msg.materialId)">
-            查看实景/动画 →
+            查看实景资料 →
           </button>
         </view>
       </view>
@@ -34,7 +43,7 @@
       <!-- 加载状态 -->
       <view v-if="loading" class="message-wrapper ai">
         <view class="message ai">
-          <text class="loading-text">AI思考中...</text>
+          <text class="loading-text">正在思考中...</text>
         </view>
       </view>
 
@@ -58,8 +67,8 @@
 </template>
 
 <script>
-// 本地关键词映射表 - 20个代表性古建筑
-const keywordMapping = {
+// 共享常量 - 关键词映射表，提取为静态只读
+const KEYWORD_MAPPING = {
   // 皇宫
   '太和殿': 'gugong_01',
   '乾清宫': 'gugong_02',
@@ -98,15 +107,21 @@ const keywordMapping = {
   '坎儿井': 'kanerjing_01',
 };
 
-// 根据问题匹配materialId
+// 根据问题匹配materialId - 纯函数优化
 function matchMaterialId(question) {
-  for (const keyword in keywordMapping) {
+  for (const keyword in KEYWORD_MAPPING) {
     if (question.includes(keyword)) {
-      return keywordMapping[keyword];
+      return KEYWORD_MAPPING[keyword];
     }
   }
   return null;
 }
+
+// 缓存mock回答避免重复创建字符串
+const MOCK_ANSWERS = {
+  '太和殿': '太和殿建成于明永乐十八年（1420年），是故宫规模最大、等级最高的建筑，用于举行大典。殿高35.05米，建筑面积2377平方米，是中国现存最大的木结构大殿。',
+  '乾清宫': '乾清宫是明清皇帝的寝宫，建于明永乐十八年。清代雍正帝后，皇帝移居养心殿，乾清宫改为皇帝处理日常政务的场所。'
+};
 
 export default {
   data() {
@@ -174,15 +189,14 @@ export default {
       }
     },
 
-    // Mock回答（用于演示）
+    // Mock回答（用于演示） - 使用缓存常量避免重复分配内存
     getMockAnswer(question) {
-      if (question.includes('太和殿')) {
-        return '太和殿建成于明永乐十八年（1420年），是故宫规模最大、等级最高的建筑，用于举行大典。殿高35.05米，建筑面积2377平方米，是中国现存最大的木结构大殿。';
+      for (const key in MOCK_ANSWERS) {
+        if (question.includes(key)) {
+          return MOCK_ANSWERS[key];
+        }
       }
-      if (question.includes('乾清宫')) {
-        return '乾清宫是明清皇帝的寝宫，建于明永乐十八年。清代雍正帝后，皇帝移居养心殿，乾清宫改为皇帝处理日常政务的场所。';
-      }
-      return '这是一个很有价值的问题。' + question + '涉及丰富的历史文化内涵。建议您参考相关历史资料获取更详细的信息。';
+      return `这是一个很有价值的问题。${question}涉及丰富的历史文化内涵。建议您参考相关历史资料获取更详细的信息。`;
     },
 
     scrollToBottom() {
@@ -209,19 +223,30 @@ export default {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background-color: #f5f5f5;
+  background-color: #f8f4e9;
 }
 
 .header {
-  background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
-  padding: 40rpx 30rpx;
+  background: #8B4513;
+  padding: 30rpx 30rpx 40rpx;
   text-align: center;
+  position: relative;
+}
+
+.header-decoration {
+  height: 2rpx;
+  width: 60%;
+  margin: 10rpx auto;
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .title {
   color: #fff;
-  font-size: 36rpx;
+  font-size: 38rpx;
   font-weight: bold;
+  letter-spacing: 8rpx;
+  display: block;
+  line-height: 1.8;
 }
 
 .message-area {
@@ -231,27 +256,57 @@ export default {
 
 .welcome {
   text-align: center;
-  padding: 60rpx 40rpx;
+  padding: 50rpx 40rpx;
   background: #fff;
-  border-radius: 20rpx;
-  margin: 20rpx;
+  border-radius: 12rpx;
+  margin: 20rpx 10rpx;
+  border: 1rpx solid #e8dcc8;
+}
+
+.welcome-divider {
+  margin-bottom: 30rpx;
+}
+
+.welcome-title {
+  font-size: 28rpx;
+  color: #8B4513;
+  font-weight: bold;
+  position: relative;
 }
 
 .welcome-text {
   display: block;
   font-size: 32rpx;
-  color: #333;
-  margin-bottom: 20rpx;
+  color: #3c2a1d;
+  margin-bottom: 16rpx;
+  font-weight: 500;
 }
 
 .welcome-sub {
   display: block;
   font-size: 26rpx;
-  color: #666;
+  color: #6b5643;
+  margin-bottom: 20rpx;
+}
+
+.example-questions {
+  margin: 10rpx 0 20rpx;
+  text-align: left;
+}
+
+.example-item {
+  display: block;
+  font-size: 24rpx;
+  color: #8B4513;
+  padding: 8rpx 16rpx;
+  margin: 8rpx 0;
+  background: #f8f4e9;
+  border-radius: 8rpx;
+  border-left: 4rpx solid #8B4513;
 }
 
 .message-wrapper {
-  margin-bottom: 20rpx;
+  margin-bottom: 24rpx;
   display: flex;
 }
 
@@ -265,73 +320,101 @@ export default {
 
 .message {
   max-width: 70%;
-  padding: 24rpx;
-  border-radius: 20rpx;
+  padding: 28rpx 24rpx;
+  border-radius: 12rpx;
   word-wrap: break-word;
 }
 
 .message.user {
-  background-color: #95EC69;
+  background-color: #8B4513;
   border-bottom-right-radius: 4rpx;
+}
+
+.message.user .message-text {
+  color: #fff;
 }
 
 .message.ai {
   background-color: #fff;
   border-bottom-left-radius: 4rpx;
-  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.1);
+  box-shadow: 0 2rpx 8rpx rgba(139, 69, 19, 0.15);
+  border: 1rpx solid #e8dcc8;
 }
 
 .message-text {
   font-size: 30rpx;
-  line-height: 1.6;
-  color: #333;
+  line-height: 1.7;
+  color: #3c2a1d;
 }
 
 .loading-text {
   font-size: 28rpx;
-  color: #999;
+  color: #8B4513;
+  font-style: italic;
 }
 
 .view-btn {
-  margin-top: 16rpx;
-  padding: 12rpx 24rpx;
-  background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
-  color: #fff;
+  margin-top: 20rpx;
+  padding: 14rpx 28rpx;
+  background: transparent;
+  color: #8B4513;
   font-size: 26rpx;
   border-radius: 30rpx;
-  border: none;
+  border: 1rpx solid #8B4513;
+  text-align: left;
+  transform: translateZ(0);
+  transition: all 0.2s;
+}
+
+.view-btn:active {
+  transform: scale(0.96);
+  background: #8B4513;
+  color: #fff;
 }
 
 .input-area {
   display: flex;
   padding: 20rpx;
   background: #fff;
-  border-top: 1rpx solid #e5e5e5;
+  border-top: 1rpx solid #e8dcc8;
 }
 
 .input {
   flex: 1;
   height: 80rpx;
-  padding: 0 24rpx;
-  background: #f5f5f5;
+  padding: 0 28rpx;
+  background: #f8f4e9;
   border-radius: 40rpx;
   font-size: 30rpx;
   margin-right: 20rpx;
+  border: 1rpx solid #e8dcc8;
+  color: #3c2a1d;
+}
+
+.input::placeholder {
+  color: #a08a76;
 }
 
 .send-btn {
-  width: 120rpx;
+  width: 140rpx;
   height: 80rpx;
   line-height: 80rpx;
-  background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+  background: #8B4513;
   color: #fff;
-  font-size: 28rpx;
+  font-size: 30rpx;
   border-radius: 40rpx;
   border: none;
+  transform: translateZ(0);
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.send-btn:active:not([disabled]) {
+  transform: scale(0.95);
 }
 
 .send-btn[disabled] {
-  background: #ccc;
+  background: #c4b8a8;
+  color: #f0ebe4;
 }
 
 .scroll-bottom {
@@ -340,28 +423,36 @@ export default {
 
 /* 快捷入口 */
 .quick-actions {
-  padding: 20rpx 30rpx;
+  padding: 24rpx 30rpx;
   background: #fff;
-  border-bottom: 1rpx solid #e5e5e5;
+  border-bottom: 1rpx solid #e8dcc8;
 }
 
 .quick-btn {
   width: 100%;
   height: 80rpx;
   line-height: 80rpx;
-  background: linear-gradient(135deg, #2E8B57 0%, #3CB371 100%);
-  color: #fff;
+  background: transparent;
+  color: #8B4513;
   font-size: 30rpx;
   border-radius: 40rpx;
-  border: none;
+  border: 2rpx solid #8B4513;
+  transform: translateZ(0);
+  transition: all 0.2s;
+}
+
+.quick-btn:active {
+  transform: scale(0.98);
+  background: #8B4513;
+  color: #fff;
 }
 
 .welcome-hint {
   display: block;
   font-size: 24rpx;
   color: #8B4513;
-  margin-top: 20rpx;
+  margin-top: 24rpx;
   padding-top: 20rpx;
-  border-top: 1rpx dashed #ddd;
+  border-top: 1rpx solid #e8dcc8;
 }
 </style>
