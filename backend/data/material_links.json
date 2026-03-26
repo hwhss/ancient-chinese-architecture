@@ -1,0 +1,50 @@
+[
+  {
+    "materialId": "gugong_01",
+    "url": "https://picsum.photos/800/600?random=1",
+    "type": "image",
+    "source": "故宫博物院官网"
+  },
+  {
+    "materialId": "gugong_02",
+    "url": "https://picsum.photos/800/600?random=2",
+    "type": "image",
+    "source": "故宫博物院官网"
+  },
+  {
+    "materialId": "gugong_03",
+    "url": "https://picsum.photos/800/600?random=3",
+    "type": "image",
+    "source": "故宫博物院官网"
+  },
+  {
+    "materialId": "gugong_04",
+    "url": "https://picsum.photos/800/600?random=4",
+    "type": "image",
+    "source": "故宫博物院官网"
+  },
+  {
+    "materialId": "gugong_05",
+    "url": "https://picsum.photos/800/600?random=5",
+    "type": "image",
+    "source": "故宫博物院官网"
+  },
+  {
+    "materialId": "gugong_06",
+    "url": "https://picsum.photos/800/600?random=6",
+    "type": "image",
+    "source": "故宫博物院官网"
+  },
+  {
+    "materialId": "gugong_07",
+    "url": "https://picsum.photos/800/600?random=7",
+    "type": "image",
+    "source": "故宫博物院官网"
+  },
+  {
+    "materialId": "gugong_08",
+    "url": "https://picsum.photos/800/600?random=8",
+    "type": "image",
+    "source": "故宫博物院官网"
+  }
+]
