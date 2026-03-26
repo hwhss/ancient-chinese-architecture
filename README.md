@@ -1,67 +1,129 @@
-[README.md](https://github.com/user-attachments/files/26262208/README.md)
-# 🏯 中国古代建筑成就可视化
+# 🏯 古建筑AI导览
 
-一个基于Python和Streamlit的交互式可视化项目，展示中国古代建筑的伟大成就。
+一个基于 UniApp + Vue3 + Node.js 的古建筑智能导览应用，提供AI问答和实景/动画素材展示功能。
 
-## ✨ 特性
+## ✨ 功能特性
 
-- 🗺️ **交互式地图** - 使用Folium展示建筑在全国的分布
-- 📊 **数据可视化** - 使用Plotly展示丰富的图表
-- 🎨 **精美界面** - 中国传统建筑风格的UI设计
-- 🏛️ **详细信息** - 20个具有代表性的古代建筑
-- 🤖 **AI问答** - 基于规则的建筑知识问答
-- 💾 **数据导出** - 支持CSV格式数据导出
+- 🤖 **AI智能问答** - 基于本地知识库 + AI API，解答古建筑相关问题
+- 🖼️ **实景/动画展示** - 图文结合，沉浸式体验古建筑魅力
+- 💬 **对话式交互** - 自然语言提问，即时获取答案
+- 📱 **跨平台支持** - 基于UniApp，支持H5、小程序、App多端运行
 
-## 🚀 快速开始
+## 🛠️ 技术栈
 
-### 安装依赖
+### 前端
+- **UniApp** - 跨端应用框架
+- **Vue3** - 前端框架
 
-```bash
-pip install -r requirements.txt
-```
-
-### 运行项目
-
-```bash
-streamlit run ancient_architecture_visualization.py
-```
+### 后端
+- **Node.js** - 运行环境
+- **Express** - Web框架
+- **AI API** - Kimi/豆包大模型接口
 
 ## 📁 项目结构
 
 ```
 .
-├── ancient_architecture_visualization.py  # 主程序
-├── simple_architecture_visualization.py   # 简化版本
-├── requirements.txt                        # 依赖包列表
-├── static/                                 # 静态资源
-│   └── zhaozhou_bridge.png                # 本地图片
-└── README.md                               # 项目说明
+├── agent.md                    # Agent开发规范
+├── docs/                       # 开发文档
+│   ├── 古建筑AI导览项目_每日任务清单-09edf513b1.md
+│   └── 2026-03-26_项目初始化与雏形搭建.md
+├── frontend/                   # UniApp前端
+│   ├── manifest.json
+│   ├── pages.json
+│   ├── App.vue
+│   ├── main.js
+│   ├── pages/
+│   │   ├── index/index.vue     # 首页-聊天界面
+│   │   └── detail/detail.vue   # 详情页-素材展示
+│   └── static/                 # 静态资源
+├── backend/                    # Node.js后端
+│   ├── package.json
+│   ├── app.js                  # 服务入口
+│   ├── services/
+│   │   └── aiService.js        # AI服务封装
+│   └── data/
+│       ├── knowledge_base.json # 知识库数据
+│       └── material_links.json # 素材链接
+└── README.md                   # 项目说明
 ```
 
-## 🎯 主题特点
+## 🚀 快速开始
 
-- **青绿山水配色** - 朱红、青色、金色的经典组合
-- **传统建筑风格** - 卷轴、印章、装饰线等元素
-- **动态效果** - 背景浮动、悬停动画、渐变过渡
+### 环境要求
+- Node.js 16+
+- HBuilder X（UniApp开发工具）
 
-## 🏗️ 建筑数据
+### 1. 克隆项目
 
-包含20个具有代表性的古代建筑：
-- 皇宫：故宫博物院、沈阳故宫
-- 桥梁：赵州桥、卢沟桥、广济桥、五亭桥
-- 民居：福建土楼、乔家大院、平遥古城、丽江古城、徽州古城、日升昌票号
-- 城防：西安城墙、南京城墙
-- 园林：苏州拙政园、颐和园
-- 官府楼阁：岳阳楼、曲阜孔庙
-- 水利工程：都江堰、坎儿井
+```bash
+git clone <你的仓库地址>
+cd ancient-chinese-architecture
+```
 
-## 🛠️ 技术栈
+### 2. 启动后端服务
 
-- **Streamlit** - Web应用框架
-- **Pandas** - 数据处理
-- **Plotly** - 数据可视化
-- **Folium** - 交互式地图
-- **Python** - 编程语言
+```bash
+# 进入后端目录
+cd backend
+
+# 安装依赖
+npm install
+
+# 启动服务
+npm start
+```
+
+服务将运行在 `http://localhost:3000`
+
+**接口列表：**
+| 接口 | 方法 | 说明 |
+|------|------|------|
+| `/test` | GET | 服务状态测试 |
+| `/api/chat` | POST | AI问答接口 |
+| `/api/material` | GET | 素材查询接口 |
+
+### 3. 运行前端项目
+
+使用 **HBuilder X** 打开 `frontend` 目录：
+
+1. 打开 HBuilder X
+2. 文件 → 打开目录 → 选择 `frontend` 文件夹
+3. 运行 → 运行到浏览器 → 选择 Chrome
+4. 等待编译完成，自动打开浏览器
+
+> 首次运行可能需要安装 UniApp 插件，按提示操作即可。
+
+### 4. 测试功能
+
+1. 在首页输入框中提问，例如：
+   - "太和殿的历史是什么？"
+   - "故宫是什么时候建成的？"
+   - "乾清宫有什么特色？"
+
+2. AI回复后，点击 **"查看实景/动画"** 按钮
+
+3. 跳转到详情页查看素材
+
+## ⚙️ 配置AI API（可选）
+
+项目默认使用 Mock 数据，如需接入真实 AI API：
+
+1. 注册 [Kimi AI](https://platform.moonshot.cn/) 或 [豆包AI](https://www.volcengine.com/docs/82379) 开发者账号
+2. 获取 API Key
+3. 修改 `backend/services/aiService.js` 中的配置：
+
+```javascript
+const KIMI_CONFIG = {
+  apiKey: 'your_api_key_here',  // 替换为你的API Key
+  apiUrl: 'https://api.moonshot.cn/v1/chat/completions',
+  model: 'moonshot-v1-8k'
+};
+```
+
+## 📝 开发记录
+
+- [2026-03-26] 项目初始化，搭建前后端框架，实现基础问答功能
 
 ## 📄 许可证
 
