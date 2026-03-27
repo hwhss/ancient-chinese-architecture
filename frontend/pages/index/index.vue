@@ -9,8 +9,9 @@
 
     <!-- 快捷入口 -->
     <view v-if="messages.length === 0" class="quick-actions">
-      <button class="quick-btn" @click="goToMap">
-        🗺️ 浏览古建筑名录
+      <button class="quick-btn" @click="goToMap">🗺️ 浏览古建筑名录</button>
+      <button class="quick-btn secondary" @click="goToDevSettings">
+        ⚙️ 开发设置
       </button>
     </view>
 
@@ -31,10 +32,19 @@
       </view>
 
       <!-- 消息列表 -->
-      <view v-for="(msg, index) in messages" :key="index" class="message-wrapper" :class="msg.role">
+      <view
+        v-for="(msg, index) in messages"
+        :key="index"
+        class="message-wrapper"
+        :class="msg.role"
+      >
         <view class="message" :class="msg.role">
           <text class="message-text">{{ msg.content }}</text>
-          <button v-if="msg.materialId" class="view-btn" @click="goToDetail(msg.materialId)">
+          <button
+            v-if="msg.materialId"
+            class="view-btn"
+            @click="goToDetail(msg.materialId)"
+          >
             查看实景资料 →
           </button>
         </view>
@@ -59,7 +69,11 @@
         confirm-type="send"
         @confirm="send"
       />
-      <button class="send-btn" :disabled="!inputText.trim() || loading" @click="send">
+      <button
+        class="send-btn"
+        :disabled="!inputText.trim() || loading"
+        @click="send"
+      >
         发送
       </button>
     </view>
@@ -67,44 +81,46 @@
 </template>
 
 <script>
-// 共享常量 - 关键词映射表，提取为静态只读
+import { chat } from "../../services/api";
+
+// 后端返回materialId后优先使用，仅作为降级兜底保留关键词映射
 const KEYWORD_MAPPING = {
   // 皇宫
-  '太和殿': 'gugong_01',
-  '乾清宫': 'gugong_02',
-  '中和殿': 'gugong_03',
-  '保和殿': 'gugong_04',
-  '养心殿': 'gugong_05',
-  '御花园': 'gugong_06',
-  '午门': 'gugong_07',
-  '天安门': 'gugong_08',
-  '故宫': 'gugong_01',
-  '紫禁城': 'gugong_01',
-  '沈阳故宫': 'shenyang_01',
+  太和殿: "gugong_01",
+  乾清宫: "gugong_02",
+  中和殿: "gugong_03",
+  保和殿: "gugong_04",
+  养心殿: "gugong_05",
+  御花园: "gugong_06",
+  午门: "gugong_07",
+  天安门: "gugong_08",
+  故宫: "gugong_01",
+  紫禁城: "gugong_01",
+  沈阳故宫: "shenyang_01",
   // 桥梁
-  '赵州桥': 'zhaozhou_01',
-  '卢沟桥': 'lugou_01',
-  '广济桥': 'guangji_01',
+  赵州桥: "zhaozhou_01",
+  卢沟桥: "lugou_01",
+  广济桥: "guangji_01",
   // 园林
-  '拙政园': 'zhuozheng_01',
-  '颐和园': 'yiheyuan_01',
-  '苏州园林': 'zhuozheng_01',
+  拙政园: "zhuozheng_01",
+  颐和园: "yiheyuan_01",
+  苏州园林: "zhuozheng_01",
   // 城防
-  '西安城墙': 'xian_01',
-  '南京城墙': 'nanjing_01',
+  西安城墙: "xian_01",
+  南京城墙: "nanjing_01",
   // 民居
-  '福建土楼': 'tulou_01',
-  '土楼': 'tulou_01',
-  '乔家大院': 'qiaojia_01',
-  '平遥古城': 'pingyao_01',
-  '丽江古城': 'lijiang_01',
+  福建土楼: "tulou_01",
+  土楼: "tulou_01",
+  乔家大院: "qiaojia_01",
+  平遥古城: "pingyao_01",
+  丽江古城: "lijiang_01",
   // 楼阁
-  '岳阳楼': 'yueyang_01',
-  '孔庙': 'kongmiao_01',
-  '曲阜孔庙': 'kongmiao_01',
+  岳阳楼: "yueyang_01",
+  孔庙: "kongmiao_01",
+  曲阜孔庙: "kongmiao_01",
   // 水利
-  '都江堰': 'dujiangyan_01',
-  '坎儿井': 'kanerjing_01',
+  都江堰: "dujiangyan_01",
+  坎儿井: "kanerjing_01",
 };
 
 // 根据问题匹配materialId - 纯函数优化
@@ -119,19 +135,19 @@ function matchMaterialId(question) {
 
 // 缓存mock回答避免重复创建字符串
 const MOCK_ANSWERS = {
-  '太和殿': '太和殿建成于明永乐十八年（1420年），是故宫规模最大、等级最高的建筑，用于举行大典。殿高35.05米，建筑面积2377平方米，是中国现存最大的木结构大殿。',
-  '乾清宫': '乾清宫是明清皇帝的寝宫，建于明永乐十八年。清代雍正帝后，皇帝移居养心殿，乾清宫改为皇帝处理日常政务的场所。'
+  太和殿:
+    "太和殿建成于明永乐十八年（1420年），是故宫规模最大、等级最高的建筑，用于举行大典。殿高35.05米，建筑面积2377平方米，是中国现存最大的木结构大殿。",
+  乾清宫:
+    "乾清宫是明清皇帝的寝宫，建于明永乐十八年。清代雍正帝后，皇帝移居养心殿，乾清宫改为皇帝处理日常政务的场所。",
 };
 
 export default {
   data() {
     return {
       messages: [],
-      inputText: '',
-      scrollId: 'msg-end',
+      inputText: "",
+      scrollId: "msg-end",
       loading: false,
-      // 后端接口地址（9527 - 好记不冲突）
-      apiBaseUrl: 'http://localhost:9527'
     };
   },
   methods: {
@@ -139,49 +155,34 @@ export default {
       const question = this.inputText.trim();
       if (!question || this.loading) return;
 
-      this.inputText = '';
+      this.inputText = "";
 
       // 添加用户消息
       this.messages.push({
-        role: 'user',
-        content: question
+        role: "user",
+        content: question,
       });
       this.scrollToBottom();
 
       this.loading = true;
 
       try {
-        // 调用后端接口
-        const response = await uni.request({
-          url: `${this.apiBaseUrl}/api/chat`,
-          method: 'POST',
-          data: { question }
+        const data = await chat(question);
+        const materialId = data.materialId || matchMaterialId(question);
+        this.messages.push({
+          role: "ai",
+          content: data.answer,
+          materialId,
         });
-
-        const result = response.data;
-
-        if (result.code === 200) {
-          const materialId = matchMaterialId(question);
-          this.messages.push({
-            role: 'ai',
-            content: result.data.answer,
-            materialId: materialId
-          });
-        } else {
-          this.messages.push({
-            role: 'ai',
-            content: '抱歉，服务暂时不可用，请稍后再试。'
-          });
-        }
       } catch (error) {
-        console.error('请求失败:', error);
+        console.error("请求失败:", error);
         // Mock模式：接口不通时返回模拟数据
         const mockAnswer = this.getMockAnswer(question);
         const materialId = matchMaterialId(question);
         this.messages.push({
-          role: 'ai',
+          role: "ai",
           content: mockAnswer,
-          materialId: materialId
+          materialId: materialId,
         });
       } finally {
         this.loading = false;
@@ -200,21 +201,27 @@ export default {
     },
 
     scrollToBottom() {
-      this.scrollId = 'msg-' + Date.now();
+      this.scrollId = "msg-" + Date.now();
     },
 
     goToDetail(materialId) {
       uni.navigateTo({
-        url: `/pages/detail/detail?materialId=${materialId}`
+        url: `/pages/detail/detail?materialId=${materialId}`,
       });
     },
 
     goToMap() {
       uni.navigateTo({
-        url: '/pages/map/map'
+        url: "/pages/map/map",
       });
-    }
-  }
+    },
+
+    goToDevSettings() {
+      uni.navigateTo({
+        url: "/pages/dev-settings/dev-settings",
+      });
+    },
+  },
 };
 </script>
 
@@ -227,7 +234,7 @@ export default {
 }
 
 .header {
-  background: #8B4513;
+  background: #8b4513;
   padding: 30rpx 30rpx 40rpx;
   text-align: center;
   position: relative;
@@ -269,7 +276,7 @@ export default {
 
 .welcome-title {
   font-size: 28rpx;
-  color: #8B4513;
+  color: #8b4513;
   font-weight: bold;
   position: relative;
 }
@@ -297,12 +304,12 @@ export default {
 .example-item {
   display: block;
   font-size: 24rpx;
-  color: #8B4513;
+  color: #8b4513;
   padding: 8rpx 16rpx;
   margin: 8rpx 0;
   background: #f8f4e9;
   border-radius: 8rpx;
-  border-left: 4rpx solid #8B4513;
+  border-left: 4rpx solid #8b4513;
 }
 
 .message-wrapper {
@@ -326,7 +333,7 @@ export default {
 }
 
 .message.user {
-  background-color: #8B4513;
+  background-color: #8b4513;
   border-bottom-right-radius: 4rpx;
 }
 
@@ -349,7 +356,7 @@ export default {
 
 .loading-text {
   font-size: 28rpx;
-  color: #8B4513;
+  color: #8b4513;
   font-style: italic;
 }
 
@@ -357,10 +364,10 @@ export default {
   margin-top: 20rpx;
   padding: 14rpx 28rpx;
   background: transparent;
-  color: #8B4513;
+  color: #8b4513;
   font-size: 26rpx;
   border-radius: 30rpx;
-  border: 1rpx solid #8B4513;
+  border: 1rpx solid #8b4513;
   text-align: left;
   transform: translateZ(0);
   transition: all 0.2s;
@@ -368,7 +375,7 @@ export default {
 
 .view-btn:active {
   transform: scale(0.96);
-  background: #8B4513;
+  background: #8b4513;
   color: #fff;
 }
 
@@ -399,13 +406,15 @@ export default {
   width: 140rpx;
   height: 80rpx;
   line-height: 80rpx;
-  background: #8B4513;
+  background: #8b4513;
   color: #fff;
   font-size: 30rpx;
   border-radius: 40rpx;
   border: none;
   transform: translateZ(0);
-  transition: transform 0.2s, background-color 0.2s;
+  transition:
+    transform 0.2s,
+    background-color 0.2s;
 }
 
 .send-btn:active:not([disabled]) {
@@ -415,6 +424,29 @@ export default {
 .send-btn[disabled] {
   background: #c4b8a8;
   color: #f0ebe4;
+}
+
+.quick-actions {
+  display: flex;
+  gap: 16rpx;
+  padding: 16rpx 20rpx;
+}
+
+.quick-btn {
+  flex: 1;
+  background: #8b4513;
+  color: #fff;
+  border: none;
+  border-radius: 10rpx;
+  font-size: 26rpx;
+  height: 74rpx;
+  line-height: 74rpx;
+}
+
+.quick-btn.secondary {
+  background: #fff;
+  color: #8b4513;
+  border: 1rpx solid #8b4513;
 }
 
 .scroll-bottom {
@@ -433,24 +465,24 @@ export default {
   height: 80rpx;
   line-height: 80rpx;
   background: transparent;
-  color: #8B4513;
+  color: #8b4513;
   font-size: 30rpx;
   border-radius: 40rpx;
-  border: 2rpx solid #8B4513;
+  border: 2rpx solid #8b4513;
   transform: translateZ(0);
   transition: all 0.2s;
 }
 
 .quick-btn:active {
   transform: scale(0.98);
-  background: #8B4513;
+  background: #8b4513;
   color: #fff;
 }
 
 .welcome-hint {
   display: block;
   font-size: 24rpx;
-  color: #8B4513;
+  color: #8b4513;
   margin-top: 24rpx;
   padding-top: 20rpx;
   border-top: 1rpx solid #e8dcc8;

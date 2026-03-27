@@ -30,7 +30,15 @@
         />
         <view class="material-info">
           <text class="material-title">{{ materialTitle }}</text>
-          <text class="material-source">来源：{{ material.source || '未知' }}</text>
+          <text v-if="building.location" class="material-location"
+            >📍 {{ building.location }}</text
+          >
+          <text v-if="building.description" class="material-desc">{{
+            building.description
+          }}</text>
+          <text class="material-source"
+            >来源：{{ material.source || "未知" }}</text
+          >
         </view>
       </view>
 
@@ -44,7 +52,15 @@
         />
         <view class="material-info">
           <text class="material-title">{{ materialTitle }}</text>
-          <text class="material-source">来源：{{ material.source || '未知' }}</text>
+          <text v-if="building.location" class="material-location"
+            >📍 {{ building.location }}</text
+          >
+          <text v-if="building.description" class="material-desc">{{
+            building.description
+          }}</text>
+          <text class="material-source"
+            >来源：{{ material.source || "未知" }}</text
+          >
         </view>
       </view>
 
@@ -59,119 +75,133 @@
 </template>
 
 <script>
+import { getBuildingById, getMaterialById } from "../../services/api";
+
 // 素材ID到名称的映射 - 静态常量
 const MATERIAL_NAMES = {
   // 皇宫
-  'gugong_01': '太和殿',
-  'gugong_02': '乾清宫',
-  'gugong_03': '中和殿',
-  'gugong_04': '保和殿',
-  'gugong_05': '养心殿',
-  'gugong_06': '御花园',
-  'gugong_07': '午门',
-  'gugong_08': '天安门',
-  'shenyang_01': '沈阳故宫大政殿',
+  gugong_01: "太和殿",
+  gugong_02: "乾清宫",
+  gugong_03: "中和殿",
+  gugong_04: "保和殿",
+  gugong_05: "养心殿",
+  gugong_06: "御花园",
+  gugong_07: "午门",
+  gugong_08: "天安门",
+  shenyang_01: "沈阳故宫大政殿",
   // 桥梁
-  'zhaozhou_01': '赵州桥',
-  'lugou_01': '卢沟桥',
-  'guangji_01': '广济桥',
+  zhaozhou_01: "赵州桥",
+  lugou_01: "卢沟桥",
+  guangji_01: "广济桥",
   // 园林
-  'zhuozheng_01': '拙政园',
-  'yiheyuan_01': '颐和园',
+  zhuozheng_01: "拙政园",
+  yiheyuan_01: "颐和园",
   // 城防
-  'xian_01': '西安城墙',
-  'nanjing_01': '南京城墙',
+  xian_01: "西安城墙",
+  nanjing_01: "南京城墙",
   // 民居
-  'tulou_01': '福建土楼',
-  'qiaojia_01': '乔家大院',
-  'pingyao_01': '平遥古城',
-  'lijiang_01': '丽江古城',
+  tulou_01: "福建土楼",
+  qiaojia_01: "乔家大院",
+  pingyao_01: "平遥古城",
+  lijiang_01: "丽江古城",
   // 楼阁
-  'yueyang_01': '岳阳楼',
-  'kongmiao_01': '曲阜孔庙',
+  yueyang_01: "岳阳楼",
+  kongmiao_01: "曲阜孔庙",
   // 水利
-  'dujiangyan_01': '都江堰',
-  'kanerjing_01': '坎儿井',
+  dujiangyan_01: "都江堰",
+  kanerjing_01: "坎儿井",
 };
 
 export default {
   data() {
     return {
-      materialId: '',
-      materialName: '',
+      materialId: "",
+      materialName: "",
+      building: {
+        id: "",
+        name: "",
+        location: "",
+        description: "",
+      },
       material: {
-        url: '',
-        type: '',
-        source: ''
+        url: "",
+        type: "",
+        source: "",
       },
       loading: false,
       error: null,
-      // 后端接口地址（9527 - 好记不冲突）
-      apiBaseUrl: 'http://localhost:9527'
     };
   },
 
   computed: {
     materialTitle() {
-      return this.materialName || MATERIAL_NAMES[this.materialId] || '古建筑素材';
-    }
+      return (
+        this.materialName ||
+        this.building.name ||
+        MATERIAL_NAMES[this.materialId] ||
+        "古建筑素材"
+      );
+    },
   },
 
   onLoad(options) {
-    this.materialId = options.materialId || '';
-    this.materialName = options.name ? decodeURIComponent(options.name) : '';
+    this.materialId = options.materialId || "";
+    this.materialName = options.name ? decodeURIComponent(options.name) : "";
     if (this.materialId) {
-      this.loadMaterial();
+      this.loadDetailData();
+    } else {
+      this.error = "缺少素材ID";
     }
   },
 
   methods: {
-    async loadMaterial() {
+    async loadDetailData() {
       this.loading = true;
       this.error = null;
 
+      await Promise.allSettled([this.loadBuilding(), this.loadMaterial()]);
+
+      this.loading = false;
+    },
+
+    async loadBuilding() {
       try {
-        const response = await uni.request({
-          url: `${this.apiBaseUrl}/api/material`,
-          method: 'GET',
-          data: { materialId: this.materialId }
-        });
-
-        const result = response.data;
-
-        if (result.code === 200) {
-          this.material = result.data;
-        } else {
-          // 使用占位数据
-          this.setPlaceholderData();
-        }
+        this.building = await getBuildingById(this.materialId);
       } catch (error) {
-        console.error('加载素材失败:', error);
-        // 接口不通时使用占位数据
+        console.error("加载建筑详情失败:", error);
+      }
+    },
+
+    async loadMaterial() {
+      try {
+        this.material = await getMaterialById(this.materialId);
+      } catch (error) {
+        console.error("加载素材失败:", error);
         this.setPlaceholderData();
-      } finally {
-        this.loading = false;
+        this.error = error.message || "网络异常，已展示占位图";
       }
     },
 
     setPlaceholderData() {
       // 模拟数据，为每个建筑ID生成对应的图片
-      const randomNum = parseInt(this.materialId.replace(/\D/g, '')) || Math.floor(Math.random() * 100);
+      const randomNum =
+        parseInt(this.materialId.replace(/\D/g, "")) ||
+        Math.floor(Math.random() * 100);
       this.material = {
         url: `https://picsum.photos/800/600?random=${randomNum}`,
-        type: 'image',
-        source: '示例图片'
+        type: "image",
+        source: "示例图片",
       };
     },
 
     onImageError() {
-      this.error = '图片加载失败';
+      this.error = "图片加载失败";
     },
 
     goBack() {
       uni.navigateBack();
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -184,12 +214,12 @@ export default {
 .header {
   display: flex;
   align-items: center;
-  background: #8B4513;
+  background: #8b4513;
   padding: 30rpx 30rpx 40rpx;
 }
 
 .back-btn {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   color: #fff;
   font-size: 28rpx;
   padding: 16rpx 24rpx;
@@ -201,7 +231,7 @@ export default {
 }
 
 .back-btn:active {
-  background: rgba(255,255,255,0.35);
+  background: rgba(255, 255, 255, 0.35);
   transform: scale(0.95);
 }
 
@@ -223,7 +253,8 @@ export default {
   padding: 30rpx;
 }
 
-.loading, .error {
+.loading,
+.error {
   text-align: center;
   padding: 100rpx 40rpx;
   font-size: 32rpx;
@@ -268,6 +299,21 @@ export default {
   display: block;
   font-size: 26rpx;
   color: #6b5643;
+}
+
+.material-location {
+  display: block;
+  font-size: 26rpx;
+  color: #8b4513;
+  margin-bottom: 10rpx;
+}
+
+.material-desc {
+  display: block;
+  font-size: 26rpx;
+  color: #6b5643;
+  line-height: 1.6;
+  margin-bottom: 14rpx;
 }
 
 .placeholder {

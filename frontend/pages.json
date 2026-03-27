@@ -17,6 +17,12 @@
       "style": {
         "navigationBarTitleText": "素材详情"
       }
+    },
+    {
+      "path": "pages/dev-settings/dev-settings",
+      "style": {
+        "navigationBarTitleText": "开发设置"
+      }
     }
   ],
   "globalStyle": {

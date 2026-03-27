@@ -23,19 +23,35 @@
 
     <!-- 建筑列表 -->
     <scroll-view class="building-list" scroll-y>
+      <view v-if="loading" class="state-box">
+        <text class="state-text">正在加载古建筑名录...</text>
+      </view>
+      <view v-else-if="error" class="state-box">
+        <text class="state-text error-text">{{ error }}</text>
+      </view>
+      <view v-else-if="filteredBuildings.length === 0" class="state-box">
+        <text class="state-text">暂无符合条件的数据</text>
+      </view>
       <view
         v-for="building in filteredBuildings"
         :key="building.id"
         class="building-card"
         @click="goToDetail(building)"
       >
-        <image class="building-image" :src="building.image" mode="aspectFill" lazy-load="true" />
+        <image
+          class="building-image"
+          :src="building.image"
+          mode="aspectFill"
+          lazy-load="true"
+        />
         <view class="building-info">
           <text class="building-name">{{ building.name }}</text>
           <text class="building-location">📍 {{ building.location }}</text>
           <text class="building-desc">{{ building.description }}</text>
           <view class="building-tags">
-            <text v-for="tag in building.tags" :key="tag" class="tag">{{ tag }}</text>
+            <text v-for="tag in building.tags" :key="tag" class="tag">{{
+              tag
+            }}</text>
           </view>
         </view>
       </view>
@@ -51,198 +67,42 @@
 </template>
 
 <script>
+import { getBuildings } from "../../services/api";
+
 // 分类配置 - 静态常量
 const categories = [
-  { key: 'all', name: '全部' },
-  { key: 'palace', name: '🏛️ 皇宫' },
-  { key: 'bridge', name: '🌉 桥梁' },
-  { key: 'garden', name: '🌿 园林' },
-  { key: 'defense', name: '🏰 城防' },
-  { key: 'residence', name: '🏠 民居' },
-  { key: 'tower', name: '🏯 楼阁' },
-  { key: 'water', name: '💧 水利' }
-];
-
-// 古建筑数据 - 静态数据保持不变，UniApp兼容处理
-const buildingsData = [
-  // 皇宫
-  {
-    id: 'gugong_01',
-    name: '太和殿',
-    category: 'palace',
-    location: '北京故宫',
-    description: '故宫规模最大、等级最高的建筑，用于举行大典。中国现存最大的木结构大殿。',
-    image: 'https://picsum.photos/400/300?random=1',
-    tags: ['皇宫', '明代', '木结构']
-  },
-  {
-    id: 'gugong_02',
-    name: '乾清宫',
-    category: 'palace',
-    location: '北京故宫',
-    description: '明清皇帝的寝宫，清代雍正后改为处理政务场所。殿内悬挂"正大光明"匾额。',
-    image: 'https://picsum.photos/400/300?random=2',
-    tags: ['皇宫', '寝宫', '清代']
-  },
-  {
-    id: 'shenyang_01',
-    name: '沈阳故宫大政殿',
-    category: 'palace',
-    location: '辽宁沈阳',
-    description: '沈阳故宫的核心建筑，清太祖努尔哈赤营建，具有浓郁的满族特色。',
-    image: 'https://picsum.photos/400/300?random=3',
-    tags: ['皇宫', '清代', '满族']
-  },
-  // 桥梁
-  {
-    id: 'zhaozhou_01',
-    name: '赵州桥',
-    category: 'bridge',
-    location: '河北赵县',
-    description: '世界上现存最古老的单孔敞肩石拱桥，建于隋代，已有1400多年历史。',
-    image: 'https://picsum.photos/400/300?random=4',
-    tags: ['桥梁', '隋代', '石拱']
-  },
-  {
-    id: 'lugou_01',
-    name: '卢沟桥',
-    category: 'bridge',
-    location: '北京',
-    description: '北京现存最古老的石造联拱桥，桥上有501只形态各异的石狮。',
-    image: 'https://picsum.photos/400/300?random=5',
-    tags: ['桥梁', '金代', '石狮']
-  },
-  {
-    id: 'guangji_01',
-    name: '广济桥',
-    category: 'bridge',
-    location: '广东潮州',
-    description: '中国四大古桥之一，集梁桥、浮桥、拱桥于一体，被誉为"世界上最早的启闭式桥梁"。',
-    image: 'https://picsum.photos/400/300?random=6',
-    tags: ['桥梁', '宋代', '启闭式']
-  },
-  // 园林
-  {
-    id: 'zhuozheng_01',
-    name: '拙政园',
-    category: 'garden',
-    location: '江苏苏州',
-    description: '中国四大名园之一，明代园林代表，以水为中心，山水萦绕，厅榭精美。',
-    image: 'https://picsum.photos/400/300?random=7',
-    tags: ['园林', '明代', '苏州']
-  },
-  {
-    id: 'yiheyuan_01',
-    name: '颐和园',
-    category: 'garden',
-    location: '北京',
-    description: '中国现存规模最大、保存最完整的皇家园林，被誉为"皇家园林博物馆"。',
-    image: 'https://picsum.photos/400/300?random=8',
-    tags: ['园林', '清代', '皇家']
-  },
-  // 城防
-  {
-    id: 'xian_01',
-    name: '西安城墙',
-    category: 'defense',
-    location: '陕西西安',
-    description: '中国现存规模最大、保存最完整的古代城垣，全长13.74公里。',
-    image: 'https://picsum.photos/400/300?random=9',
-    tags: ['城防', '明代', '城墙']
-  },
-  {
-    id: 'nanjing_01',
-    name: '南京城墙',
-    category: 'defense',
-    location: '江苏南京',
-    description: '世界最长、规模最大、保存原真性最好的古代城垣，全长35.267公里。',
-    image: 'https://picsum.photos/400/300?random=10',
-    tags: ['城防', '明代', '最长']
-  },
-  // 民居
-  {
-    id: 'tulou_01',
-    name: '福建土楼',
-    category: 'residence',
-    location: '福建龙岩',
-    description: '世界文化遗产，客家人聚族而居的大型夯土民居，被誉为"东方古城堡"。',
-    image: 'https://picsum.photos/400/300?random=11',
-    tags: ['民居', '客家', '圆形']
-  },
-  {
-    id: 'qiaojia_01',
-    name: '乔家大院',
-    category: 'residence',
-    location: '山西祁县',
-    description: '清代晋商民宅代表，建筑精美，有"北方民居建筑明珠"之称。',
-    image: 'https://picsum.photos/400/300?random=12',
-    tags: ['民居', '清代', '晋商']
-  },
-  {
-    id: 'pingyao_01',
-    name: '平遥古城',
-    category: 'residence',
-    location: '山西平遥',
-    description: '中国保存最完整的明清古县城，1997年被列入世界文化遗产。',
-    image: 'https://picsum.photos/400/300?random=13',
-    tags: ['古城', '明清', '世界遗产']
-  },
-  // 楼阁
-  {
-    id: 'yueyang_01',
-    name: '岳阳楼',
-    category: 'tower',
-    location: '湖南岳阳',
-    description: '江南三大名楼之一，因范仲淹《岳阳楼记》而闻名天下。',
-    image: 'https://picsum.photos/400/300?random=14',
-    tags: ['楼阁', '宋代', '名楼']
-  },
-  {
-    id: 'kongmiao_01',
-    name: '曲阜孔庙',
-    category: 'temple',
-    location: '山东曲阜',
-    description: '中国三大古建筑群之一，祭祀孔子的庙宇，规模宏大。',
-    image: 'https://picsum.photos/400/300?random=15',
-    tags: ['庙宇', '祭祀', '孔子']
-  },
-  // 水利工程
-  {
-    id: 'dujiangyan_01',
-    name: '都江堰',
-    category: 'water',
-    location: '四川成都',
-    description: '世界最古老的水利工程之一，至今仍在使用，使成都平原成为"天府之国"。',
-    image: 'https://picsum.photos/400/300?random=16',
-    tags: ['水利', '战国', '李冰']
-  },
-  {
-    id: 'kanerjing_01',
-    name: '坎儿井',
-    category: 'water',
-    location: '新疆吐鲁番',
-    description: '中国古代三大工程之一，与长城、大运河齐名，是干旱地区的地下水利工程。',
-    image: 'https://picsum.photos/400/300?random=17',
-    tags: ['水利', '地下', '新疆']
-  }
+  { key: "all", name: "全部" },
+  { key: "palace", name: "🏛️ 皇宫" },
+  { key: "bridge", name: "🌉 桥梁" },
+  { key: "garden", name: "🌿 园林" },
+  { key: "defense", name: "🏰 城防" },
+  { key: "residence", name: "🏠 民居" },
+  { key: "tower", name: "🏯 楼阁" },
+  { key: "water", name: "💧 水利" },
 ];
 
 export default {
   data() {
     return {
       categories,
-      currentCategory: 'all',
-      buildings: buildingsData
+      currentCategory: "all",
+      buildings: [],
+      loading: false,
+      error: "",
     };
+  },
+
+  onLoad() {
+    this.loadBuildings();
   },
 
   computed: {
     filteredBuildings() {
-      if (this.currentCategory === 'all') {
+      if (this.currentCategory === "all") {
         return this.buildings;
       }
-      return this.buildings.filter(b => b.category === this.currentCategory);
-    }
+      return this.buildings.filter((b) => b.category === this.currentCategory);
+    },
   },
 
   methods: {
@@ -250,18 +110,34 @@ export default {
       this.currentCategory = key;
     },
 
+    async loadBuildings() {
+      this.loading = true;
+      this.error = "";
+
+      try {
+        const list = await getBuildings();
+        this.buildings = Array.isArray(list) ? list : [];
+      } catch (error) {
+        console.error("加载古建筑名录失败:", error);
+        this.error = error.message || "网络异常，暂时无法加载数据";
+        this.buildings = [];
+      } finally {
+        this.loading = false;
+      }
+    },
+
     goToDetail(building) {
       uni.navigateTo({
-        url: `/pages/detail/detail?materialId=${building.id}&name=${encodeURIComponent(building.name)}`
+        url: `/pages/detail/detail?materialId=${building.id}&name=${encodeURIComponent(building.name)}`,
       });
     },
 
     goToChat() {
       uni.navigateTo({
-        url: '/pages/index/index'
+        url: "/pages/index/index",
       });
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -274,7 +150,7 @@ export default {
 }
 
 .header {
-  background: #8B4513;
+  background: #8b4513;
   padding: 30rpx 30rpx 40rpx;
   text-align: center;
 }
@@ -307,7 +183,7 @@ export default {
 
 .subtitle {
   display: block;
-  color: rgba(255,255,255,0.8);
+  color: rgba(255, 255, 255, 0.8);
   font-size: 26rpx;
   letter-spacing: 2rpx;
 }
@@ -333,14 +209,32 @@ export default {
 }
 
 .tab.active {
-  background: #8B4513;
+  background: #8b4513;
   color: #fff;
-  border-color: #8B4513;
+  border-color: #8b4513;
 }
 
 .building-list {
   flex: 1;
   padding: 20rpx;
+}
+
+.state-box {
+  background: #fff;
+  border-radius: 12rpx;
+  border: 1rpx solid #e8dcc8;
+  padding: 40rpx 24rpx;
+  text-align: center;
+  margin-bottom: 20rpx;
+}
+
+.state-text {
+  font-size: 28rpx;
+  color: #6b5643;
+}
+
+.error-text {
+  color: #b85450;
 }
 
 .building-card {
@@ -350,7 +244,9 @@ export default {
   margin-bottom: 30rpx;
   box-shadow: 0 4rpx 12rpx rgba(139, 69, 19, 0.12);
   transform: translateZ(0);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
   border: 1rpx solid #e8dcc8;
 }
 
@@ -379,7 +275,7 @@ export default {
 .building-location {
   display: block;
   font-size: 26rpx;
-  color: #8B4513;
+  color: #8b4513;
   margin-bottom: 16rpx;
 }
 
@@ -401,7 +297,7 @@ export default {
   background: #f8f4e9;
   border-radius: 20rpx;
   font-size: 24rpx;
-  color: #8B4513;
+  color: #8b4513;
   margin-right: 16rpx;
   margin-bottom: 10rpx;
   border: 1rpx solid #e8dcc8;
@@ -419,7 +315,7 @@ export default {
   width: 300rpx;
   height: 80rpx;
   line-height: 80rpx;
-  background: #8B4513;
+  background: #8b4513;
   color: #fff;
   font-size: 30rpx;
   border-radius: 40rpx;
@@ -430,8 +326,8 @@ export default {
 
 .action-btn.secondary {
   background: #fff;
-  color: #8B4513;
-  border: 2rpx solid #8B4513;
+  color: #8b4513;
+  border: 2rpx solid #8b4513;
 }
 
 .action-btn:active {
