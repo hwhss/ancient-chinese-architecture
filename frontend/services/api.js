@@ -171,6 +171,18 @@ export async function getBuildingById(id) {
   return request(`/api/buildings/${id}`, "GET");
 }
 
+export async function getBuildingModel3d(id) {
+  return request(`/api/buildings/${id}/model3d`, "GET");
+}
+
+export async function getBuildingModel3dManifest(id) {
+  return request(`/api/buildings/${id}/model3d/manifest`, "GET");
+}
+
+export async function refreshSignedAssetToken(token) {
+  return request('/api/assets/refresh', 'GET', { token });
+}
+
 export async function getMaterialById(materialId) {
   return request("/api/material", "GET", { materialId });
 }

@@ -30,15 +30,12 @@
         />
         <view class="material-info">
           <text class="material-title">{{ materialTitle }}</text>
-          <text v-if="building.location" class="material-location"
-            >📍 {{ building.location }}</text
-          >
-          <text v-if="building.description" class="material-desc">{{
-            building.description
-          }}</text>
           <text class="material-source"
-            >来源：{{ material.source || "未知" }}</text
+            >参考素材来源：{{ material.source || "未知" }}</text
           >
+          <text v-if="materialNotice" class="material-notice">{{
+            materialNotice
+          }}</text>
         </view>
       </view>
 
@@ -52,15 +49,12 @@
         />
         <view class="material-info">
           <text class="material-title">{{ materialTitle }}</text>
-          <text v-if="building.location" class="material-location"
-            >📍 {{ building.location }}</text
-          >
-          <text v-if="building.description" class="material-desc">{{
-            building.description
-          }}</text>
           <text class="material-source"
-            >来源：{{ material.source || "未知" }}</text
+            >参考素材来源：{{ material.source || "未知" }}</text
           >
+          <text v-if="materialNotice" class="material-notice">{{
+            materialNotice
+          }}</text>
         </view>
       </view>
 
@@ -68,7 +62,38 @@
       <view v-else class="placeholder">
         <view class="placeholder-icon">🏯</view>
         <text class="placeholder-text">素材ID: {{ materialId }}</text>
-        <text class="placeholder-sub">此处将展示古建筑的实景图或动画视频</text>
+        <text class="placeholder-sub">暂无素材，已展示建筑文字详情</text>
+      </view>
+
+      <view v-if="!loading && !error" class="detail-card">
+        <text class="detail-title">建筑详情</text>
+        <view class="detail-row">
+          <text class="detail-label">名称</text>
+          <text class="detail-value">{{ materialTitle }}</text>
+        </view>
+        <view class="detail-row">
+          <text class="detail-label">分类</text>
+          <text class="detail-value">{{ categoryText }}</text>
+        </view>
+        <view class="detail-row">
+          <text class="detail-label">位置</text>
+          <text class="detail-value">{{ building.location || "暂无" }}</text>
+        </view>
+        <view class="detail-row detail-col">
+          <text class="detail-label">简介</text>
+          <text class="detail-value wrap">{{
+            building.description || "暂无介绍"
+          }}</text>
+        </view>
+        <view v-if="building.tags && building.tags.length" class="tag-list">
+          <text v-for="tag in building.tags" :key="tag" class="tag-item">{{
+            tag
+          }}</text>
+        </view>
+
+        <view class="action-row">
+          <button class="action-btn" @click="goToViewer">进入3D导览</button>
+        </view>
       </view>
     </view>
   </view>
@@ -120,14 +145,17 @@ export default {
       building: {
         id: "",
         name: "",
+        category: "",
         location: "",
         description: "",
+        tags: [],
       },
       material: {
         url: "",
         type: "",
         source: "",
       },
+      materialNotice: "",
       loading: false,
       error: null,
     };
@@ -141,6 +169,19 @@ export default {
         MATERIAL_NAMES[this.materialId] ||
         "古建筑素材"
       );
+    },
+
+    categoryText() {
+      const map = {
+        palace: "皇宫",
+        bridge: "桥梁",
+        garden: "园林",
+        defense: "城防",
+        residence: "民居",
+        tower: "楼阁",
+        water: "水利",
+      };
+      return map[this.building.category] || "未分类";
     },
   },
 
@@ -158,8 +199,13 @@ export default {
     async loadDetailData() {
       this.loading = true;
       this.error = null;
+      this.materialNotice = "";
 
       await Promise.allSettled([this.loadBuilding(), this.loadMaterial()]);
+
+      if (!this.building || !this.building.id) {
+        this.error = "未找到建筑详情";
+      }
 
       this.loading = false;
     },
@@ -169,6 +215,7 @@ export default {
         this.building = await getBuildingById(this.materialId);
       } catch (error) {
         console.error("加载建筑详情失败:", error);
+        this.error = error.message || "建筑详情加载失败";
       }
     },
 
@@ -178,7 +225,7 @@ export default {
       } catch (error) {
         console.error("加载素材失败:", error);
         this.setPlaceholderData();
-        this.error = error.message || "网络异常，已展示占位图";
+        this.materialNotice = "当前素材暂不可用，已展示示例图";
       }
     },
 
@@ -200,6 +247,13 @@ export default {
 
     goBack() {
       uni.navigateBack();
+    },
+
+    goToViewer() {
+      const name = encodeURIComponent(this.materialTitle || "");
+      uni.navigateTo({
+        url: `/pages/viewer/viewer?materialId=${this.materialId}&name=${name}`,
+      });
     },
   },
 };
@@ -299,6 +353,93 @@ export default {
   display: block;
   font-size: 26rpx;
   color: #6b5643;
+}
+
+.material-notice {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #b85450;
+}
+
+.detail-card {
+  margin-top: 24rpx;
+  background: #fff;
+  border-radius: 12rpx;
+  border: 1rpx solid #e8dcc8;
+  padding: 24rpx;
+}
+
+.detail-title {
+  display: block;
+  font-size: 32rpx;
+  color: #3c2a1d;
+  font-weight: bold;
+  margin-bottom: 18rpx;
+}
+
+.detail-row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 12rpx;
+}
+
+.detail-row.detail-col {
+  display: block;
+}
+
+.detail-label {
+  width: 120rpx;
+  flex-shrink: 0;
+  font-size: 26rpx;
+  color: #8b735c;
+}
+
+.detail-value {
+  flex: 1;
+  min-width: 0;
+  font-size: 26rpx;
+  color: #3c2a1d;
+  line-height: 1.6;
+}
+
+.wrap {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-top: 12rpx;
+}
+
+.tag-item {
+  padding: 6rpx 14rpx;
+  border-radius: 20rpx;
+  border: 1rpx solid #d9c8b0;
+  background: #f8f4e9;
+  font-size: 22rpx;
+  color: #6b5643;
+}
+
+.action-row {
+  margin-top: 20rpx;
+}
+
+.action-btn {
+  width: 100%;
+  border: 1rpx solid #8b4513;
+  background: #8b4513;
+  color: #fff;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  padding: 14rpx 0;
+}
+
+.action-btn:active {
+  opacity: 0.92;
 }
 
 .material-location {

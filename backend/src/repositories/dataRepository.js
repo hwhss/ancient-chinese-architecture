@@ -21,9 +21,11 @@ function readJsonFile(filename, defaultValue) {
 const knowledgeBase = readJsonFile('knowledge_base.json', []);
 const materialLinks = readJsonFile('material_links.json', []);
 const buildings = readJsonFile('buildings.json', []);
+const buildingProfiles = readJsonFile('building_profiles.json', []);
 
 const materialMap = new Map(materialLinks.map((item) => [item.materialId, item]));
 const buildingMap = new Map(buildings.map((item) => [item.id, item]));
+const buildingProfileMap = new Map(buildingProfiles.map((item) => [item.id, item]));
 
 function getKnowledgeBase() {
   return knowledgeBase;
@@ -45,10 +47,20 @@ function getBuildingById(id) {
   return buildingMap.get(id) || null;
 }
 
+function getBuildingProfiles() {
+  return buildingProfiles;
+}
+
+function getBuildingProfileById(id) {
+  return buildingProfileMap.get(id) || null;
+}
+
 module.exports = {
   getKnowledgeBase,
   getMaterialLinks,
   getMaterialById,
   getBuildings,
-  getBuildingById
+  getBuildingById,
+  getBuildingProfiles,
+  getBuildingProfileById
 };

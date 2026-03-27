@@ -1,0 +1,266 @@
+[
+  {
+    "id": "gugong_01",
+    "era": "明永乐十八年（1420）",
+    "style": "明清皇家宫殿木构",
+    "overviewSummary": "故宫核心礼制建筑，象征皇权与国家典仪。",
+    "keyPoints": ["重檐庑殿顶", "金砖地面", "礼制中轴核心"],
+    "history": "太和殿始建于明永乐时期，历经多次修缮，清代沿用为国家大典场所。",
+    "architectureHighlights": ["中国现存体量最大的木结构宫殿之一", "台基与殿身层级分明", "斗拱与彩画工艺精细"],
+    "culturalValue": "是中国古代礼制文化与宫殿建筑技术的集中体现。",
+    "model3d": {
+      "status": "demo",
+      "viewerType": "model-viewer",
+      "poster": "https://picsum.photos/800/600?random=101",
+      "preload": {
+        "panoramaUrl": "https://picsum.photos/2048/1024?random=901",
+        "posterBlur": "https://picsum.photos/80/60?random=901",
+        "swapMode": "replace-on-ready"
+      },
+      "note": "当前为演示模型，后续可替换为真实古建筑模型",
+      "versions": [
+        {
+          "version": "v1-lite",
+          "label": "轻量版",
+          "format": "glb",
+          "allowedRoles": ["viewer", "admin"],
+          "modelUrl": "https://modelviewer.dev/shared-assets/models/Astronaut.glb",
+          "draco": false,
+          "ktx2": false,
+          "lod": [
+            {
+              "level": 0,
+              "modelUrl": "https://modelviewer.dev/shared-assets/models/RobotExpressive.glb"
+            }
+          ],
+          "hotspots": [
+            {
+              "id": "dg-1",
+              "title": "斗拱结构",
+              "name": "斗拱",
+              "description": "观察屋檐下层层叠涩的受力与装饰关系。",
+              "narration": "斗拱既承担传力，也构成宫殿立面的节奏美感。",
+              "position": [0.2, 1.1, 0.1]
+            },
+            {
+              "id": "yj-1",
+              "title": "屋脊装饰",
+              "name": "吻兽",
+              "description": "屋脊脊饰体现等级与工艺特征。",
+              "narration": "脊饰数量和形式与建筑等级密切相关。",
+              "position": [-0.1, 1.6, 0.05]
+            }
+          ],
+          "camera": {
+            "orbit": "35deg 70deg 3.2m",
+            "target": "0m 0.8m 0m",
+            "fov": "45deg"
+          }
+        },
+        {
+          "version": "v1-hd",
+          "label": "高清版",
+          "format": "glb",
+          "allowedRoles": ["admin"],
+          "modelUrl": "https://modelviewer.dev/shared-assets/models/RobotExpressive.glb",
+          "draco": false,
+          "ktx2": false,
+          "hotspots": []
+        }
+      ]
+    }
+  },
+  {
+    "id": "gugong_02",
+    "era": "明永乐十八年（1420）",
+    "style": "明清宫廷建筑",
+    "overviewSummary": "清代中后期皇帝处理政务的重要空间之一。",
+    "keyPoints": ["前朝后寝格局节点", "正大光明匾", "宫廷起居与政务交汇"],
+    "history": "乾清宫原为皇帝寝宫，雍正后皇帝移居养心殿，乾清宫转为典礼与政务空间。",
+    "architectureHighlights": ["单体建筑形制端正", "室内陈设承载清代宫廷制度", "与交泰殿、坤宁宫形成后廷序列"],
+    "culturalValue": "体现清代宫廷权力运行与生活空间的关系。",
+    "model3d": {
+      "status": "planned",
+      "viewerType": "model-viewer",
+      "modelUrl": "",
+      "poster": "https://picsum.photos/800/600?random=102"
+    }
+  },
+  {
+    "id": "shenyang_01",
+    "era": "后金-清初",
+    "style": "满汉融合宫殿建筑",
+    "overviewSummary": "清代入关前的政治核心建筑之一，具有鲜明民族特色。",
+    "keyPoints": ["八角重檐", "满族礼仪空间", "早期清宫风格"],
+    "history": "大政殿是后金政权议政和典礼的重要场所，见证了清代政权早期发展。",
+    "architectureHighlights": ["平面与屋顶形制独特", "木构节点具地域特色", "装饰纹样融合多文化元素"],
+    "culturalValue": "是研究清初政治制度与建筑文化的重要实物。"
+  },
+  {
+    "id": "zhaozhou_01",
+    "era": "隋代",
+    "style": "敞肩石拱桥",
+    "overviewSummary": "中国古代桥梁工程的标志性作品，结构思想领先。",
+    "keyPoints": ["单孔敞肩", "减轻自重", "跨越能力强"],
+    "history": "由工匠李春主持建造，历经千年洪水与地震仍保持良好状态。",
+    "architectureHighlights": ["拱券受力路径清晰", "敞肩设计改善排水与减重", "石材加工精度高"],
+    "culturalValue": "体现中国古代工程实践与结构创新能力。"
+  },
+  {
+    "id": "lugou_01",
+    "era": "金代",
+    "style": "联拱石桥",
+    "overviewSummary": "兼具交通功能与历史记忆的代表性古桥。",
+    "keyPoints": ["多孔联拱", "石狮雕刻", "河道适应性"],
+    "history": "卢沟桥长期承担北京西南交通功能，并在近代史上具有重要意义。",
+    "architectureHighlights": ["桥面与拱圈组合稳定", "石栏构件尺度统一", "雕刻工艺丰富"],
+    "culturalValue": "是城市历史、工程技术与纪念意义叠加的地标。"
+  },
+  {
+    "id": "guangji_01",
+    "era": "宋至明清",
+    "style": "梁桥-浮桥-拱桥组合",
+    "overviewSummary": "结构类型复合、功能灵活的古代桥梁典范。",
+    "keyPoints": ["启闭功能", "桥墩密布", "适应潮汐"],
+    "history": "广济桥历经多代营建，逐步形成独特的开合桥段体系。",
+    "architectureHighlights": ["多种结构并置", "局部可拆装以适应航运", "桥亭与交通功能结合"],
+    "culturalValue": "反映了古代工程对水文环境的长期适应。"
+  },
+  {
+    "id": "zhuozheng_01",
+    "era": "明代",
+    "style": "江南私家园林",
+    "overviewSummary": "以水景为核心，空间层次与借景手法成熟。",
+    "keyPoints": ["水体主导", "曲折游线", "亭台轩榭"],
+    "history": "拙政园在明代形成基本格局，后世多次修缮仍保持江南园林神韵。",
+    "architectureHighlights": ["建筑尺度亲切", "视线组织精妙", "植物与建筑关系紧密"],
+    "culturalValue": "是中国古典园林艺术的重要范本。"
+  },
+  {
+    "id": "yiheyuan_01",
+    "era": "清代",
+    "style": "皇家园林",
+    "overviewSummary": "山水格局宏大，兼具政治与休憩功能。",
+    "keyPoints": ["昆明湖", "万寿山", "长廊序列"],
+    "history": "颐和园由清代皇家园苑发展而来，历经修复后成为代表性园林遗产。",
+    "architectureHighlights": ["山水与建筑整体规划", "长廊彩画系统完整", "宫苑轴线与景观轴线并存"],
+    "culturalValue": "体现清代皇家园林的综合营造能力。"
+  },
+  {
+    "id": "xian_01",
+    "era": "明代",
+    "style": "城垣防御体系",
+    "overviewSummary": "保存完整的古代城市防御系统样本。",
+    "keyPoints": ["城门瓮城", "马面", "护城河"],
+    "history": "西安城墙在明代基础上不断维护，形成今天可感知的完整城防系统。",
+    "architectureHighlights": ["防御节点布置均衡", "城墙厚度与通行功能兼顾", "城门系统层级清晰"],
+    "culturalValue": "是研究古代城市军事工程的关键实物。"
+  },
+  {
+    "id": "nanjing_01",
+    "era": "明代",
+    "style": "巨型城垣工程",
+    "overviewSummary": "规模宏大、建造周期长，反映国家级工程组织能力。",
+    "keyPoints": ["超长城垣", "因地制宜", "多材料并用"],
+    "history": "南京城墙由明初大规模营建，长期影响城市空间发展。",
+    "architectureHighlights": ["城段形态适应地势", "砖石构造与土体结合", "城门体系复杂"],
+    "culturalValue": "是古代都城工程体系的重要见证。"
+  },
+  {
+    "id": "tulou_01",
+    "era": "明清至近代",
+    "style": "客家夯土民居",
+    "overviewSummary": "兼具居住、防御与宗族组织功能的复合型建筑。",
+    "keyPoints": ["环形或方形围合", "厚重夯土墙", "内向型院落"],
+    "history": "土楼随客家聚落发展形成体系，成为山区社区生活核心。",
+    "architectureHighlights": ["材料获取本地化", "结构耐久性高", "共享空间组织清晰"],
+    "culturalValue": "体现民间建筑智慧与社区协作机制。"
+  },
+  {
+    "id": "qiaojia_01",
+    "era": "清代",
+    "style": "晋商大院",
+    "overviewSummary": "商帮文化与北方民居工艺结合的典型。",
+    "keyPoints": ["多重院落", "砖雕木雕", "礼序空间"],
+    "history": "乔家大院见证晋商兴盛及其家族生活组织方式。",
+    "architectureHighlights": ["院落层层递进", "构件装饰精致", "居住与会客功能分区"],
+    "culturalValue": "是研究近世商帮文化的重要建筑样本。"
+  },
+  {
+    "id": "pingyao_01",
+    "era": "明清",
+    "style": "古城街巷与院落体系",
+    "overviewSummary": "城池、街巷、商号与民居整体保存度高。",
+    "keyPoints": ["棋盘式街巷", "票号遗存", "城墙完整"],
+    "history": "平遥古城在明清商业发展中逐步繁荣，保留了完整城市肌理。",
+    "architectureHighlights": ["街巷尺度稳定", "建筑风貌统一", "公共与商业空间交织"],
+    "culturalValue": "展示了传统城市形态与金融文化发展脉络。"
+  },
+  {
+    "id": "yueyang_01",
+    "era": "宋以来多次重修",
+    "style": "传统楼阁建筑",
+    "overviewSummary": "以文学记忆与楼阁景观共同构成文化地标。",
+    "keyPoints": ["临湖视野", "楼阁层级", "文脉象征"],
+    "history": "岳阳楼历代屡毁屡建，因文人题咏形成深厚文化影响。",
+    "architectureHighlights": ["楼体比例挺拔", "观景平台组织明确", "屋顶轮廓识别度高"],
+    "culturalValue": "是文学与建筑互相塑造的典型案例。"
+  },
+  {
+    "id": "kongmiao_01",
+    "era": "金元明清多次扩建",
+    "style": "祭祀礼制建筑群",
+    "overviewSummary": "以中轴礼制空间组织儒家祭祀活动。",
+    "keyPoints": ["中轴递进", "牌坊碑亭", "祭祀序列"],
+    "history": "孔庙建筑群历代扩建，形成今天规模宏大的礼制体系。",
+    "architectureHighlights": ["院落层层抬升", "礼仪动线完整", "构件装饰庄重"],
+    "culturalValue": "是儒家文化物质化表达的重要代表。"
+  },
+  {
+    "id": "dujiangyan_01",
+    "era": "战国",
+    "style": "无坝引水系统",
+    "overviewSummary": "以分水、泄洪、引流协同实现长期稳定灌溉。",
+    "keyPoints": ["鱼嘴分水堤", "飞沙堰", "宝瓶口"],
+    "history": "都江堰由李冰父子主持修建，至今仍发挥防洪与灌溉作用。",
+    "architectureHighlights": ["顺应自然水势", "工程系统协同运行", "维护机制持续"],
+    "culturalValue": "体现中国古代治水思想与工程系统观。",
+    "model3d": {
+      "status": "demo",
+      "viewerType": "model-viewer",
+      "poster": "https://picsum.photos/800/600?random=116",
+      "note": "当前为演示模型，后续可替换为真实水利工程模型",
+      "versions": [
+        {
+          "version": "v1-lite",
+          "label": "轻量版",
+          "format": "glb",
+          "allowedRoles": ["viewer", "admin"],
+          "modelUrl": "https://modelviewer.dev/shared-assets/models/Astronaut.glb",
+          "draco": false,
+          "ktx2": false,
+          "hotspots": [
+            {
+              "id": "yz-1",
+              "title": "鱼嘴分水堤",
+              "name": "鱼嘴",
+              "description": "负责分流内外江，是都江堰运行关键节点。",
+              "narration": "鱼嘴通过分流比例调节丰枯水期供水与泄洪平衡。",
+              "position": [0.12, 0.45, 0.08]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "kanerjing_01",
+    "era": "古代至近现代",
+    "style": "地下引水系统",
+    "overviewSummary": "通过地下渠道与竖井实现干旱区稳定供水。",
+    "keyPoints": ["暗渠输水", "竖井通风检修", "蒸发损失低"],
+    "history": "坎儿井在吐鲁番地区长期服务农业与聚落发展，形成独特水文化。",
+    "architectureHighlights": ["线路顺坡布置", "维护井间距科学", "地表与地下工程协同"],
+    "culturalValue": "展示干旱环境下的人地适应智慧。"
+  }
+]

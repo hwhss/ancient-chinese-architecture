@@ -19,6 +19,12 @@
       }
     },
     {
+      "path": "pages/viewer/viewer",
+      "style": {
+        "navigationBarTitleText": "3D导览"
+      }
+    },
+    {
       "path": "pages/dev-settings/dev-settings",
       "style": {
         "navigationBarTitleText": "开发设置"
