@@ -16,32 +16,39 @@
     </view>
 
     <!-- 消息区域 -->
-    <scroll-view class="message-area" scroll-y :scroll-into-view="scrollId">
+    <scroll-view 
+      class="message-area" 
+      scroll-y 
+      :scroll-into-view="scrollId"
+      :scroll-with-animation="true"
+      :scroll-top="scrollTop"
+      @scroll="onScroll"
+    >
       <!-- 欢迎消息 -->
       <view v-if="messages.length === 0" class="welcome">
         <view class="welcome-divider">
           <text class="welcome-title">欢迎使用</text>
         </view>
         <text class="welcome-text">您好！我是您的古建筑导览助手</text>
-        <text class="welcome-sub">可以问我关于古建筑的问题，例如：</text>
-        <view class="example-questions">
-          <text class="example-item">"太和殿的历史是什么？"</text>
-          <text class="example-item">"赵州桥的建筑特色？"</text>
-        </view>
-        <text class="welcome-hint">💡 或点击上方按钮浏览全部古建筑</text>
+        <text class="welcome-sub">可以问我关于古建筑的问题</text>
+        <text class="welcome-hint">💡 或点击下方示例问题快速开始</text>
       </view>
 
       <!-- 消息列表 -->
       <view
         v-for="(msg, index) in messages"
-        :key="index"
+        :key="msg.id"
+        :id="'msg-' + index"
         class="message-wrapper"
         :class="msg.role"
       >
         <view class="message" :class="msg.role">
-          <text class="message-text">{{ msg.content }}</text>
+          <text class="message-text">
+            {{ msg.displayContent || msg.content }}
+            <text v-if="msg.isTyping" class="cursor">|</text>
+          </text>
           <button
-            v-if="msg.materialId"
+            v-if="msg.materialId && !msg.isTyping"
             class="view-btn"
             @click="goToDetail(msg.materialId)"
           >
@@ -51,30 +58,58 @@
       </view>
 
       <!-- 加载状态 -->
-      <view v-if="loading" class="message-wrapper ai">
-        <view class="message ai">
-          <text class="loading-text">正在思考中...</text>
+      <view v-if="loading && !hasPendingAiMessage" class="message-wrapper ai">
+        <view class="message ai loading-msg">
+          <view class="loading-dots">
+            <view class="dot"></view>
+            <view class="dot"></view>
+            <view class="dot"></view>
+          </view>
+          <text class="loading-text">正在思考中</text>
         </view>
       </view>
 
-      <view :id="scrollId" class="scroll-bottom"></view>
+      <!-- 错误重试提示 -->
+      <view v-if="lastError" class="error-retry">
+        <text class="error-text">{{ lastError }}</text>
+        <button class="retry-btn" @click="retryLastQuestion">重新发送</button>
+      </view>
+
+      <view class="scroll-bottom"></view>
     </scroll-view>
 
+    <!-- 示例问题区域（永久显示） -->
+    <view class="example-questions-area">
+      <text class="example-title">常见问题：</text>
+      <view class="example-list">
+        <text 
+          v-for="(q, idx) in exampleQuestions" 
+          :key="idx" 
+          class="example-tag"
+          @click="quickQuestion(q)"
+        >{{ q }}</text>
+      </view>
+    </view>
+
     <!-- 输入区域 -->
-    <view class="input-area">
+    <view class="input-area" :class="{ 'keyboard-active': keyboardHeight > 0 }">
       <input
         v-model="inputText"
         class="input"
         placeholder="请输入问题..."
         confirm-type="send"
-        @confirm="send"
+        :disabled="isSending"
+        @confirm="handleSend"
+        @focus="onInputFocus"
+        @blur="onInputBlur"
       />
       <button
         class="send-btn"
-        :disabled="!inputText.trim() || loading"
-        @click="send"
+        :disabled="!canSend || isSending"
+        :class="{ 'sending': isSending }"
+        @click="handleSend"
       >
-        发送
+        {{ isSending ? '发送中' : '发送' }}
       </button>
     </view>
   </view>
@@ -82,6 +117,9 @@
 
 <script>
 import { chat } from "../../services/api";
+
+// 缓存键
+const CACHE_KEY = "CHAT_HISTORY";
 
 // 后端返回materialId后优先使用，仅作为降级兜底保留关键词映射
 const KEYWORD_MAPPING = {
@@ -123,7 +161,15 @@ const KEYWORD_MAPPING = {
   坎儿井: "kanerjing_01",
 };
 
-// 根据问题匹配materialId - 纯函数优化
+// 示例问题
+const EXAMPLE_QUESTIONS = [
+  "太和殿的历史是什么？",
+  "赵州桥的建筑特色？",
+  "拙政园的造园手法？",
+  "故宫的布局特点？"
+];
+
+// 根据问题匹配materialId
 function matchMaterialId(question) {
   for (const keyword in KEYWORD_MAPPING) {
     if (question.includes(keyword)) {
@@ -133,7 +179,7 @@ function matchMaterialId(question) {
   return null;
 }
 
-// 缓存mock回答避免重复创建字符串
+// 缓存mock回答
 const MOCK_ANSWERS = {
   太和殿:
     "太和殿建成于明永乐十八年（1420年），是故宫规模最大、等级最高的建筑，用于举行大典。殿高35.05米，建筑面积2377平方米，是中国现存最大的木结构大殿。",
@@ -146,51 +192,201 @@ export default {
     return {
       messages: [],
       inputText: "",
-      scrollId: "msg-end",
+      scrollId: "",
+      scrollTop: 0,
       loading: false,
+      isSending: false,
+      keyboardHeight: 0,
+      lastError: "",
+      lastQuestion: "",
+      typingTimer: null,
+      exampleQuestions: EXAMPLE_QUESTIONS
     };
   },
+
+  computed: {
+    canSend() {
+      return this.inputText.trim().length > 0;
+    },
+    hasPendingAiMessage() {
+      return this.messages.some(m => m.isTyping);
+    }
+  },
+
+  onLoad() {
+    this.loadHistory();
+  },
+
+  onUnload() {
+    this.clearTypingTimer();
+  },
+
+  onHide() {
+    this.saveHistory();
+  },
+
   methods: {
+    // 加载历史记录
+    loadHistory() {
+      try {
+        const cached = uni.getStorageSync(CACHE_KEY);
+        if (cached && Array.isArray(cached)) {
+          this.messages = cached.filter(m => !m.isTyping);
+        }
+      } catch (e) {
+        console.warn("加载聊天历史失败:", e);
+      }
+    },
+
+    // 保存历史记录
+    saveHistory() {
+      try {
+        const historyToSave = this.messages.filter(m => !m.isTyping);
+        uni.setStorageSync(CACHE_KEY, historyToSave);
+      } catch (e) {
+        console.warn("保存聊天历史失败:", e);
+      }
+    },
+
+    // 快速问题
+    quickQuestion(question) {
+      this.inputText = question;
+      this.handleSend();
+    },
+
+    // 处理发送（带防重复）
+    handleSend() {
+      if (this.isSending) return;
+      if (!this.canSend) return;
+      
+      this.send();
+    },
+
     async send() {
       const question = this.inputText.trim();
-      if (!question || this.loading) return;
+      if (!question) return;
 
       this.inputText = "";
+      this.lastError = "";
+      this.lastQuestion = question;
 
       // 添加用户消息
-      this.messages.push({
+      const userMsg = {
+        id: Date.now(),
         role: "user",
         content: question,
-      });
+        displayContent: question,
+        isTyping: false
+      };
+      this.messages.push(userMsg);
       this.scrollToBottom();
+      this.saveHistory();
 
       this.loading = true;
+      this.isSending = true;
 
       try {
         const data = await chat(question);
         const materialId = data.materialId || matchMaterialId(question);
-        this.messages.push({
+        
+        // 添加AI消息
+        const aiMsg = {
+          id: Date.now() + 1,
           role: "ai",
           content: data.answer,
+          displayContent: "",
           materialId,
-        });
+          isTyping: true
+        };
+        this.messages.push(aiMsg);
+        this.scrollToBottom();
+        
+        // 开始打字机效果
+        this.startTypingEffect(this.messages.length - 1);
+        
       } catch (error) {
         console.error("请求失败:", error);
+        this.lastError = error.message || "网络异常，请稍后重试";
+        
         // Mock模式：接口不通时返回模拟数据
         const mockAnswer = this.getMockAnswer(question);
         const materialId = matchMaterialId(question);
-        this.messages.push({
+        
+        const aiMsg = {
+          id: Date.now() + 1,
           role: "ai",
           content: mockAnswer,
-          materialId: materialId,
-        });
+          displayContent: "",
+          materialId,
+          isTyping: true
+        };
+        this.messages.push(aiMsg);
+        this.scrollToBottom();
+        
+        this.startTypingEffect(this.messages.length - 1);
+        
       } finally {
         this.loading = false;
-        this.scrollToBottom();
+        this.isSending = false;
       }
     },
 
-    // Mock回答（用于演示） - 使用缓存常量避免重复分配内存
+    // 打字机效果（优化版）
+    startTypingEffect(msgIndex) {
+      const msg = this.messages[msgIndex];
+      if (!msg) return;
+      
+      const fullText = msg.content;
+      let index = 0;
+      const speed = 50; // 稍微放慢一点，更流畅
+
+      this.clearTypingTimer();
+
+      const typeNext = () => {
+        if (index < fullText.length) {
+          // 批量更新，每5个字符更新一次，减少渲染压力
+          const batchSize = Math.min(3, fullText.length - index);
+          index += batchSize;
+          
+          // 使用 Vue 的响应式更新方式
+          this.$set(this.messages[msgIndex], 'displayContent', fullText.slice(0, index));
+          
+          // 只在需要时滚动到底部
+          if (index % 10 === 0 || index >= fullText.length) {
+            this.scrollToBottom();
+          }
+          
+          this.typingTimer = setTimeout(typeNext, speed);
+        } else {
+          // 完成打字
+          this.$set(this.messages[msgIndex], 'isTyping', false);
+          this.$set(this.messages[msgIndex], 'displayContent', fullText);
+          this.scrollToBottom();
+          this.saveHistory();
+        }
+      };
+
+      // 立即开始
+      typeNext();
+    },
+
+    clearTypingTimer() {
+      if (this.typingTimer) {
+        clearTimeout(this.typingTimer);
+        this.typingTimer = null;
+      }
+    },
+
+    // 重试上次问题
+    retryLastQuestion() {
+      if (this.lastQuestion && !this.isSending) {
+        this.lastError = "";
+        this.inputText = this.lastQuestion;
+        this.send();
+      }
+    },
+
+    // Mock回答
     getMockAnswer(question) {
       for (const key in MOCK_ANSWERS) {
         if (question.includes(key)) {
@@ -200,8 +396,29 @@ export default {
       return `这是一个很有价值的问题。${question}涉及丰富的历史文化内涵。建议您参考相关历史资料获取更详细的信息。`;
     },
 
+    // 滚动到底部
     scrollToBottom() {
-      this.scrollId = "msg-" + Date.now();
+      this.$nextTick(() => {
+        if (this.messages.length > 0) {
+          this.scrollId = "msg-" + (this.messages.length - 1);
+        }
+      });
+    },
+
+    onScroll(e) {
+      this.scrollTop = e.detail.scrollTop;
+    },
+
+    // 键盘聚焦
+    onInputFocus() {
+      // 键盘弹起时，延迟调整滚动
+      setTimeout(() => {
+        this.scrollToBottom();
+      }, 300);
+    },
+
+    onInputBlur() {
+      this.keyboardHeight = 0;
     },
 
     goToDetail(materialId) {
@@ -230,11 +447,11 @@ export default {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background-color: #f8f4e9;
+  background-color: #f5f0e6;
 }
 
 .header {
-  background: #8b4513;
+  background: linear-gradient(135deg, #6b4423 0%, #8b5a2b 50%, #6b4423 100%);
   padding: 30rpx 30rpx 40rpx;
   text-align: center;
   position: relative;
@@ -244,30 +461,32 @@ export default {
   height: 2rpx;
   width: 60%;
   margin: 10rpx auto;
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 248, 230, 0.4);
 }
 
 .title {
-  color: #fff;
+  color: #fff8e6;
   font-size: 38rpx;
   font-weight: bold;
   letter-spacing: 8rpx;
   display: block;
   line-height: 1.8;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
 }
 
 .message-area {
   flex: 1;
   padding: 20rpx;
+  overflow: hidden;
 }
 
 .welcome {
   text-align: center;
   padding: 50rpx 40rpx;
-  background: #fff;
+  background: linear-gradient(180deg, #fffdf8 0%, #f8f4e9 100%);
   border-radius: 12rpx;
   margin: 20rpx 10rpx;
-  border: 1rpx solid #e8dcc8;
+  border: 1rpx solid #d4c4a8;
 }
 
 .welcome-divider {
@@ -276,7 +495,7 @@ export default {
 
 .welcome-title {
   font-size: 28rpx;
-  color: #8b4513;
+  color: #6b4423;
   font-weight: bold;
   position: relative;
 }
@@ -284,7 +503,7 @@ export default {
 .welcome-text {
   display: block;
   font-size: 32rpx;
-  color: #3c2a1d;
+  color: #4a3828;
   margin-bottom: 16rpx;
   font-weight: 500;
 }
@@ -292,24 +511,58 @@ export default {
 .welcome-sub {
   display: block;
   font-size: 26rpx;
-  color: #6b5643;
+  color: #7a6652;
   margin-bottom: 20rpx;
 }
 
-.example-questions {
-  margin: 10rpx 0 20rpx;
-  text-align: left;
-}
-
-.example-item {
+.welcome-hint {
   display: block;
   font-size: 24rpx;
-  color: #8b4513;
-  padding: 8rpx 16rpx;
-  margin: 8rpx 0;
-  background: #f8f4e9;
-  border-radius: 8rpx;
-  border-left: 4rpx solid #8b4513;
+  color: #6b4423;
+  margin-top: 24rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #d4c4a8;
+}
+
+/* 示例问题区域（永久显示） */
+.example-questions-area {
+  padding: 16rpx 20rpx;
+  background: linear-gradient(180deg, #f8f4e9 0%, #f5f0e6 100%);
+  border-top: 1rpx solid #d4c4a8;
+  border-bottom: 1rpx solid #d4c4a8;
+}
+
+.example-title {
+  display: block;
+  font-size: 24rpx;
+  color: #6b4423;
+  margin-bottom: 12rpx;
+  font-weight: 500;
+}
+
+.example-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.example-tag {
+  display: inline-block;
+  padding: 10rpx 20rpx;
+  background: #fffdf8;
+  border: 1rpx solid #c4b4a0;
+  border-radius: 30rpx;
+  font-size: 24rpx;
+  color: #6b4423;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.example-tag:active {
+  background: #8b5a2b;
+  color: #fff8e6;
+  transform: scale(0.96);
 }
 
 .message-wrapper {
@@ -326,37 +579,90 @@ export default {
 }
 
 .message {
-  max-width: 70%;
+  max-width: 75%;
   padding: 28rpx 24rpx;
   border-radius: 12rpx;
   word-wrap: break-word;
+  position: relative;
 }
 
+/* 用户消息 - 暖棕色调 */
 .message.user {
-  background-color: #8b4513;
+  background: linear-gradient(135deg, #a67c52 0%, #8b5a2b 100%);
   border-bottom-right-radius: 4rpx;
+  box-shadow: 0 4rpx 12rpx rgba(107, 68, 35, 0.25);
 }
 
 .message.user .message-text {
-  color: #fff;
+  color: #fff8e6;
 }
 
+/* AI消息 - 青灰调 */
 .message.ai {
-  background-color: #fff;
+  background: linear-gradient(135deg, #e8ebe8 0%, #d8ddd8 100%);
   border-bottom-left-radius: 4rpx;
-  box-shadow: 0 2rpx 8rpx rgba(139, 69, 19, 0.15);
-  border: 1rpx solid #e8dcc8;
+  box-shadow: 0 4rpx 12rpx rgba(80, 100, 80, 0.15);
+  border: 1rpx solid #c0c8c0;
 }
 
 .message-text {
   font-size: 30rpx;
-  line-height: 1.7;
-  color: #3c2a1d;
+  line-height: 1.8;
+  color: #3a4a3a;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.cursor {
+  display: inline-block;
+  animation: blink 0.8s infinite;
+  font-weight: bold;
+  margin-left: 2rpx;
+  color: #5a7a5a;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* 加载动画 */
+.loading-msg {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.loading-dots {
+  display: flex;
+  gap: 8rpx;
+}
+
+.dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #5a7a5a;
+  animation: dotBounce 1.4s infinite ease-in-out both;
+}
+
+.dot:nth-child(1) { animation-delay: -0.32s; }
+.dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes dotBounce {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .loading-text {
   font-size: 28rpx;
-  color: #8b4513;
+  color: #5a7a5a;
   font-style: italic;
 }
 
@@ -364,10 +670,10 @@ export default {
   margin-top: 20rpx;
   padding: 14rpx 28rpx;
   background: transparent;
-  color: #8b4513;
+  color: #5a7a5a;
   font-size: 26rpx;
   border-radius: 30rpx;
-  border: 1rpx solid #8b4513;
+  border: 1rpx solid #6a8a6a;
   text-align: left;
   transform: translateZ(0);
   transition: all 0.2s;
@@ -375,116 +681,135 @@ export default {
 
 .view-btn:active {
   transform: scale(0.96);
-  background: #8b4513;
-  color: #fff;
+  background: #5a7a5a;
+  color: #f0f8f0;
 }
 
 .input-area {
   display: flex;
   padding: 20rpx;
-  background: #fff;
-  border-top: 1rpx solid #e8dcc8;
+  background: linear-gradient(180deg, #fffdf8 0%, #f5f0e6 100%);
+  border-top: 1rpx solid #d4c4a8;
+  transition: all 0.2s;
+}
+
+.keyboard-active {
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
 }
 
 .input {
   flex: 1;
   height: 80rpx;
   padding: 0 28rpx;
-  background: #f8f4e9;
+  background: #fffdf8;
   border-radius: 40rpx;
   font-size: 30rpx;
   margin-right: 20rpx;
-  border: 1rpx solid #e8dcc8;
-  color: #3c2a1d;
+  border: 1rpx solid #c4b4a0;
+  color: #4a3828;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  border-color: #8b5a2b;
 }
 
 .input::placeholder {
-  color: #a08a76;
+  color: #9a8a76;
 }
 
 .send-btn {
   width: 140rpx;
   height: 80rpx;
   line-height: 80rpx;
-  background: #8b4513;
-  color: #fff;
+  background: linear-gradient(135deg, #6b7a6b 0%, #5a7a5a 100%);
+  color: #f0f8f0;
   font-size: 30rpx;
   border-radius: 40rpx;
   border: none;
   transform: translateZ(0);
-  transition:
-    transform 0.2s,
-    background-color 0.2s;
+  transition: all 0.2s;
+  box-shadow: 0 2rpx 8rpx rgba(90, 122, 90, 0.3);
 }
 
 .send-btn:active:not([disabled]) {
   transform: scale(0.95);
+  box-shadow: 0 1rpx 4rpx rgba(90, 122, 90, 0.2);
 }
 
 .send-btn[disabled] {
-  background: #c4b8a8;
-  color: #f0ebe4;
+  background: linear-gradient(135deg, #a8b0a8 0%, #98a098 100%);
+  color: #d8e0d8;
+  box-shadow: none;
+}
+
+.send-btn.sending {
+  opacity: 0.9;
 }
 
 .quick-actions {
+  padding: 24rpx 30rpx;
+  background: linear-gradient(180deg, #fffdf8 0%, #f5f0e6 100%);
+  border-bottom: 1rpx solid #d4c4a8;
   display: flex;
   gap: 16rpx;
-  padding: 16rpx 20rpx;
 }
 
 .quick-btn {
   flex: 1;
-  background: #8b4513;
-  color: #fff;
-  border: none;
-  border-radius: 10rpx;
-  font-size: 26rpx;
-  height: 74rpx;
-  line-height: 74rpx;
-}
-
-.quick-btn.secondary {
-  background: #fff;
-  color: #8b4513;
-  border: 1rpx solid #8b4513;
-}
-
-.scroll-bottom {
-  height: 1rpx;
-}
-
-/* 快捷入口 */
-.quick-actions {
-  padding: 24rpx 30rpx;
-  background: #fff;
-  border-bottom: 1rpx solid #e8dcc8;
-}
-
-.quick-btn {
-  width: 100%;
   height: 80rpx;
   line-height: 80rpx;
   background: transparent;
-  color: #8b4513;
-  font-size: 30rpx;
+  color: #6b7a6b;
+  font-size: 28rpx;
   border-radius: 40rpx;
-  border: 2rpx solid #8b4513;
+  border: 2rpx solid #7a8a7a;
   transform: translateZ(0);
   transition: all 0.2s;
 }
 
 .quick-btn:active {
   transform: scale(0.98);
-  background: #8b4513;
-  color: #fff;
+  background: linear-gradient(135deg, #6b7a6b 0%, #5a7a5a 100%);
+  color: #f0f8f0;
 }
 
-.welcome-hint {
-  display: block;
+.quick-btn.secondary {
+  background: #fffdf8;
+  color: #6b4423;
+  border: 1rpx solid #a67c52;
+}
+
+.scroll-bottom {
+  height: 1rpx;
+}
+
+/* 错误重试 */
+.error-retry {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #fef5f0 0%, #fae8e0 100%);
+  border: 1rpx solid #d4a090;
+  border-radius: 12rpx;
+  padding: 20rpx 24rpx;
+  margin: 20rpx 10rpx;
+}
+
+.error-text {
+  flex: 1;
+  font-size: 26rpx;
+  color: #8b4a40;
+  margin-right: 16rpx;
+}
+
+.retry-btn {
+  padding: 12rpx 24rpx;
+  background: linear-gradient(135deg, #a66050 0%, #8b4a40 100%);
+  color: #fff8f0;
   font-size: 24rpx;
-  color: #8b4513;
-  margin-top: 24rpx;
-  padding-top: 20rpx;
-  border-top: 1rpx solid #e8dcc8;
+  border-radius: 30rpx;
+  border: none;
+  box-shadow: 0 2rpx 8rpx rgba(139, 74, 64, 0.25);
 }
 </style>
