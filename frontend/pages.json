@@ -1,6 +1,13 @@
 {
   "pages": [
     {
+      "path": "pages/home/home",
+      "style": {
+        "navigationBarTitleText": "中华古建筑导览",
+        "navigationStyle": "custom"
+      }
+    },
+    {
       "path": "pages/map/map",
       "style": {
         "navigationBarTitleText": "古建筑名录"
