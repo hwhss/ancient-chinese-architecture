@@ -3,15 +3,15 @@ const {
   getMaterialLinks
 } = require('../repositories/dataRepository');
 
-function getMaterial(materialId) {
+async function getMaterial(materialId) {
   if (!materialId) {
     return null;
   }
   return getMaterialById(materialId);
 }
 
-function listMaterials(query = {}) {
-  const list = getMaterialLinks();
+async function listMaterials(query = {}) {
+  const list = await getMaterialLinks();
   const { type } = query;
 
   if (!type) {

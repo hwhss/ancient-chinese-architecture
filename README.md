@@ -12,10 +12,12 @@
 ## 🛠️ 技术栈
 
 ### 前端
+
 - **UniApp** - 跨端应用框架
 - **Vue3** - 前端框架
 
 ### 后端
+
 - **Node.js** - 运行环境
 - **Express** - Web框架
 - **AI API** - Kimi/豆包大模型接口
@@ -51,6 +53,7 @@
 ## 🚀 快速开始
 
 ### 环境要求
+
 - Node.js 16+
 - HBuilder X（UniApp开发工具）
 
@@ -70,11 +73,77 @@ cd backend
 # 安装依赖
 npm install
 
+# 复制环境变量模板（首次）
+cp .env.example .env
+
 # 启动服务
 npm start
 ```
 
 服务将运行在 `http://localhost:9527`（好记不冲突）
+
+### 2.1 PostgreSQL 初始化（已安装 PG 时）
+
+```bash
+# 一键执行：建表 + 导入 JSON 数据
+npm run db:setup
+```
+
+等价分步命令：
+
+```bash
+npm run db:migrate
+npm run db:seed
+```
+
+注意：
+
+1. 若 `db:setup` 失败并提示 `Password authentication failed`，请修改 `.env` 中 `DATABASE_URL` 的用户名/密码。
+2. 若 `npm start` 失败并提示 `EADDRINUSE`，表示 `9527` 端口被占用，需结束占用进程或调整 `PORT`。
+
+### 2.2 启动模式说明
+
+后端启动时会读取 `.env`：
+
+1. `DATA_SOURCE=json`：接口从 `backend/data/*.json` 读取。
+2. `DATA_SOURCE=postgres`：接口从 PostgreSQL 读取（Phase 2 已完成）。
+
+当前结论（2026-03-28）：
+
+1. PostgreSQL 建表和 seed 已可执行并已实测通过。
+2. 仓储层已支持 `DATA_SOURCE=json|postgres` 双模式切换。
+3. 在 `json` 与 `postgres` 双模式下，核心接口返回已完成一致性回归。
+
+相关迁移文档：
+
+1. `backend/migrations/README.md`
+2. `docs/2026-03-28_PostgreSQL迁移计划草案.md`
+
+### 2.3 快速回滚说明（postgres -> json）
+
+当你需要临时回滚到 JSON 数据源时，可按下面步骤执行：
+
+```bash
+# 1) 停掉当前后端进程
+# 2) 修改 backend/.env
+DATA_SOURCE=json
+
+# 3) 重启后端
+cd backend
+npm start
+```
+
+回滚后验证：
+
+1. 启动日志出现 `DATA_SOURCE: json`。
+2. 访问 `/api/health` 返回 `datasets` 正常。
+3. 如需做一致性确认，可再次执行 `npm run test:phase3`（json 与 postgres 对比）。
+
+恢复到 PostgreSQL 只需把 `.env` 改回：
+
+```bash
+DATA_SOURCE=postgres
+```
 
 **接口列表：**
 | 接口 | 方法 | 说明 |
@@ -115,9 +184,9 @@ npm start
 
 ```javascript
 const KIMI_CONFIG = {
-  apiKey: 'your_api_key_here',  // 替换为你的API Key
-  apiUrl: 'https://api.moonshot.cn/v1/chat/completions',
-  model: 'moonshot-v1-8k'
+  apiKey: "your_api_key_here", // 替换为你的API Key
+  apiUrl: "https://api.moonshot.cn/v1/chat/completions",
+  model: "moonshot-v1-8k",
 };
 ```
 

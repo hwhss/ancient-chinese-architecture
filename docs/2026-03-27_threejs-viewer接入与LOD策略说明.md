@@ -122,3 +122,21 @@ this.tokenRefresher.start();
 ## 6. 一句话总结
 
 当前 Viewer 已具备“快开（LOD0）+ 提质（高清替换）+ 不白屏（失败保底）”的核心能力；你后续接入自动续期与弱网降级后，就能形成完整的生产级 3D 播放链路。
+
+## 7. 2026-03-28 后端修补结果与前端待对接
+
+已完成后端修补：
+
+1. `manifest.versions[]` 已改为最小暴露字段（不再返回裸 `modelUrl`），避免真实资源地址外泄。
+2. Manifest 签名 URL 改为优先使用请求域名生成（`requestBaseUrl`），降低真机/代理环境下 `localhost` 不可达问题。
+3. `scene.lod[]` 签名兼容 `modelUrl` 与 `url` 两种历史字段，输出统一为签名后的地址。
+
+前端待对接项（本次不改代码）：
+
+1. 在 `viewer.vue` 接入 `createModel3dTokenRefresher()`。
+2. `onUnload` 时执行 `tokenRefresher.stop()`。
+3. 续期成功后更新 `manifest.scene.entry` 和 `manifest.scene.expiresAt`，并复用现有高清替换逻辑。
+
+相关规范：
+
+- `docs/2026-03-28_3D资源签名链路强制规范.md`

@@ -4,8 +4,8 @@ function normalizeText(value) {
   return String(value || '').trim().toLowerCase();
 }
 
-function findBestKnowledgeMatch(question) {
-  const list = getKnowledgeBase();
+async function findBestKnowledgeMatch(question) {
+  const list = await getKnowledgeBase();
   if (!list.length) {
     return null;
   }

@@ -1,8 +1,13 @@
 const { getKnowledgeBase } = require('../repositories/dataRepository');
 const { sendSuccess } = require('../utils/response');
 
-function getKnowledge(req, res) {
-  return sendSuccess(res, getKnowledgeBase());
+async function getKnowledge(req, res, next) {
+  try {
+    const list = await getKnowledgeBase();
+    return sendSuccess(res, list);
+  } catch (error) {
+    return next(error);
+  }
 }
 
 module.exports = {

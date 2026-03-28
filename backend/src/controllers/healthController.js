@@ -5,21 +5,31 @@ const {
   getBuildings
 } = require('../repositories/dataRepository');
 
-function getHealth(req, res) {
-  const knowledgeCount = getKnowledgeBase().length;
-  const materialCount = getMaterialLinks().length;
-  const buildingCount = getBuildings().length;
+async function getHealth(req, res, next) {
+  try {
+    const [knowledgeList, materialList, buildingList] = await Promise.all([
+      getKnowledgeBase(),
+      getMaterialLinks(),
+      getBuildings()
+    ]);
 
-  return sendSuccess(res, {
-    service: 'ancient-architecture-backend',
-    status: 'ok',
-    datasets: {
-      knowledge: knowledgeCount,
-      materials: materialCount,
-      buildings: buildingCount
-    },
-    timestamp: new Date().toISOString()
-  });
+    const knowledgeCount = knowledgeList.length;
+    const materialCount = materialList.length;
+    const buildingCount = buildingList.length;
+
+    return sendSuccess(res, {
+      service: 'ancient-architecture-backend',
+      status: 'ok',
+      datasets: {
+        knowledge: knowledgeCount,
+        materials: materialCount,
+        buildings: buildingCount
+      },
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    return next(error);
+  }
 }
 
 module.exports = {

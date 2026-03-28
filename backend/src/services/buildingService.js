@@ -99,8 +99,14 @@ function normalizeRequester(requester) {
     userId: String(requester && requester.userId ? requester.userId : 'anonymous').trim(),
     role: role || 'viewer',
     ip: String(requester && requester.ip ? requester.ip : '').trim(),
-    userAgent: String(requester && requester.userAgent ? requester.userAgent : '').trim()
+    userAgent: String(requester && requester.userAgent ? requester.userAgent : '').trim(),
+    requestBaseUrl: String(requester && requester.requestBaseUrl ? requester.requestBaseUrl : '').trim().replace(/\/$/, '')
   };
+}
+
+function getSigningBaseUrl(requester) {
+  const safeRequester = normalizeRequester(requester || {});
+  return safeRequester.requestBaseUrl || String(config.publicBaseUrl || '').trim().replace(/\/$/, '');
 }
 
 function canRequesterAccessVersion(requester, versionItem) {
@@ -111,12 +117,51 @@ function canRequesterAccessVersion(requester, versionItem) {
   return roles.includes(safeRequester.role);
 }
 
+function buildSignedLodArray(lodArray, buildingId, version, requester) {
+  if (!Array.isArray(lodArray) || lodArray.length === 0) {
+    return [];
+  }
+
+  const safeRequester = normalizeRequester(requester || {});
+  const signingBaseUrl = getSigningBaseUrl(safeRequester);
+
+  return lodArray.map((item) => {
+    const rawResourceUrl = String((item && (item.modelUrl || item.url)) || '').trim();
+    if (!item || !rawResourceUrl) {
+      return item;
+    }
+
+    const signed = buildSignedAssetUrl({
+      resourceUrl: rawResourceUrl,
+      buildingId,
+      version: `${version}-lod${Number(item.level) || 0}`,
+      userId: safeRequester.userId,
+      role: safeRequester.role,
+      bindIp: safeRequester.ip,
+      userAgent: safeRequester.userAgent,
+      expireSeconds: config.assetSignExpireSeconds,
+      secret: config.assetSignSecret,
+      publicBaseUrl: signingBaseUrl
+    });
+
+    return {
+      ...item,
+      modelUrl: signed.signedUrl,
+      url: signed.signedUrl,
+      signedUrl: signed.signedUrl,
+      expiresAt: signed.expiresAt
+    };
+  });
+}
+
 function buildSignedVersion(versionItem, buildingId, requester) {
   const safeRequester = normalizeRequester(requester);
+  const signingBaseUrl = getSigningBaseUrl(safeRequester);
 
   if (!versionItem.modelUrl) {
     return {
       ...versionItem,
+      modelUrl: '',
       signedUrl: '',
       expiresAt: ''
     };
@@ -132,27 +177,50 @@ function buildSignedVersion(versionItem, buildingId, requester) {
     userAgent: safeRequester.userAgent,
     expireSeconds: config.assetSignExpireSeconds,
     secret: config.assetSignSecret,
-    publicBaseUrl: config.publicBaseUrl
+    publicBaseUrl: signingBaseUrl
   });
 
   return {
     ...versionItem,
+    modelUrl: signed.signedUrl,
     signedUrl: signed.signedUrl,
     expiresAt: signed.expiresAt
   };
 }
 
-function buildPreloadInfo(model3d, defaultVersion) {
+function buildPreloadInfo(model3d, defaultVersion, buildingId, requester) {
   const preloadFromModel = model3d && model3d.preload ? model3d.preload : {};
   const preloadFromVersion = defaultVersion && defaultVersion.preload ? defaultVersion.preload : {};
+  const signingBaseUrl = getSigningBaseUrl(requester);
 
   const lod0Item = defaultVersion && Array.isArray(defaultVersion.lod)
     ? defaultVersion.lod.find((item) => item && Number(item.level) === 0 && (item.modelUrl || item.url))
     : null;
 
-  const lod0ModelUrl = preloadFromVersion.lod0ModelUrl
+  let lod0ModelUrl = preloadFromVersion.lod0ModelUrl
     || preloadFromModel.lod0ModelUrl
     || (lod0Item ? (lod0Item.modelUrl || lod0Item.url) : '');
+
+  let lod0ExpiresAt = '';
+
+  // 对 LOD0 URL 签名
+  if (lod0ModelUrl && defaultVersion && defaultVersion.version) {
+    const safeRequester = normalizeRequester(requester || {});
+    const signed = buildSignedAssetUrl({
+      resourceUrl: lod0ModelUrl,
+      buildingId,
+      version: `${defaultVersion.version}-lod0`,
+      userId: safeRequester.userId,
+      role: safeRequester.role,
+      bindIp: safeRequester.ip,
+      userAgent: safeRequester.userAgent,
+      expireSeconds: config.assetSignExpireSeconds,
+      secret: config.assetSignSecret,
+      publicBaseUrl: signingBaseUrl
+    });
+    lod0ModelUrl = signed.signedUrl;
+    lod0ExpiresAt = signed.expiresAt;
+  }
 
   const panoramaUrl = preloadFromVersion.panoramaUrl
     || preloadFromModel.panoramaUrl
@@ -165,6 +233,7 @@ function buildPreloadInfo(model3d, defaultVersion) {
   return {
     placeholderType,
     lod0ModelUrl,
+    lod0ExpiresAt,
     panoramaUrl,
     posterBlur: preloadFromVersion.posterBlur || preloadFromModel.posterBlur || '',
     swapMode: preloadFromVersion.swapMode || preloadFromModel.swapMode || 'replace-on-ready',
@@ -173,25 +242,27 @@ function buildPreloadInfo(model3d, defaultVersion) {
 }
 
 function buildBuildingSummary(item) {
-  const profile = getBuildingProfileById(item.id) || {};
-  const model3d = buildModel3d(profile, item.image);
+  return getBuildingProfileById(item.id).then((profile) => {
+    const safeProfile = profile || {};
+    const model3d = buildModel3d(safeProfile, item.image);
 
-  return {
-    id: item.id,
-    name: item.name,
-    category: item.category,
-    categoryText: getCategoryText(item.category),
-    location: item.location,
-    coverImage: item.image,
-    tags: item.tags || [],
-    overviewSummary: profile.overviewSummary || item.description || '',
-    has3d: model3d.canView,
-    model3dStatus: model3d.status
-  };
+    return {
+      id: item.id,
+      name: item.name,
+      category: item.category,
+      categoryText: getCategoryText(item.category),
+      location: item.location,
+      coverImage: item.image,
+      tags: item.tags || [],
+      overviewSummary: safeProfile.overviewSummary || item.description || '',
+      has3d: model3d.canView,
+      model3dStatus: model3d.status
+    };
+  });
 }
 
-function buildBuildingDetail(item) {
-  const profile = getBuildingProfileById(item.id) || {};
+async function buildBuildingDetail(item) {
+  const profile = await getBuildingProfileById(item.id) || {};
   const model3d = buildModel3d(profile, item.image);
 
   return {
@@ -216,8 +287,8 @@ function buildBuildingDetail(item) {
   };
 }
 
-function listBuildings(query = {}) {
-  const allBuildings = getBuildings();
+async function listBuildings(query = {}) {
+  const allBuildings = await getBuildings();
   const { category, q } = query;
 
   const filtered = allBuildings.filter((item) => {
@@ -235,24 +306,24 @@ function listBuildings(query = {}) {
     return text.includes(String(q).toLowerCase());
   });
 
-  return filtered.map(buildBuildingSummary);
+  return Promise.all(filtered.map((item) => buildBuildingSummary(item)));
 }
 
-function getBuilding(id) {
-  const item = getBuildingById(id);
+async function getBuilding(id) {
+  const item = await getBuildingById(id);
   if (!item) {
     return null;
   }
   return buildBuildingDetail(item);
 }
 
-function getBuildingModel3d(id, requester) {
-  const item = getBuildingById(id);
+async function getBuildingModel3d(id, requester) {
+  const item = await getBuildingById(id);
   if (!item) {
     return null;
   }
 
-  const profile = getBuildingProfileById(id) || {};
+  const profile = await getBuildingProfileById(id) || {};
   const versions = normalizeModelVersions(profile.model3d || null);
   const filteredVersions = versions.filter((versionItem) => canRequesterAccessVersion(requester, versionItem));
   const signedVersions = filteredVersions.map((versionItem) => buildSignedVersion(versionItem, id, requester));
@@ -273,22 +344,31 @@ function getBuildingModel3d(id, requester) {
   };
 }
 
-function getBuildingModel3dManifest(id, requester) {
-  const item = getBuildingById(id);
+async function getBuildingModel3dManifest(id, requester) {
+  const item = await getBuildingById(id);
   if (!item) {
     return null;
   }
 
-  const profile = getBuildingProfileById(id) || {};
+  const profile = await getBuildingProfileById(id) || {};
   const model3d = buildModel3d(profile, item.image);
   const versions = normalizeModelVersions(profile.model3d || null)
     .filter((versionItem) => canRequesterAccessVersion(requester, versionItem))
     .map((versionItem) => buildSignedVersion(versionItem, id, requester));
+  const versionSummaries = versions.map((versionItem) => ({
+    version: versionItem.version,
+    label: versionItem.label,
+    format: versionItem.format,
+    signedUrl: versionItem.signedUrl,
+    expiresAt: versionItem.expiresAt,
+    draco: Boolean(versionItem.draco),
+    ktx2: Boolean(versionItem.ktx2)
+  }));
   const defaultVersion = versions[0] || null;
   const hotspots = defaultVersion && Array.isArray(defaultVersion.hotspots)
     ? defaultVersion.hotspots
     : [];
-  const preload = buildPreloadInfo(profile.model3d || null, defaultVersion);
+  const preload = buildPreloadInfo(profile.model3d || null, defaultVersion, id, requester);
   const camera = defaultVersion && defaultVersion.camera
     ? defaultVersion.camera
     : {
@@ -305,7 +385,7 @@ function getBuildingModel3dManifest(id, requester) {
     canView: model3d.canView && Boolean(defaultVersion && defaultVersion.signedUrl),
     poster: model3d.poster,
     activeVersion: defaultVersion ? defaultVersion.version : '',
-    versions,
+    versions: versionSummaries,
     tokenPolicy: {
       expiresInSeconds: config.assetSignExpireSeconds,
       refreshWindowSeconds: config.assetRefreshWindowSeconds,
@@ -319,7 +399,7 @@ function getBuildingModel3dManifest(id, requester) {
       environment: 'neutral',
       draco: defaultVersion.draco,
       ktx2: defaultVersion.ktx2,
-      lod: defaultVersion.lod,
+      lod: buildSignedLodArray(defaultVersion.lod, id, defaultVersion.version, requester),
       expiresAt: defaultVersion.expiresAt
     } : {
       format: 'glb',

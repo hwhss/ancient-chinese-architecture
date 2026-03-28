@@ -2,7 +2,7 @@ const { getAIAnswer } = require('../../services/aiService');
 const { findBestKnowledgeMatch } = require('./knowledgeService');
 
 async function getChatResponse(question) {
-  const matched = findBestKnowledgeMatch(question);
+  const matched = await findBestKnowledgeMatch(question);
 
   if (matched) {
     return {
