@@ -141,18 +141,46 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .container {
   display: flex;
   flex-direction: column;
   height: 100vh;
   background: linear-gradient(180deg, #f8f4e8 0%, #f0e9d8 100%);
+  position: relative;
+}
+
+.container::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800'%3E%3Cpath fill='%238b4513' d='M400,100 Q300,50 200,100 Q100,150 200,200 Q300,250 400,200 Q500,150 600,200 Q700,250 600,100 Q500,50 400,100'/%3E%3C/svg%3E");
+  background-size: 400rpx 400rpx;
+  background-repeat: repeat;
+  opacity: 0.12;
+  animation: cloudMove 20s linear infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+
+@keyframes cloudMove {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 800rpx 400rpx;
+  }
 }
 
 .header {
   background: #8b4513;
   padding: 30rpx 30rpx 40rpx;
   text-align: center;
+  position: relative;
+  z-index: 1;
 }
 
 .header-decoration {
@@ -193,6 +221,8 @@ export default {
   padding: 20rpx;
   white-space: nowrap;
   border-bottom: 1rpx solid #e8dcc8;
+  position: relative;
+  z-index: 1;
 }
 
 .tab {
@@ -203,9 +233,20 @@ export default {
   border-radius: 30rpx;
   font-size: 26rpx;
   color: #6b5643;
-  transition: all 0.3s;
-  transform: translateZ(0);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateZ(0) translateY(0);
   border: 1rpx solid transparent;
+  cursor: pointer;
+}
+
+.tab:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4rpx 12rpx rgba(139, 69, 19, 0.15);
+}
+
+.tab:active {
+  transform: translateY(-1px) scale(0.97);
+  box-shadow: 0 2rpx 8rpx rgba(139, 69, 19, 0.12);
 }
 
 .tab.active {
@@ -217,6 +258,8 @@ export default {
 .building-list {
   flex: 1;
   padding: 20rpx;
+  position: relative;
+  z-index: 1;
 }
 
 .state-box {
@@ -226,6 +269,8 @@ export default {
   padding: 40rpx 24rpx;
   text-align: center;
   margin-bottom: 20rpx;
+  position: relative;
+  z-index: 1;
 }
 
 .state-text {
@@ -243,16 +288,25 @@ export default {
   overflow: hidden;
   margin-bottom: 30rpx;
   box-shadow: 0 4rpx 12rpx rgba(139, 69, 19, 0.12);
-  transform: translateZ(0);
+  transform: translateZ(0) scale(1);
   transition:
-    transform 0.2s,
-    box-shadow 0.2s;
+    transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1rpx solid #e8dcc8;
+  position: relative;
+  z-index: 1;
+  cursor: pointer;
+}
+
+/* 卡片悬浮动效 - 明显上浮8px，放大1%，阴影加深 */
+.building-card:hover {
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: 0 12rpx 32rpx rgba(139, 69, 19, 0.3);
 }
 
 .building-card:active {
-  transform: scale(0.98);
-  box-shadow: 0 2rpx 8rpx rgba(139, 69, 19, 0.15);
+  transform: translateY(-4px) scale(0.99);
+  box-shadow: 0 8rpx 24rpx rgba(139, 69, 19, 0.25);
 }
 
 .building-image {
@@ -301,6 +355,21 @@ export default {
   margin-right: 16rpx;
   margin-bottom: 10rpx;
   border: 1rpx solid #e8dcc8;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateZ(0) translateY(0);
+  cursor: pointer;
+}
+
+.tag:hover {
+  background: #e8dcc8;
+  color: #5c2d0e;
+  transform: translateY(-2px);
+  box-shadow: 0 2rpx 8rpx rgba(139, 69, 19, 0.12);
+}
+
+.tag:active {
+  transform: translateY(0) scale(0.96);
+  box-shadow: 0 1rpx 4rpx rgba(139, 69, 19, 0.08);
 }
 
 .bottom-actions {
@@ -309,6 +378,8 @@ export default {
   border-top: 1rpx solid #e8dcc8;
   display: flex;
   justify-content: center;
+  position: relative;
+  z-index: 1;
 }
 
 .action-btn {
@@ -320,8 +391,19 @@ export default {
   font-size: 30rpx;
   border-radius: 40rpx;
   border: none;
-  transform: translateZ(0);
-  transition: all 0.2s;
+  transform: translateZ(0) translateY(0);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.action-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4rpx 12rpx rgba(139, 69, 19, 0.35);
+}
+
+.action-btn:active {
+  transform: translateY(-1px) scale(0.97);
+  box-shadow: 0 2rpx 8rpx rgba(139, 69, 19, 0.25);
 }
 
 .action-btn.secondary {
@@ -330,7 +412,11 @@ export default {
   border: 2rpx solid #8b4513;
 }
 
-.action-btn:active {
-  transform: scale(0.96);
+.action-btn.secondary:hover {
+  box-shadow: 0 4rpx 12rpx rgba(139, 69, 19, 0.25);
+}
+
+.action-btn.secondary:active {
+  box-shadow: 0 2rpx 8rpx rgba(139, 69, 19, 0.2);
 }
 </style>
