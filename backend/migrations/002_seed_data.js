@@ -181,12 +181,30 @@ class DataImporter {
 
     for (const item of rows) {
       await this.pool.query(
-        `INSERT INTO buildings (id, name, category, location, description, image, tags)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)
+        `INSERT INTO buildings (
+          id, name, category, location,
+          province, city, lat, lng,
+          heritage_level, open_status, main_era_start, main_era_end,
+          description, image, tags
+        )
+         VALUES (
+          $1, $2, $3, $4,
+          $5, $6, $7, $8,
+          $9, $10, $11, $12,
+          $13, $14, $15
+        )
          ON CONFLICT (id) DO UPDATE SET
            name = EXCLUDED.name,
            category = EXCLUDED.category,
            location = EXCLUDED.location,
+           province = EXCLUDED.province,
+           city = EXCLUDED.city,
+           lat = EXCLUDED.lat,
+           lng = EXCLUDED.lng,
+           heritage_level = EXCLUDED.heritage_level,
+           open_status = EXCLUDED.open_status,
+           main_era_start = EXCLUDED.main_era_start,
+           main_era_end = EXCLUDED.main_era_end,
            description = EXCLUDED.description,
            image = EXCLUDED.image,
            tags = EXCLUDED.tags`,
@@ -195,6 +213,14 @@ class DataImporter {
           item.name || '',
           item.category || '',
           item.location || '',
+          item.province || '',
+          item.city || '',
+          Number.isFinite(Number(item.lat)) ? Number(item.lat) : null,
+          Number.isFinite(Number(item.lng)) ? Number(item.lng) : null,
+          item.heritageLevel || 'unknown',
+          item.openStatus || 'unknown',
+          Number.isFinite(Number(item.mainEraStart)) ? Number(item.mainEraStart) : null,
+          Number.isFinite(Number(item.mainEraEnd)) ? Number(item.mainEraEnd) : null,
           item.description || '',
           item.image || '',
           toJson(item.tags || [], [])

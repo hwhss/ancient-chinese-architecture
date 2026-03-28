@@ -20,6 +20,28 @@ function getCategoryText(category) {
   return CATEGORY_TEXT_MAP[category] || '未分类';
 }
 
+function buildVisualizationMeta(item) {
+  const lat = Number.isFinite(Number(item.lat)) ? Number(item.lat) : null;
+  const lng = Number.isFinite(Number(item.lng)) ? Number(item.lng) : null;
+  const mainEraStart = Number.isFinite(Number(item.mainEraStart)) ? Number(item.mainEraStart) : null;
+  const mainEraEnd = Number.isFinite(Number(item.mainEraEnd)) ? Number(item.mainEraEnd) : null;
+
+  return {
+    province: String(item.province || '').trim(),
+    city: String(item.city || '').trim(),
+    coordinates: {
+      lat,
+      lng
+    },
+    heritageLevel: String(item.heritageLevel || 'unknown').trim() || 'unknown',
+    openStatus: String(item.openStatus || 'unknown').trim() || 'unknown',
+    mainEra: {
+      start: mainEraStart,
+      end: mainEraEnd
+    }
+  };
+}
+
 function buildModel3d(profile, fallbackPoster) {
   const model3d = profile && profile.model3d ? profile.model3d : null;
   if (!model3d) {
@@ -245,6 +267,7 @@ function buildBuildingSummary(item) {
   return getBuildingProfileById(item.id).then((profile) => {
     const safeProfile = profile || {};
     const model3d = buildModel3d(safeProfile, item.image);
+    const visualization = buildVisualizationMeta(item);
 
     return {
       id: item.id,
@@ -252,6 +275,12 @@ function buildBuildingSummary(item) {
       category: item.category,
       categoryText: getCategoryText(item.category),
       location: item.location,
+      province: visualization.province,
+      city: visualization.city,
+      coordinates: visualization.coordinates,
+      heritageLevel: visualization.heritageLevel,
+      openStatus: visualization.openStatus,
+      mainEra: visualization.mainEra,
       coverImage: item.image,
       tags: item.tags || [],
       overviewSummary: safeProfile.overviewSummary || item.description || '',
@@ -264,6 +293,7 @@ function buildBuildingSummary(item) {
 async function buildBuildingDetail(item) {
   const profile = await getBuildingProfileById(item.id) || {};
   const model3d = buildModel3d(profile, item.image);
+  const visualization = buildVisualizationMeta(item);
 
   return {
     id: item.id,
@@ -271,6 +301,12 @@ async function buildBuildingDetail(item) {
     category: item.category,
     categoryText: getCategoryText(item.category),
     location: item.location,
+    province: visualization.province,
+    city: visualization.city,
+    coordinates: visualization.coordinates,
+    heritageLevel: visualization.heritageLevel,
+    openStatus: visualization.openStatus,
+    mainEra: visualization.mainEra,
     description: item.description,
     image: item.image,
     tags: item.tags || [],

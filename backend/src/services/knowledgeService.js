@@ -1,56 +1,22 @@
-const { getKnowledgeBase } = require('../repositories/dataRepository');
-
-function normalizeText(value) {
-  return String(value || '').trim().toLowerCase();
-}
+const config = require('../config');
+const { searchKeywordCandidates } = require('./retrieval/keywordRetriever');
 
 async function findBestKnowledgeMatch(question) {
-  const list = await getKnowledgeBase();
-  if (!list.length) {
+  const candidates = await searchKeywordCandidates(question);
+  const best = candidates[0];
+
+  if (!best || best.keywordScore < config.chatKeywordScoreThreshold) {
     return null;
   }
 
-  const normalizedQuestion = normalizeText(question);
-  if (!normalizedQuestion) {
-    return null;
-  }
-
-  let best = null;
-
-  for (const item of list) {
-    const questionText = normalizeText(item.question);
-    const keywords = Array.isArray(item.keywords) ? item.keywords : [];
-
-    let score = 0;
-
-    if (questionText && normalizedQuestion.includes(questionText)) {
-      score += 100;
-    }
-
-    if (questionText && questionText.includes(normalizedQuestion)) {
-      score += 30;
-    }
-
-    for (const keyword of keywords) {
-      const normalizedKeyword = normalizeText(keyword);
-      if (normalizedKeyword && normalizedQuestion.includes(normalizedKeyword)) {
-        score += 20;
-      }
-    }
-
-    if (!best || score > best.score) {
-      best = {
-        item,
-        score
-      };
-    }
-  }
-
-  if (!best || best.score < 20) {
-    return null;
-  }
-
-  return best.item;
+  return {
+    id: best.id,
+    question: best.question,
+    answer: best.answer,
+    materialId: best.materialId || null,
+    keywords: best.keywords,
+    score: best.keywordScore
+  };
 }
 
 module.exports = {

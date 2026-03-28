@@ -7,12 +7,29 @@ CREATE TABLE IF NOT EXISTS buildings (
     name VARCHAR(200) NOT NULL,
     category VARCHAR(50),
     location VARCHAR(200),
+    province VARCHAR(100),
+    city VARCHAR(100),
+    lat DOUBLE PRECISION,
+    lng DOUBLE PRECISION,
+    heritage_level VARCHAR(50),
+    open_status VARCHAR(50),
+    main_era_start INTEGER,
+    main_era_end INTEGER,
     description TEXT,
     image VARCHAR(500),
     tags JSONB,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+ALTER TABLE buildings ADD COLUMN IF NOT EXISTS province VARCHAR(100);
+ALTER TABLE buildings ADD COLUMN IF NOT EXISTS city VARCHAR(100);
+ALTER TABLE buildings ADD COLUMN IF NOT EXISTS lat DOUBLE PRECISION;
+ALTER TABLE buildings ADD COLUMN IF NOT EXISTS lng DOUBLE PRECISION;
+ALTER TABLE buildings ADD COLUMN IF NOT EXISTS heritage_level VARCHAR(50);
+ALTER TABLE buildings ADD COLUMN IF NOT EXISTS open_status VARCHAR(50);
+ALTER TABLE buildings ADD COLUMN IF NOT EXISTS main_era_start INTEGER;
+ALTER TABLE buildings ADD COLUMN IF NOT EXISTS main_era_end INTEGER;
 
 -- 2. 建筑详细档案表
 CREATE TABLE IF NOT EXISTS building_profiles (

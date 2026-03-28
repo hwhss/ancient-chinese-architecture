@@ -6,6 +6,12 @@ const { postChat } = require('../controllers/chatController');
 const { getMaterialById, getMaterials } = require('../controllers/materialController');
 const { getKnowledge } = require('../controllers/knowledgeController');
 const {
+  getOverview,
+	getMapPoints,
+	getTimeline,
+	getStats
+} = require('../controllers/visualizationController');
+const {
 	getBuildingList,
 	getBuildingDetail,
 	getBuildingModel,
@@ -25,6 +31,10 @@ router.get('/api/material', getMaterialById);
 router.get('/api/materials', getMaterials);
 
 router.get('/api/knowledge', getKnowledge);
+router.get('/api/visualization/overview', getOverview);
+router.get('/api/visualization/map-points', getMapPoints);
+router.get('/api/visualization/timeline', getTimeline);
+router.get('/api/visualization/stats', getStats);
 
 router.get('/api/buildings', getBuildingList);
 router.get('/api/buildings/:id', getBuildingDetail);

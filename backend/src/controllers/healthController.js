@@ -1,4 +1,5 @@
 const { sendSuccess } = require('../utils/response');
+const config = require('../config');
 const {
   getKnowledgeBase,
   getMaterialLinks,
@@ -24,6 +25,10 @@ async function getHealth(req, res, next) {
         knowledge: knowledgeCount,
         materials: materialCount,
         buildings: buildingCount
+      },
+      runtime: {
+        dataSource: config.dataSource,
+        vectorRetrievalEnabled: Boolean(config.enableVectorRetrieval && config.dataSource === 'postgres')
       },
       timestamp: new Date().toISOString()
     });

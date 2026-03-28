@@ -1,14 +1,13 @@
 const { getAIAnswer } = require('../../services/aiService');
-const { findBestKnowledgeMatch } = require('./knowledgeService');
+const { findBestKnowledgeByHybrid } = require('./retrieval/hybridRetriever');
 
 async function getChatResponse(question) {
-  const matched = await findBestKnowledgeMatch(question);
-
-  if (matched) {
+  const knowledgeMatched = await findBestKnowledgeByHybrid(question);
+  if (knowledgeMatched) {
     return {
-      answer: matched.answer,
-      source: 'knowledge_base',
-      materialId: matched.materialId || null
+      answer: knowledgeMatched.answer,
+      source: knowledgeMatched.source,
+      materialId: knowledgeMatched.materialId || null
     };
   }
 

@@ -51,6 +51,18 @@ function mapBuildingRow(row) {
     name: row.name,
     category: row.category,
     location: row.location,
+    province: row.province || '',
+    city: row.city || '',
+    lat: Number.isFinite(Number(row.lat)) ? Number(row.lat) : null,
+    lng: Number.isFinite(Number(row.lng)) ? Number(row.lng) : null,
+    heritageLevel: row.heritage_level || row.heritageLevel || 'unknown',
+    openStatus: row.open_status || row.openStatus || 'unknown',
+    mainEraStart: Number.isFinite(Number(row.main_era_start || row.mainEraStart))
+      ? Number(row.main_era_start || row.mainEraStart)
+      : null,
+    mainEraEnd: Number.isFinite(Number(row.main_era_end || row.mainEraEnd))
+      ? Number(row.main_era_end || row.mainEraEnd)
+      : null,
     description: row.description,
     image: row.image,
     tags: toArray(row.tags, [])
@@ -59,6 +71,7 @@ function mapBuildingRow(row) {
 
 function mapKnowledgeRow(row) {
   return {
+    id: row.id || null,
     question: row.question,
     answer: row.answer,
     materialId: row.material_id,
@@ -164,7 +177,7 @@ async function getKnowledgeBaseJson() {
 
 async function getKnowledgeBasePostgres() {
   const rows = await query(
-    'SELECT question, answer, material_id, keywords FROM knowledge_base ORDER BY id ASC',
+    'SELECT id, question, answer, material_id, keywords FROM knowledge_base ORDER BY id ASC',
     []
   );
   return rows.map(mapKnowledgeRow);
@@ -207,7 +220,12 @@ async function getBuildingsJson() {
 
 async function getBuildingsPostgres() {
   const rows = await query(
-    'SELECT id, name, category, location, description, image, tags FROM buildings ORDER BY id ASC',
+    `SELECT
+      id, name, category, location,
+      province, city, lat, lng, heritage_level, open_status, main_era_start, main_era_end,
+      description, image, tags
+     FROM buildings
+     ORDER BY id ASC`,
     []
   );
   return rows.map(mapBuildingRow);
@@ -219,7 +237,13 @@ async function getBuildingByIdJson(id) {
 
 async function getBuildingByIdPostgres(id) {
   const rows = await query(
-    'SELECT id, name, category, location, description, image, tags FROM buildings WHERE id = $1 LIMIT 1',
+    `SELECT
+      id, name, category, location,
+      province, city, lat, lng, heritage_level, open_status, main_era_start, main_era_end,
+      description, image, tags
+     FROM buildings
+     WHERE id = $1
+     LIMIT 1`,
     [id]
   );
   if (!rows.length) {
