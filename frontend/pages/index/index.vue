@@ -5,6 +5,8 @@
       <view class="header-decoration"></view>
       <text class="title">🏯 古建筑AI导览</text>
       <view class="header-decoration"></view>
+      <!-- 清空聊天按钮 -->
+      <button v-if="messages.length > 0" class="clear-btn" @click="clearChat">清空聊天</button>
     </view>
 
     <!-- 快捷入口 -->
@@ -120,6 +122,8 @@ import { chat } from "../../services/api";
 
 // 缓存键
 const CACHE_KEY = "CHAT_HISTORY";
+// 最大缓存条数
+const MAX_HISTORY_LENGTH = 15;
 
 // 后端返回materialId后优先使用，仅作为降级兜底保留关键词映射
 const KEYWORD_MAPPING = {
@@ -231,7 +235,9 @@ export default {
       try {
         const cached = uni.getStorageSync(CACHE_KEY);
         if (cached && Array.isArray(cached)) {
-          this.messages = cached.filter(m => !m.isTyping);
+          // 只加载最近的15条记录
+          const filtered = cached.filter(m => !m.isTyping);
+          this.messages = filtered.slice(-MAX_HISTORY_LENGTH);
         }
       } catch (e) {
         console.warn("加载聊天历史失败:", e);
@@ -242,9 +248,36 @@ export default {
     saveHistory() {
       try {
         const historyToSave = this.messages.filter(m => !m.isTyping);
-        uni.setStorageSync(CACHE_KEY, historyToSave);
+        // 只保存最近的15条记录
+        const trimmedHistory = historyToSave.slice(-MAX_HISTORY_LENGTH);
+        uni.setStorageSync(CACHE_KEY, trimmedHistory);
       } catch (e) {
         console.warn("保存聊天历史失败:", e);
+      }
+    },
+
+    // 清空聊天记录
+    clearChat() {
+      uni.showModal({
+        title: '确认清空',
+        content: '确定要清空所有聊天记录吗？',
+        confirmColor: '#8b5a2b',
+        success: (res) => {
+          if (res.confirm) {
+            this.messages = [];
+            this.lastError = '';
+            this.saveHistory();
+          }
+        }
+      });
+    },
+
+    // 裁剪消息列表，保持最多15条
+    trimMessages() {
+      if (this.messages.length > MAX_HISTORY_LENGTH) {
+        // 删除最旧的消息
+        const removeCount = this.messages.length - MAX_HISTORY_LENGTH;
+        this.messages.splice(0, removeCount);
       }
     },
 
@@ -279,6 +312,8 @@ export default {
         isTyping: false
       };
       this.messages.push(userMsg);
+      // 限制消息数量，超过15条则删除最旧的
+      this.trimMessages();
       this.scrollToBottom();
       this.saveHistory();
 
@@ -299,6 +334,8 @@ export default {
           isTyping: true
         };
         this.messages.push(aiMsg);
+        // 限制消息数量，超过15条则删除最旧的
+        this.trimMessages();
         this.scrollToBottom();
         
         // 开始打字机效果
@@ -321,6 +358,8 @@ export default {
           isTyping: true
         };
         this.messages.push(aiMsg);
+        // 限制消息数量，超过15条则删除最旧的
+        this.trimMessages();
         this.scrollToBottom();
         
         this.startTypingEffect(this.messages.length - 1);
@@ -472,6 +511,27 @@ export default {
   display: block;
   line-height: 1.8;
   text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
+}
+
+/* 清空聊天按钮 */
+.clear-btn {
+  position: absolute;
+  right: 20rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 10rpx 24rpx;
+  background: rgba(255, 248, 230, 0.15);
+  color: #fff8e6;
+  font-size: 24rpx;
+  border-radius: 30rpx;
+  border: 1rpx solid rgba(255, 248, 230, 0.3);
+  line-height: 1.4;
+  transition: all 0.2s;
+}
+
+.clear-btn:active {
+  background: rgba(255, 248, 230, 0.25);
+  transform: translateY(-50%) scale(0.96);
 }
 
 .message-area {
