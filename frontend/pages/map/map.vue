@@ -1,12 +1,24 @@
 <template>
-  <view class="container">
+  <view class="container page-enter">
     <!-- 底层：径向渐变打底 -->
     <view class="radial-gradient-bg"></view>
     <!-- 顶层：动态祥云 -->
     <view class="cloud-background"></view>
-    
+
+    <!-- 骨架屏 - 加载时显示 -->
+    <SkeletonScreen
+      v-if="loading && buildings.length === 0"
+      type="map"
+      :loading="loading"
+      :list-count="6"
+    />
+
     <!-- 主内容区域 -->
-    <view class="main-content" :class="{ 'map-mode': currentView === 'map' }">
+    <view
+      v-show="!(loading && buildings.length === 0)"
+      class="main-content"
+      :class="{ 'map-mode': currentView === 'map' }"
+    >
       <!-- 顶部标题 -->
       <view class="header">
         <view class="header-decoration top"></view>
@@ -102,72 +114,83 @@
         </view>
       </view>
 
-      <!-- 建筑列表视图 -->
-      <scroll-view 
-        v-show="currentView === 'list'" 
-        scroll-y 
-        class="scroll-view" 
-        @scroll="onScroll" 
-        scroll-with-animation 
-        :scroll-top="scrollTop"
-      >
-        <view class="building-grid">
-          <view v-if="loading" class="state-box">
-            <text class="state-text">正在加载古建筑名录...</text>
-          </view>
-          <view v-else-if="error" class="state-box">
-            <text class="state-text error-text">{{ error }}</text>
-          </view>
-          <view v-else-if="filteredBuildings.length === 0" class="state-box">
-            <text class="empty-icon">🏛️</text>
-            <text class="state-text">没有找到对应的古建哦，试试换个关键词吧</text>
-          </view>
-          <view
-            v-for="(building, index) in filteredBuildings"
-            :key="building.id"
-            class="building-card preview-card"
-            :class="{ 'visible': visibleCards[index] }"
-            @click="goToDetail(building)"
-          >
-            <view class="card-image" :style="{ backgroundImage: 'url(' + building.image + ')' }"></view>
-            <view class="card-info">
-              <text class="card-name">{{ building.name }}</text>
-              <text class="card-desc">{{ building.description }}</text>
-              <view class="card-tags">
-                <text v-for="tag in building.tags.slice(0, 2)" :key="tag" class="card-tag">{{ tag }}</text>
+      <!-- 视图切换动画容器 -->
+      <view class="view-transition-container">
+        <!-- 建筑列表视图 -->
+        <scroll-view 
+          v-show="currentView === 'list'" 
+          scroll-y 
+          class="scroll-view view-content" 
+          :class="{ 'view-active': currentView === 'list', 'view-inactive': currentView !== 'list' }"
+          @scroll="onScroll" 
+          scroll-with-animation 
+          :scroll-top="scrollTop"
+        >
+          <view class="building-grid">
+            <view v-if="loading" class="state-box">
+              <text class="state-text">正在加载古建筑名录...</text>
+            </view>
+            <view v-else-if="error" class="state-box">
+              <text class="state-text error-text">{{ error }}</text>
+            </view>
+            <view v-else-if="filteredBuildings.length === 0" class="state-box">
+              <text class="empty-icon">🏛️</text>
+              <text class="state-text">没有找到对应的古建哦，试试换个关键词吧</text>
+            </view>
+            <view
+              v-for="(building, index) in filteredBuildings"
+              :key="building.id"
+              class="building-card preview-card"
+              :class="{ 'visible': visibleCards[index] }"
+              @click="goToDetail(building)"
+            >
+              <view class="card-image" :style="{ backgroundImage: 'url(' + building.image + ')' }"></view>
+              <view class="card-info">
+                <text class="card-name">{{ building.name }}</text>
+                <text class="card-desc">{{ building.description }}</text>
+                <view class="card-tags">
+                  <text v-for="tag in building.tags.slice(0, 2)" :key="tag" class="card-tag">{{ tag }}</text>
+                </view>
               </view>
             </view>
           </view>
-        </view>
 
-        <!-- 底部按钮 -->
-        <view class="bottom-actions">
-          <button class="action-btn secondary" @click="goToChat">
-            💬 返回AI问答
-          </button>
-        </view>
-      </scroll-view>
-      
-      <!-- 地图视图 -->
-      <view v-show="currentView === 'map'" class="map-view">
-        <view v-if="loading" class="state-box">
-          <text class="state-text">正在加载古建筑名录...</text>
-        </view>
-        <view v-else-if="error" class="state-box">
-          <text class="state-text error-text">{{ error }}</text>
-        </view>
-        <view v-else-if="filteredBuildings.length === 0" class="state-box">
-          <text class="empty-icon">🏛️</text>
-          <text class="state-text">没有找到对应的古建哦，试试换个关键词吧</text>
-        </view>
-        <view v-else class="map-container">
-          <!-- 可交互地图容器 -->
-          <view id="tencentMap" class="tencent-map"></view>
-          
-          <!-- 地图说明 -->
-          <view class="map-legend">
-            <text class="legend-title">📍 点击标记查看详情</text>
-            <text class="legend-desc">当前显示 {{ filteredBuildings.length }} 处古建筑 · 鼠标滚轮缩放 · 拖拽移动</text>
+          <!-- 底部按钮 -->
+          <view class="bottom-actions">
+            <button class="action-btn secondary" @click="goToChat">
+              💬 返回AI问答
+            </button>
+          </view>
+        </scroll-view>
+        
+        <!-- 地图视图 -->
+        <view 
+          v-show="currentView === 'map'" 
+          class="map-view view-content"
+          :class="{ 'view-active': currentView === 'map', 'view-inactive': currentView !== 'map' }"
+        >
+          <!-- 地图容器 - 始终保留以确保地图实例正常工作 -->
+          <view class="map-container">
+            <!-- 可交互地图容器 -->
+            <view id="tencentMap" class="tencent-map"></view>
+            
+            <!-- 加载/错误/空状态遮罩 -->
+            <view v-if="loading" class="map-overlay state-box">
+              <text class="state-text">正在加载古建筑名录...</text>
+            </view>
+            <view v-else-if="error" class="map-overlay state-box">
+              <text class="state-text error-text">{{ error }}</text>
+            </view>
+            <view v-else-if="filteredBuildings.length === 0" class="map-overlay state-box">
+              <text class="empty-icon">🏛️</text>
+              <text class="state-text">没有找到对应的古建哦，试试换个关键词吧</text>
+            </view>
+            
+            <!-- 地图说明 -->
+            <view class="map-legend" v-if="!loading && !error && filteredBuildings.length > 0">
+              <text class="legend-title">📍 点击标记查看详情</text>
+              <text class="legend-desc">当前显示 {{ filteredBuildings.length }} 处古建筑 · 鼠标滚轮缩放 · 拖拽移动</text>
+            </view>
           </view>
         </view>
       </view>
@@ -188,6 +211,7 @@
 
 <script>
 import { getBuildings } from "../../services/api";
+import SkeletonScreen from "../../components/SkeletonScreen.vue";
 
 // 分类配置 - 静态常量
 const categories = [
@@ -221,6 +245,9 @@ const dynastyMap = {
 };
 
 export default {
+  components: {
+    SkeletonScreen
+  },
   data() {
     return {
       categories,
@@ -243,7 +270,8 @@ export default {
       mapZoom: 4,
       mapMarkers: [],
       mapInstance: null,
-      markersInstance: []
+      markersInstance: [],
+      lastClusterSignature: null
     };
   },
 
@@ -308,8 +336,9 @@ export default {
     filteredBuildings: {
       handler() {
         this.visibleCards = new Array(this.filteredBuildings.length).fill(false);
-        this.updateMapMarkers();
+        // 修复：延迟更新地图标记，确保 DOM 已更新
         this.$nextTick(() => {
+          this.updateMapMarkers();
           this.checkVisibleCards();
         });
       },
@@ -326,7 +355,15 @@ export default {
           if (!this.mapInstance) {
             this.initMap();
           } else {
-            this.updateMapMarkers();
+            // 修复：多次延迟确保容器已渲染并刷新地图
+            setTimeout(() => {
+              this.mapInstance.invalidateSize(true);
+              // 修复：重新设置视图以刷新地图显示
+              const currentCenter = this.mapInstance.getCenter();
+              const currentZoom = this.mapInstance.getZoom();
+              this.mapInstance.setView(currentCenter, currentZoom, { animate: false });
+              this.updateMapMarkers();
+            }, 150);
           }
         });
       }
@@ -372,6 +409,10 @@ export default {
       const container = document.getElementById('tencentMap');
       if (!container) return;
       
+      // 修复：确保容器有明确的大小
+      container.style.width = '100%';
+      container.style.height = '100%';
+      
       // 清空容器
       container.innerHTML = '';
       
@@ -388,8 +429,24 @@ export default {
         maxZoom: 18
       }).addTo(this.mapInstance);
       
-      // 更新标记
-      this.updateMapMarkers();
+      // 修复：延迟更新标记以确保地图完全初始化
+      setTimeout(() => {
+        this.mapInstance.invalidateSize();
+        this.updateMapMarkers();
+      }, 200);
+
+      // 监听地图缩放事件，使用防抖优化性能
+      let zoomTimeout = null;
+      this.mapInstance.on('zoomend', () => {
+        // 清除之前的定时器
+        if (zoomTimeout) {
+          clearTimeout(zoomTimeout);
+        }
+        // 延迟300ms后重新渲染，避免频繁更新
+        zoomTimeout = setTimeout(() => {
+          this.renderMarkers();
+        }, 300);
+      });
     },
     
     // 获取建筑坐标
@@ -456,95 +513,315 @@ export default {
       // 在地图上添加标记
       this.renderMarkers();
       
-      // 更新地图中心
-      if (this.mapMarkers.length > 0 && this.mapInstance && window.L) {
-        const totalLat = this.mapMarkers.reduce((sum, m) => sum + m.lat, 0);
-        const totalLng = this.mapMarkers.reduce((sum, m) => sum + m.lng, 0);
-        const centerLat = totalLat / this.mapMarkers.length;
-        const centerLng = totalLng / this.mapMarkers.length;
-        this.mapInstance.setView([centerLat, centerLng], this.mapZoom);
+      // 更新地图中心 - 修复：空数据时显示默认中国中心
+      if (this.mapInstance && window.L) {
+        if (this.mapMarkers.length > 0) {
+          const totalLat = this.mapMarkers.reduce((sum, m) => sum + m.lat, 0);
+          const totalLng = this.mapMarkers.reduce((sum, m) => sum + m.lng, 0);
+          const centerLat = totalLat / this.mapMarkers.length;
+          const centerLng = totalLng / this.mapMarkers.length;
+          this.mapInstance.setView([centerLat, centerLng], this.mapZoom);
+        } else {
+          // 没有标记时显示中国中心位置
+          this.mapInstance.setView([35.8617, 104.1954], 4);
+        }
+        
+        // 修复：强制地图重新计算大小（解决切换后地图不显示问题）
+        this.$nextTick(() => {
+          this.mapInstance.invalidateSize();
+        });
       }
     },
     
+    // 计算两点之间的距离（简化版，单位：公里）
+    calculateDistance(lat1, lng1, lat2, lng2) {
+      const R = 6371; // 地球半径
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLng = (lng2 - lng1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLng/2) * Math.sin(dLng/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    },
+
+    // 对标记进行聚类
+    clusterMarkers(markers, zoom) {
+      // 根据缩放级别调整聚类距离阈值
+      const distanceThreshold = zoom >= 10 ? 0.5 : zoom >= 7 ? 2 : zoom >= 5 ? 5 : 10;
+
+      const clusters = [];
+      const processed = new Set();
+
+      markers.forEach((marker, index) => {
+        if (processed.has(index)) return;
+
+        const cluster = {
+          center: { lat: marker.lat, lng: marker.lng },
+          markers: [marker],
+          id: index
+        };
+        processed.add(index);
+
+        // 查找附近的标记
+        markers.forEach((other, otherIndex) => {
+          if (index === otherIndex || processed.has(otherIndex)) return;
+
+          const distance = this.calculateDistance(
+            marker.lat, marker.lng,
+            other.lat, other.lng
+          );
+
+          if (distance < distanceThreshold) {
+            cluster.markers.push(other);
+            processed.add(otherIndex);
+
+            // 重新计算聚类中心
+            const totalLat = cluster.markers.reduce((sum, m) => sum + m.lat, 0);
+            const totalLng = cluster.markers.reduce((sum, m) => sum + m.lng, 0);
+            cluster.center = {
+              lat: totalLat / cluster.markers.length,
+              lng: totalLng / cluster.markers.length
+            };
+          }
+        });
+
+        clusters.push(cluster);
+      });
+
+      return clusters;
+    },
+
     // 渲染标记到地图
     renderMarkers() {
       if (!this.mapInstance || !window.L) return;
-      
-      // 清除旧标记
+
+      // 修复：如果没有标记数据，直接返回
+      if (this.mapMarkers.length === 0) {
+        // 清除旧标记
+        this.mapInstance.eachLayer(layer => {
+          if (layer instanceof window.L.Marker || layer instanceof window.L.Popup) {
+            this.mapInstance.removeLayer(layer);
+          }
+        });
+        this.markersInstance = [];
+        return;
+      }
+
+      // 获取当前缩放级别
+      const currentZoom = this.mapInstance.getZoom();
+
+      // 对标记进行聚类
+      const clusters = this.clusterMarkers(this.mapMarkers, currentZoom);
+
+      // 生成聚类签名，用于比较是否需要更新
+      const clusterSignature = clusters.map(c =>
+        c.markers.length === 1
+          ? `s:${c.markers[0].title}`
+          : `c:${c.center.lat.toFixed(4)},${c.center.lng.toFixed(4)}:${c.markers.length}`
+      ).join('|');
+
+      // 如果聚类结果没有变化，跳过渲染
+      if (this.lastClusterSignature === clusterSignature) {
+        return;
+      }
+      this.lastClusterSignature = clusterSignature;
+
+      // 清除旧标记 - 只在需要更新时执行
       this.mapInstance.eachLayer(layer => {
-        if (layer instanceof window.L.Marker) {
+        if (layer instanceof window.L.Marker || layer instanceof window.L.Popup) {
           this.mapInstance.removeLayer(layer);
         }
       });
       this.markersInstance = [];
-      
-      // 添加新标记
-      this.mapMarkers.forEach((markerData, index) => {
-        // 获取建筑图片
-        const buildingImage = markerData.buildingData.image || '';
-        
-        // 创建自定义图标 - 醒目的红色标记（带标签）
-        const customIcon = window.L.divIcon({
-          className: 'building-marker',
-          html: `
-            <div style="position: relative; width: 40px; height: 50px; display: flex; flex-direction: column; align-items: center;">
-              <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 40px; height: 40px; border-radius: 50%; background: rgba(196, 30, 58, 0.3); animation: pulse 1.5s ease-out infinite;"></div>
-              <div style="position: relative; width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%); border: 3px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.4);"></div>
-              <div style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 12px solid #c41e3a;"></div>
-              <div style="position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.95); padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #333; white-space: nowrap; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">${markerData.title.length > 4 ? markerData.title.substring(0, 4) + '...' : markerData.title}</div>
-            </div>
-            <style>
-              @keyframes pulse {
-                0% { transform: translateX(-50%) scale(1); opacity: 1; }
-                100% { transform: translateX(-50%) scale(1.6); opacity: 0; }
-              }
-            </style>
-          `,
-          iconSize: [40, 50],
-          iconAnchor: [20, 50],
-          popupAnchor: [0, -50]
-        });
-        
-        // 创建标记
-        const marker = window.L.marker([markerData.lat, markerData.lng], { 
-          icon: customIcon,
-          zIndexOffset: 1000 - index // 确保后面的标记在前面
-        }).addTo(this.mapInstance);
-        
-        // 创建弹窗内容
-        const popupContent = `
-          <div class="map-info-card">
-            <div class="info-image" style="background-image: url('${buildingImage}')"></div>
-            <div class="info-body">
-              <h4 class="info-title">${markerData.title}</h4>
-              <p class="info-desc">${markerData.buildingData.description || ''}</p>
-              <button class="info-btn" onclick="window.goToBuildingDetail(${markerData.buildingData.id})">查看详情</button>
-            </div>
-          </div>
-        `;
-        
-        marker.bindPopup(popupContent, {
-          closeButton: true,
-          offset: [0, -10]
-        });
-        
-        // 点击标记打开弹窗
-        marker.on('click', () => {
-          marker.openPopup();
-        });
-        
-        // 将跳转函数挂载到 window 对象
-        window.goToBuildingDetail = (id) => {
-          const building = this.filteredBuildings.find(b => b.id === id);
-          if (building) {
-            this.goToDetail(building);
-          }
-        };
-        
-        this.markersInstance.push(marker);
+
+      // 批量添加标记，减少重绘次数
+      const markerGroup = window.L.layerGroup();
+
+      // 添加聚类标记
+      clusters.forEach((cluster, index) => {
+        if (cluster.markers.length === 1) {
+          // 单个标记，使用普通标记
+          const marker = this.createSingleMarker(cluster.markers[0], index);
+          if (marker) markerGroup.addLayer(marker);
+        } else {
+          // 多个标记，使用聚类标记
+          const marker = this.createClusterMarker(cluster, index);
+          if (marker) markerGroup.addLayer(marker);
+        }
       });
+
+      // 一次性添加到地图
+      markerGroup.addTo(this.mapInstance);
     },
-    
+
+    // 创建单个标记（返回marker实例，不直接添加到地图）
+    createSingleMarker(markerData, index) {
+      // 获取建筑图片
+      const buildingImage = markerData.buildingData.image || '';
+
+      // 创建自定义图标 - 醒目的红色标记（带标签）
+      const customIcon = window.L.divIcon({
+        className: 'building-marker',
+        html: `
+          <div style="position: relative; width: 40px; height: 50px; display: flex; flex-direction: column; align-items: center;">
+            <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 40px; height: 40px; border-radius: 50%; background: rgba(196, 30, 58, 0.3); animation: pulse 1.5s ease-out infinite;"></div>
+            <div style="position: relative; width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%); border: 3px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.4);"></div>
+            <div style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 12px solid #c41e3a;"></div>
+            <div style="position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.95); padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #333; white-space: nowrap; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">${markerData.title.length > 4 ? markerData.title.substring(0, 4) + '...' : markerData.title}</div>
+          </div>
+          <style>
+            @keyframes pulse {
+              0% { transform: translateX(-50%) scale(1); opacity: 1; }
+              100% { transform: translateX(-50%) scale(1.6); opacity: 0; }
+            }
+          </style>
+        `,
+        iconSize: [40, 50],
+        iconAnchor: [20, 50],
+        popupAnchor: [0, -50]
+      });
+
+      // 创建标记
+      const marker = window.L.marker([markerData.lat, markerData.lng], {
+        icon: customIcon,
+        zIndexOffset: 1000 - index
+      });
+
+      // 创建弹窗内容
+      const popupContent = `
+        <div class="map-info-card">
+          <div class="info-image" style="background-image: url('${buildingImage}')"></div>
+          <div class="info-body">
+            <h4 class="info-title">${markerData.title}</h4>
+            <p class="info-desc">${markerData.buildingData.description || ''}</p>
+            <button class="info-btn" onclick="window.goToBuildingDetail(${markerData.buildingData.id})">查看详情</button>
+          </div>
+        </div>
+      `;
+
+      marker.bindPopup(popupContent, {
+        closeButton: true,
+        offset: [0, -10]
+      });
+
+      // 点击标记打开弹窗
+      marker.on('click', () => {
+        marker.openPopup();
+      });
+
+      // 将跳转函数挂载到 window 对象
+      window.goToBuildingDetail = (id) => {
+        const building = this.filteredBuildings.find(b => b.id === id);
+        if (building) {
+          this.goToDetail(building);
+        }
+      };
+
+      this.markersInstance.push(marker);
+      return marker;
+    },
+
+    // 创建聚类标记（返回marker实例，不直接添加到地图）
+    createClusterMarker(cluster, index) {
+      const count = cluster.markers.length;
+
+      // 创建聚类图标
+      const clusterIcon = window.L.divIcon({
+        className: 'cluster-marker',
+        html: `
+          <div style="
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #e84a38 0%, #c82506 100%);
+            border: 4px solid #fff;
+            box-shadow: 0 4px 12px rgba(200, 37, 6, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 18px;
+            font-weight: bold;
+            position: relative;
+          ">
+            ${count}
+            <div style="
+              position: absolute;
+              top: 50%;
+              left: 50%;
+              transform: translate(-50%, -50%);
+              width: 60px;
+              height: 60px;
+              border-radius: 50%;
+              border: 2px solid rgba(200, 37, 6, 0.3);
+              animation: clusterPulse 2s ease-out infinite;
+            "></div>
+          </div>
+          <style>
+            @keyframes clusterPulse {
+              0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+              100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
+            }
+          </style>
+        `,
+        iconSize: [50, 50],
+        iconAnchor: [25, 25]
+      });
+
+      // 创建聚类标记
+      const marker = window.L.marker([cluster.center.lat, cluster.center.lng], {
+        icon: clusterIcon,
+        zIndexOffset: 1000
+      });
+
+      // 创建弹窗内容 - 显示聚类中的所有建筑
+      const buildingList = cluster.markers.map(m =>
+        `<div style="padding: 8px 0; border-bottom: 1px solid #eee; cursor: pointer;" onclick="window.zoomToBuilding('${m.title}')">
+          <strong>${m.title}</strong>
+        </div>`
+      ).join('');
+
+      const popupContent = `
+        <div style="min-width: 200px; max-height: 300px; overflow-y: auto;">
+          <h4 style="margin: 0 0 12px 0; color: #c82506; font-size: 16px;">📍 该区域有 ${count} 处古建</h4>
+          <div style="font-size: 14px;">${buildingList}</div>
+          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee; text-align: center; color: #999; font-size: 12px;">
+            点击建筑名称查看详情，或放大地图查看更多
+          </div>
+        </div>
+      `;
+
+      marker.bindPopup(popupContent, {
+        closeButton: true,
+        offset: [0, -10]
+      });
+
+      // 点击聚类标记打开弹窗
+      marker.on('click', () => {
+        marker.openPopup();
+      });
+
+      // 双击聚类标记放大地图
+      marker.on('dblclick', (e) => {
+        e.originalEvent.stopPropagation();
+        this.mapInstance.setView([cluster.center.lat, cluster.center.lng], this.mapInstance.getZoom() + 2);
+      });
+
+      // 将跳转函数挂载到 window 对象
+      window.zoomToBuilding = (title) => {
+        const targetMarker = cluster.markers.find(m => m.title === title);
+        if (targetMarker) {
+          this.mapInstance.setView([targetMarker.lat, targetMarker.lng], 12);
+          // 关闭弹窗
+          marker.closePopup();
+        }
+      };
+
+      this.markersInstance.push(marker);
+      return marker;
+    },
+
     selectCategory(key) {
       this.currentCategory = key;
     },
@@ -629,6 +906,244 @@ export default {
 /* 霞鹜文楷书法字体 */
 @import url('https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&display=swap');
 
+/* ============================================
+   步骤七：规范化色彩系统 - CSS 变量定义
+   ============================================ */
+:root {
+  /* 主色调 - 朱砂红 */
+  --color-primary: #c41e3a;
+  --color-primary-dark: #8b0000;
+  --color-primary-light: #d6455a;
+  
+  /* 辅助色 - 古铜棕 */
+  --color-secondary: #8b4513;
+  --color-secondary-dark: #6b3410;
+  --color-secondary-light: #a67c52;
+  
+  /* 中性色 */
+  --color-text-primary: #3c2a1d;
+  --color-text-secondary: #6b5643;
+  --color-text-tertiary: #8b7355;
+  --color-text-muted: #a89078;
+  
+  /* 背景色 */
+  --color-bg-primary: #f8f4e8;
+  --color-bg-secondary: #f0e9d8;
+  --color-bg-tertiary: #e8dcc8;
+  --color-bg-card: #ffffff;
+  
+  /* 边框色 */
+  --color-border: #e8dcc8;
+  --color-border-light: #dcc8b0;
+  
+  /* 功能色 */
+  --color-error: #b85450;
+  --color-success: #5b8c5a;
+  
+  /* 阴影 */
+  --shadow-sm: 0 2rpx 8rpx rgba(139, 69, 19, 0.08);
+  --shadow-md: 0 4rpx 16rpx rgba(139, 69, 19, 0.12);
+  --shadow-lg: 0 8rpx 24rpx rgba(139, 69, 19, 0.15);
+  --shadow-primary: 0 6rpx 16rpx rgba(196, 30, 58, 0.3);
+  
+  /* 动画曲线 */
+  --ease-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  /* 圆角 */
+  --radius-sm: 8rpx;
+  --radius-md: 16rpx;
+  --radius-lg: 24rpx;
+  --radius-xl: 32rpx;
+  --radius-full: 9999rpx;
+  
+  /* ============================================
+     步骤八：字体层级系统
+     ============================================ */
+  /* 字体族 */
+  --font-display: 'ZCOOL XiaoWei', 'Noto Serif SC', 'Source Han Serif SC', serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  
+  /* 字体大小层级 */
+  --text-xs: 20rpx;
+  --text-sm: 24rpx;
+  --text-base: 28rpx;
+  --text-lg: 32rpx;
+  --text-xl: 36rpx;
+  --text-2xl: 40rpx;
+  --text-3xl: 48rpx;
+  --text-4xl: 56rpx;
+  --text-5xl: 72rpx;
+  --text-6xl: 96rpx;
+  
+  /* 行高 */
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+  
+  /* 字间距 */
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.05em;
+  --tracking-wider: 0.1em;
+  --tracking-widest: 0.2em;
+  
+  /* 字重 */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  
+  /* ============================================
+     步骤九：微动效系统
+     ============================================ */
+  /* 动画时长 */
+  --duration-instant: 100ms;
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --duration-slower: 700ms;
+  
+  /* 悬浮效果 */
+  --hover-lift: translateY(-4px);
+  --hover-scale: scale(1.02);
+  --hover-shadow: 0 12rpx 32rpx rgba(139, 69, 19, 0.2);
+}
+
+/* ============================================
+   步骤九：微动效 - 骨架屏动画
+   ============================================ */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #e8dcc8 25%,
+    #f0e9d8 50%,
+    #e8dcc8 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ============================================
+   步骤九：微动效 - 按钮波纹效果
+   ============================================ */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+.btn-ripple:active::after {
+  width: 300rpx;
+  height: 300rpx;
+}
+
+/* ============================================
+   步骤九：微动效 - 脉冲动画
+   ============================================ */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.pulse-effect {
+  position: relative;
+}
+
+.pulse-effect::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  background: inherit;
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  z-index: -1;
+}
+
+/* ============================================
+   步骤九：微动效 - 悬浮抬升效果
+   ============================================ */
+.hover-lift {
+  transition: transform var(--duration-normal) var(--ease-out),
+              box-shadow var(--duration-normal) var(--ease-out);
+}
+
+.hover-lift:hover {
+  transform: var(--hover-lift);
+  box-shadow: var(--hover-shadow);
+}
+
+/* ============================================
+   步骤九：微动效 - 摇晃提示
+   ============================================ */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4rpx); }
+  20%, 40%, 60%, 80% { transform: translateX(4rpx); }
+}
+
+.shake-animation {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* ============================================
+   步骤九：微动效 - 旋转加载
+   ============================================ */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin-animation {
+  animation: spin 1s linear infinite;
+}
+
+/* ============================================
+   步骤九：微动效 - 呼吸效果
+   ============================================ */
+@keyframes breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.breathe-animation {
+  animation: breathe 2s ease-in-out infinite;
+}
+
 /* 底层：径向渐变打底 */
 .radial-gradient-bg {
   position: fixed;
@@ -679,6 +1194,7 @@ export default {
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
   position: relative;
   z-index: 2;
 }
@@ -935,6 +1451,75 @@ export default {
   font-size: 22rpx;
   color: #c41e3a;
   font-weight: 500;
+}
+
+/* 视图切换动画 */
+.view-transition-container {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+}
+
+.view-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+  transform: translateX(30rpx);
+  pointer-events: none;
+}
+
+.view-content.view-active {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+.view-content.view-inactive {
+  opacity: 0;
+  transform: translateX(-30rpx);
+}
+
+/* 修复：确保地图视图在激活时有正确的高度 */
+.map-view.view-active,
+.map-view.view-content {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 列表视图特定样式 */
+.scroll-view.view-active {
+  animation: fadeInLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 地图视图特定样式 */
+.map-view.view-active {
+  animation: fadeInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .building-grid {
@@ -1288,19 +1873,42 @@ export default {
   position: relative;
   z-index: 2;
   padding: 0;
+  height: 100%;
+  min-height: 600rpx;
 }
 
 .map-container {
   flex: 1;
   width: 100%;
+  height: 100%;
   overflow: hidden;
   position: relative;
+  min-height: 600rpx;
 }
 
 .tencent-map {
   width: 100%;
   height: 100%;
-  min-height: 500rpx;
+  min-height: 600rpx;
+}
+
+/* 地图遮罩层 - 用于显示加载/错误/空状态 */
+.map-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(248, 244, 232, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  grid-column: auto;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
 }
 
 /* Leaflet 自定义标记样式 */

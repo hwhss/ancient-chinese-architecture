@@ -1,5 +1,5 @@
 <template>
-  <view class="container">
+  <view class="container page-enter">
     <!-- 底层：径向渐变打底 -->
     <view class="radial-gradient-bg"></view>
     <!-- 中层：水墨古建远景 -->
@@ -8,9 +8,24 @@
     <view class="ink-background"></view>
     <!-- 顶层：动态祥云 -->
     <view class="cloud-background"></view>
-    
+
+    <!-- 骨架屏 - 加载时显示 -->
+    <SkeletonScreen
+      v-if="loading"
+      type="home"
+      :loading="loading"
+      :card-count="4"
+    />
+
     <!-- 主内容区域 -->
-    <scroll-view scroll-y class="scroll-view" @scroll="onScroll" scroll-with-animation :scroll-top="scrollTop">
+    <scroll-view
+      v-show="!loading"
+      scroll-y
+      class="scroll-view"
+      @scroll="onScroll"
+      scroll-with-animation
+      :scroll-top="scrollTop"
+    >
       <!-- 顶部 Hero 区 - 简化版 -->
       <view class="hero-section">
         <!-- 简化的角落装饰 -->
@@ -88,9 +103,108 @@
               <text class="category-text">城防</text>
             </view>
           </view>
+
+          <!-- 我的收藏快捷入口 -->
+          <view class="favorites-shortcut-wrapper" :class="{ 'visible': sections.hero.categoryShortcuts }">
+            <view class="favorites-shortcut" @click="goToFavorites">
+              <view class="favorites-icon-wrapper">
+                <text class="favorites-icon">⭐</text>
+                <view v-if="favoriteCount > 0" class="favorites-badge">{{ favoriteCount }}</view>
+              </view>
+              <view class="favorites-info">
+                <text class="favorites-title">我的收藏</text>
+                <text class="favorites-count">{{ favoriteCount }} 处古建</text>
+              </view>
+              <view class="favorites-arrow-wrapper">
+                <text class="favorites-arrow">→</text>
+              </view>
+            </view>
+          </view>
         </view>
       </view>
       
+      <!-- 每日推荐区 -->
+      <view class="section-daily" :class="{ 'visible': sections.daily }">
+        <view class="section-header">
+          <view class="daily-header-left">
+            <text class="section-title">📅 每日一建</text>
+            <text class="daily-date">{{ todayDate }}</text>
+          </view>
+          <view class="window-divider">
+            <view class="window-pattern"></view>
+          </view>
+        </view>
+
+        <view v-if="dailyBuilding" class="daily-card-wrapper">
+          <view class="daily-card" @click="goToDetail(dailyBuilding)">
+            <!-- 左侧图片 -->
+            <view class="daily-image-section">
+              <view class="daily-image" :style="{ backgroundImage: 'url(' + dailyBuilding.image + ')' }"></view>
+              <view class="daily-badge">
+                <text class="badge-text">今日推荐</text>
+              </view>
+              <!-- 装饰性角落 -->
+              <view class="image-corner top-left"></view>
+              <view class="image-corner top-right"></view>
+              <view class="image-corner bottom-left"></view>
+              <view class="image-corner bottom-right"></view>
+            </view>
+
+            <!-- 右侧内容 -->
+            <view class="daily-content-section">
+              <view class="daily-content">
+                <!-- 标题区 -->
+                <view class="daily-header">
+                  <view class="daily-title-wrapper">
+                    <text class="daily-name">{{ dailyBuilding.name }}</text>
+                    <view class="daily-location">
+                      <text class="location-icon">📍</text>
+                      <text class="location-text">{{ dailyBuilding.location }}</text>
+                    </view>
+                  </view>
+                  <view class="daily-dynasty-badge">
+                    <text class="dynasty-text">{{ dailyBuilding.dynasty }}</text>
+                  </view>
+                </view>
+
+                <!-- 分隔线 -->
+                <view class="daily-divider"></view>
+
+                <!-- 描述 -->
+                <text class="daily-desc">{{ dailyBuilding.description }}</text>
+
+                <!-- 标签 -->
+                <view class="daily-tags">
+                  <text v-for="tag in dailyBuilding.tags" :key="tag" class="daily-tag">{{ tag }}</text>
+                </view>
+
+                <!-- 底部操作区 -->
+                <view class="daily-footer">
+                  <view class="daily-action-btn">
+                    <text class="action-icon">👁️</text>
+                    <text class="action-text">查看详情</text>
+                  </view>
+                  <view class="daily-actions-right">
+                    <view class="daily-favorite-btn" @click.stop="toggleFavorite(dailyBuilding)">
+                      <text class="favorite-icon" :class="{ 'active': isFavorite(dailyBuilding.id) }">
+                        {{ isFavorite(dailyBuilding.id) ? '★' : '☆' }}
+                      </text>
+                      <text class="favorite-text" :class="{ 'active': isFavorite(dailyBuilding.id) }">
+                        {{ isFavorite(dailyBuilding.id) ? '已收藏' : '收藏' }}
+                      </text>
+                    </view>
+                    <view class="daily-share-btn" @click.stop="shareDailyBuilding">
+                      <text class="share-icon">📤</text>
+                      <text class="share-text">分享</text>
+                    </view>
+                  </view>
+                </view>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
       <!-- 精选古建预览区 -->
       <view class="section-preview" :class="{ 'visible': sections.preview }">
         <view class="section-header">
@@ -237,9 +351,15 @@
 </template>
 
 <script>
+import SkeletonScreen from "../../components/SkeletonScreen.vue";
+
 export default {
+  components: {
+    SkeletonScreen
+  },
   data() {
     return {
+      loading: true,
       scrollTop: 0,
       sections: {
         hero: {
@@ -254,6 +374,7 @@ export default {
           statCards: false,
           categoryShortcuts: false
         },
+        daily: false,
         preview: false,
         previewCards: [false, false, false, false, false, false, false, false],
         features: false,
@@ -261,15 +382,17 @@ export default {
         footer: false
       },
       previewBuildings: [
-        { id: 'gugong_01', name: '太和殿', category: 'palace', location: '北京故宫', description: '紫禁城，明清皇家宫殿', tags: ['宫殿', '明代'], image: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=400&h=300&fit=crop' },
-        { id: 'zhuozheng_01', name: '拙政园', category: 'garden', location: '江苏苏州', description: '咫尺之内再造乾坤', tags: ['园林', '苏州'], image: 'https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=400&h=300&fit=crop' },
-        { id: 'zhaozhou_01', name: '赵州桥', category: 'bridge', location: '河北赵县', description: '天下第一桥，千年不朽', tags: ['桥梁', '隋代'], image: 'https://images.unsplash.com/photo-1537531383496-f4749b8032cf?w=400&h=300&fit=crop' },
-        { id: 'yueyang_01', name: '岳阳楼', category: 'tower', location: '湖南岳阳', description: '天下绝景，江南名楼', tags: ['楼阁', '宋代'], image: 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=400&h=300&fit=crop' },
-        { id: 'xian_01', name: '西安城墙', category: 'defense', location: '陕西西安', description: '中国现存规模最大的古代城垣', tags: ['城防', '明代'], image: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=400&h=300&fit=crop' },
-        { id: 'shenyang_01', name: '沈阳故宫大政殿', category: 'palace', location: '辽宁沈阳', description: '浓郁满族特色的宫殿建筑', tags: ['宫殿', '清代'], image: 'https://images.unsplash.com/photo-1503220317375-aaad61436b1b?w=400&h=300&fit=crop' },
-        { id: 'kongmiao_01', name: '曲阜孔庙', category: 'tower', location: '山东曲阜', description: '祭祀孔子的庙宇建筑群', tags: ['庙宇', '祭祀'], image: 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=400&h=300&fit=crop' },
-        { id: 'tulou_01', name: '福建土楼', category: 'residence', location: '福建龙岩', description: '客家人的东方古城堡', tags: ['民居', '客家'], image: 'https://images.unsplash.com/photo-1528127269322-539801943592?w=400&h=300&fit=crop' }
+        { id: 'gugong_01', name: '太和殿', category: 'palace', location: '北京故宫', description: '紫禁城，明清皇家宫殿', tags: ['宫殿', '明代'], dynasty: '明代', image: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=400&h=300&fit=crop' },
+        { id: 'zhuozheng_01', name: '拙政园', category: 'garden', location: '江苏苏州', description: '咫尺之内再造乾坤', tags: ['园林', '苏州'], dynasty: '明代', image: 'https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=400&h=300&fit=crop' },
+        { id: 'zhaozhou_01', name: '赵州桥', category: 'bridge', location: '河北赵县', description: '天下第一桥，千年不朽', tags: ['桥梁', '隋代'], dynasty: '隋代', image: 'https://images.unsplash.com/photo-1537531383496-f4749b8032cf?w=400&h=300&fit=crop' },
+        { id: 'yueyang_01', name: '岳阳楼', category: 'tower', location: '湖南岳阳', description: '天下绝景，江南名楼', tags: ['楼阁', '宋代'], dynasty: '宋代', image: 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=400&h=300&fit=crop' },
+        { id: 'xian_01', name: '西安城墙', category: 'defense', location: '陕西西安', description: '中国现存规模最大的古代城垣', tags: ['城防', '明代'], dynasty: '明代', image: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=400&h=300&fit=crop' },
+        { id: 'shenyang_01', name: '沈阳故宫大政殿', category: 'palace', location: '辽宁沈阳', description: '浓郁满族特色的宫殿建筑', tags: ['宫殿', '清代'], dynasty: '清代', image: 'https://images.unsplash.com/photo-1503220317375-aaad61436b1b?w=400&h=300&fit=crop' },
+        { id: 'kongmiao_01', name: '曲阜孔庙', category: 'tower', location: '山东曲阜', description: '祭祀孔子的庙宇建筑群', tags: ['庙宇', '祭祀'], dynasty: '宋代', image: 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=400&h=300&fit=crop' },
+        { id: 'tulou_01', name: '福建土楼', category: 'residence', location: '福建龙岩', description: '客家人的东方古城堡', tags: ['民居', '客家'], dynasty: '清代', image: 'https://images.unsplash.com/photo-1528127269322-539801943592?w=400&h=300&fit=crop' }
       ],
+      dailyBuilding: null,
+      favorites: [],
       knowledgeItems: [
         { title: '斗拱', text: '斗拱，中国古建筑的灵魂构件，不用一钉一卯，就能撑起千斤重量，是古人榫卯智慧的极致体现。' },
         { title: '榫卯', text: '榫卯，木头之间的"海誓山盟"，一凸一凹严密扣合，越压越紧，让古建历经千年不倒。' },
@@ -293,8 +416,31 @@ export default {
   },
   
   mounted() {
-    this.startHeroAnimation();
-    this.shuffleKnowledgeItems();
+    // 获取每日推荐
+    this.getDailyBuilding();
+
+    // 模拟加载延迟，展示骨架屏效果
+    setTimeout(() => {
+      this.loading = false;
+      this.startHeroAnimation();
+      this.shuffleKnowledgeItems();
+    }, 800);
+  },
+
+  onShow() {
+    // 每次页面显示时重新加载收藏列表，保持数据同步
+    this.loadFavorites();
+  },
+
+  computed: {
+    todayDate() {
+      return this.getTodayDate();
+    },
+
+    // 获取收藏数量
+    favoriteCount() {
+      return this.favorites?.length || 0;
+    }
   },
   
   beforeDestroy() {
@@ -311,6 +457,121 @@ export default {
       this.knowledgeItems = array;
     },
 
+    // 获取每日推荐建筑
+    getDailyBuilding() {
+      // 获取今天的日期字符串作为种子
+      const today = new Date();
+      const dateStr = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;
+
+      // 使用日期字符串生成一个固定的索引
+      let hash = 0;
+      for (let i = 0; i < dateStr.length; i++) {
+        const char = dateStr.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+      }
+
+      // 使用哈希值选择建筑，确保同一天总是显示同一座建筑
+      const index = Math.abs(hash) % this.previewBuildings.length;
+      this.dailyBuilding = this.previewBuildings[index];
+    },
+
+    // 获取今天的日期字符串
+    getTodayDate() {
+      const today = new Date();
+      const month = today.getMonth() + 1;
+      const day = today.getDate();
+      const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+      const weekDay = weekDays[today.getDay()];
+      return `${month}月${day}日 星期${weekDay}`;
+    },
+
+    // 分享每日推荐
+    shareDailyBuilding() {
+      if (!this.dailyBuilding) return;
+
+      uni.showShareMenu({
+        withShareTicket: true,
+        menus: ['shareAppMessage', 'shareTimeline']
+      });
+
+      uni.showToast({
+        title: '点击右上角分享',
+        icon: 'none',
+        duration: 2000
+      });
+    },
+
+    // ========== 收藏功能 ==========
+
+    // 加载收藏列表
+    loadFavorites() {
+      try {
+        const favorites = uni.getStorageSync('FAVORITE_BUILDINGS');
+        if (favorites && Array.isArray(favorites)) {
+          this.favorites = favorites;
+        }
+      } catch (e) {
+        console.warn('加载收藏失败:', e);
+      }
+    },
+
+    // 保存收藏列表
+    saveFavorites() {
+      try {
+        uni.setStorageSync('FAVORITE_BUILDINGS', this.favorites);
+      } catch (e) {
+        console.warn('保存收藏失败:', e);
+      }
+    },
+
+    // 切换收藏状态
+    toggleFavorite(building) {
+      const index = this.favorites.findIndex(f => f.id === building.id);
+
+      if (index > -1) {
+        // 取消收藏
+        this.favorites.splice(index, 1);
+        uni.showToast({
+          title: '已取消收藏',
+          icon: 'none',
+          duration: 1500
+        });
+      } else {
+        // 添加收藏
+        this.favorites.push({
+          id: building.id,
+          name: building.name,
+          image: building.image,
+          location: building.location,
+          dynasty: building.dynasty,
+          description: building.description,
+          tags: building.tags,
+          category: building.category,
+          addedAt: Date.now()
+        });
+        uni.showToast({
+          title: '收藏成功',
+          icon: 'success',
+          duration: 1500
+        });
+      }
+
+      this.saveFavorites();
+    },
+
+    // 检查是否已收藏
+    isFavorite(buildingId) {
+      return this.favorites.some(f => f.id === buildingId);
+    },
+
+    // 跳转到收藏页面
+    goToFavorites() {
+      uni.navigateTo({
+        url: '/pages/favorites/favorites'
+      });
+    },
+
     startHeroAnimation() {
       setTimeout(() => this.sections.hero.title = true, 200);
       setTimeout(() => this.sections.hero.seal = true, 400);
@@ -321,6 +582,7 @@ export default {
       setTimeout(() => this.sections.hero.btn2 = true, 1900);
       setTimeout(() => this.sections.hero.statCards = true, 2100);
       setTimeout(() => this.sections.hero.categoryShortcuts = true, 2300);
+      setTimeout(() => this.sections.daily = true, 2500);
     },
 
     onKnowledgeScroll(e) {
@@ -401,7 +663,245 @@ export default {
 /* 霞鹜文楷书法字体 */
 @import url('https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&display=swap');
 
-/* 自定义滚动条样式 */
+/* ============================================
+   步骤七：规范化色彩系统 - CSS 变量定义
+   ============================================ */
+:root {
+  /* 主色调 - 朱砂红 */
+  --color-primary: #c41e3a;
+  --color-primary-dark: #8b0000;
+  --color-primary-light: #d6455a;
+  
+  /* 辅助色 - 古铜棕 */
+  --color-secondary: #8b4513;
+  --color-secondary-dark: #6b3410;
+  --color-secondary-light: #a67c52;
+  
+  /* 中性色 */
+  --color-text-primary: #3c2a1d;
+  --color-text-secondary: #6b5643;
+  --color-text-tertiary: #8b7355;
+  --color-text-muted: #a89078;
+  
+  /* 背景色 */
+  --color-bg-primary: #f8f4e8;
+  --color-bg-secondary: #f0e9d8;
+  --color-bg-tertiary: #e8dcc8;
+  --color-bg-card: #ffffff;
+  
+  /* 边框色 */
+  --color-border: #e8dcc8;
+  --color-border-light: #dcc8b0;
+  
+  /* 功能色 */
+  --color-error: #b85450;
+  --color-success: #5b8c5a;
+  
+  /* 阴影 */
+  --shadow-sm: 0 2rpx 8rpx rgba(139, 69, 19, 0.08);
+  --shadow-md: 0 4rpx 16rpx rgba(139, 69, 19, 0.12);
+  --shadow-lg: 0 8rpx 24rpx rgba(139, 69, 19, 0.15);
+  --shadow-primary: 0 6rpx 16rpx rgba(196, 30, 58, 0.3);
+  
+  /* 动画曲线 */
+  --ease-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  /* 圆角 */
+  --radius-sm: 8rpx;
+  --radius-md: 16rpx;
+  --radius-lg: 24rpx;
+  --radius-xl: 32rpx;
+  --radius-full: 9999rpx;
+  
+  /* ============================================
+     步骤八：字体层级系统
+     ============================================ */
+  /* 字体族 */
+  --font-display: 'ZCOOL XiaoWei', 'Noto Serif SC', 'Source Han Serif SC', serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  
+  /* 字体大小层级 */
+  --text-xs: 20rpx;
+  --text-sm: 24rpx;
+  --text-base: 28rpx;
+  --text-lg: 32rpx;
+  --text-xl: 36rpx;
+  --text-2xl: 40rpx;
+  --text-3xl: 48rpx;
+  --text-4xl: 56rpx;
+  --text-5xl: 72rpx;
+  --text-6xl: 96rpx;
+  
+  /* 行高 */
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+  
+  /* 字间距 */
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.05em;
+  --tracking-wider: 0.1em;
+  --tracking-widest: 0.2em;
+  
+  /* 字重 */
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  
+  /* ============================================
+     步骤九：微动效系统
+     ============================================ */
+  /* 动画时长 */
+  --duration-instant: 100ms;
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --duration-slower: 700ms;
+  
+  /* 悬浮效果 */
+  --hover-lift: translateY(-4px);
+  --hover-scale: scale(1.02);
+  --hover-shadow: 0 12rpx 32rpx rgba(139, 69, 19, 0.2);
+}
+
+/* ============================================
+   步骤九：微动效 - 骨架屏动画
+   ============================================ */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #e8dcc8 25%,
+    #f0e9d8 50%,
+    #e8dcc8 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ============================================
+   步骤九：微动效 - 按钮波纹效果
+   ============================================ */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+.btn-ripple:active::after {
+  width: 300rpx;
+  height: 300rpx;
+}
+
+/* ============================================
+   步骤九：微动效 - 脉冲动画
+   ============================================ */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.pulse-effect {
+  position: relative;
+}
+
+.pulse-effect::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  background: inherit;
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  z-index: -1;
+}
+
+/* ============================================
+   步骤九：微动效 - 悬浮抬升效果
+   ============================================ */
+.hover-lift {
+  transition: transform var(--duration-normal) var(--ease-out),
+              box-shadow var(--duration-normal) var(--ease-out);
+}
+
+.hover-lift:hover {
+  transform: var(--hover-lift);
+  box-shadow: var(--hover-shadow);
+}
+
+/* ============================================
+   步骤九：微动效 - 摇晃提示
+   ============================================ */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-4rpx); }
+  20%, 40%, 60%, 80% { transform: translateX(4rpx); }
+}
+
+.shake-animation {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* ============================================
+   步骤九：微动效 - 旋转加载
+   ============================================ */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin-animation {
+  animation: spin 1s linear infinite;
+}
+
+/* ============================================
+   步骤九：微动效 - 呼吸效果
+   ============================================ */
+@keyframes breathe {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.breathe-animation {
+  animation: breathe 2s ease-in-out infinite;
+}
+
+/* 底层：径向渐变打底 */
 .scroll-view::-webkit-scrollbar {
   width: 12rpx;
 }
@@ -825,6 +1325,7 @@ export default {
 }
 
 /* 通用区块样式 */
+.section-daily,
 .section-preview,
 .section-features,
 .section-knowledge,
@@ -835,12 +1336,667 @@ export default {
   transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.section-daily.visible,
 .section-preview.visible,
 .section-features.visible,
 .section-knowledge.visible,
 .footer.visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* ========== 每日推荐区 ========== */
+.section-daily {
+  padding: 80rpx 40rpx;
+  background: linear-gradient(180deg, transparent 0%, rgba(200, 37, 6, 0.03) 50%, transparent 100%);
+}
+
+.daily-header-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.daily-date {
+  font-size: 26rpx;
+  color: #8b7355;
+  font-weight: 500;
+  background: linear-gradient(135deg, #fff8d8 0%, #f5e6c8 100%);
+  padding: 12rpx 28rpx;
+  border-radius: 30rpx;
+  border: 2rpx solid #e8b860;
+  box-shadow: 0 4rpx 12rpx rgba(232, 184, 96, 0.2);
+}
+
+/* 卡片容器 */
+.daily-card-wrapper {
+  max-width: 800rpx;
+  margin: 0 auto;
+}
+
+/* 卡片主体 - 优化比例 */
+.daily-card {
+  display: flex;
+  background: linear-gradient(135deg, #fffef9 0%, #faf6ed 100%);
+  border-radius: 32rpx;
+  overflow: hidden;
+  box-shadow: 
+    0 20rpx 60rpx rgba(139, 69, 19, 0.12),
+    0 8rpx 24rpx rgba(139, 69, 19, 0.08);
+  border: 2rpx solid #e8d8c8;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.daily-card:active {
+  transform: translateY(-6rpx);
+  box-shadow: 
+    0 28rpx 80rpx rgba(139, 69, 19, 0.18),
+    0 12rpx 32rpx rgba(139, 69, 19, 0.12);
+}
+
+/* 左侧图片区域 - 优化为黄金比例 */
+.daily-image-section {
+  position: relative;
+  width: 42%;
+  min-height: 360rpx;
+  overflow: hidden;
+}
+
+.daily-image {
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.daily-card:hover .daily-image {
+  transform: scale(1.1);
+}
+
+/* 图片渐变遮罩 */
+.daily-image-section::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 60rpx;
+  background: linear-gradient(90deg, transparent, rgba(250, 246, 237, 0.8));
+  pointer-events: none;
+}
+
+/* 图片装饰角落 - 更精致 */
+.image-corner {
+  position: absolute;
+  width: 40rpx;
+  height: 40rpx;
+  border: 4rpx solid rgba(200, 37, 6, 0.4);
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+.daily-card:hover .image-corner {
+  border-color: rgba(200, 37, 6, 0.7);
+  width: 50rpx;
+  height: 50rpx;
+}
+
+.image-corner.top-left {
+  top: 20rpx;
+  left: 20rpx;
+  border-right: none;
+  border-bottom: none;
+}
+
+.image-corner.top-right {
+  top: 20rpx;
+  right: 20rpx;
+  border-left: none;
+  border-bottom: none;
+}
+
+.image-corner.bottom-left {
+  bottom: 20rpx;
+  left: 20rpx;
+  border-right: none;
+  border-top: none;
+}
+
+.image-corner.bottom-right {
+  bottom: 20rpx;
+  right: 20rpx;
+  border-left: none;
+  border-top: none;
+}
+
+/* 今日推荐徽章 - 更醒目 */
+.daily-badge {
+  position: absolute;
+  top: 20rpx;
+  left: 20rpx;
+  background: linear-gradient(135deg, #e84a38 0%, #c82506 100%);
+  padding: 12rpx 24rpx;
+  border-radius: 8rpx;
+  box-shadow: 0 6rpx 20rpx rgba(200, 37, 6, 0.4);
+  z-index: 3;
+  transform: rotate(-3deg);
+}
+
+.badge-text {
+  font-size: 22rpx;
+  color: #fff8e6;
+  font-weight: bold;
+  letter-spacing: 4rpx;
+}
+
+/* 右侧内容区域 - 更紧凑 */
+.daily-content-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 36rpx 40rpx;
+}
+
+.daily-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+/* 头部区域 - 优化布局 */
+.daily-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-bottom: 4rpx;
+}
+
+.daily-title-wrapper {
+  flex: 1;
+}
+
+.daily-name {
+  font-size: 42rpx;
+  font-weight: bold;
+  color: #3c2a1d;
+  letter-spacing: 8rpx;
+  margin-bottom: 10rpx;
+  display: block;
+  line-height: 1.3;
+}
+
+.daily-location {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.location-icon {
+  font-size: 22rpx;
+}
+
+.location-text {
+  font-size: 24rpx;
+  color: #8b7355;
+}
+
+/* 朝代徽章 - 圆形设计 */
+.daily-dynasty-badge {
+  background: linear-gradient(135deg, #c82506 0%, #a81c07 100%);
+  padding: 10rpx 20rpx;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 12rpx rgba(200, 37, 6, 0.25);
+  flex-shrink: 0;
+}
+
+.dynasty-text {
+  font-size: 24rpx;
+  color: #fff8e6;
+  font-weight: bold;
+  letter-spacing: 4rpx;
+}
+
+/* 分隔线 - 更精致 */
+.daily-divider {
+  width: 100%;
+  height: 2rpx;
+  background: linear-gradient(90deg, #e8d8c8 0%, transparent 80%);
+  margin: 4rpx 0;
+}
+
+/* 描述文字 - 优化行高 */
+.daily-desc {
+  font-size: 28rpx;
+  color: #5a4a3a;
+  line-height: 1.7;
+  text-align: justify;
+  max-height: 96rpx;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* 标签 - 更紧凑 */
+.daily-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+}
+
+.daily-tag {
+  font-size: 22rpx;
+  color: #8b7355;
+  background: linear-gradient(135deg, #f7f1e6 0%, #ebe4d6 100%);
+  padding: 8rpx 16rpx;
+  border-radius: 16rpx;
+  border: 1rpx solid #e0d4c0;
+}
+
+/* 底部操作区 - 优化按钮 */
+.daily-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12rpx;
+  padding-top: 24rpx;
+  border-top: 2rpx solid #f0e6d8;
+}
+
+.daily-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 18rpx 32rpx;
+  background: linear-gradient(145deg, #e84a38 0%, #c82506 50%, #a81c07 100%);
+  border-radius: 32rpx;
+  box-shadow:
+    0 6rpx 18rpx rgba(200, 37, 6, 0.35),
+    0 2rpx 6rpx rgba(200, 37, 6, 0.2),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.daily-action-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.daily-action-btn:hover::before {
+  left: 100%;
+}
+
+.daily-action-btn:hover {
+  transform: translateY(-3rpx);
+  box-shadow:
+    0 10rpx 28rpx rgba(200, 37, 6, 0.4),
+    0 4rpx 10rpx rgba(200, 37, 6, 0.25);
+}
+
+.daily-action-btn:active {
+  transform: translateY(-1rpx) scale(0.97);
+  box-shadow: 0 4rpx 12rpx rgba(200, 37, 6, 0.3);
+}
+
+.action-icon {
+  font-size: 28rpx;
+  filter: drop-shadow(0 1rpx 2rpx rgba(0, 0, 0, 0.1));
+}
+
+.action-text {
+  font-size: 28rpx;
+  color: #fff8e6;
+  font-weight: 600;
+  letter-spacing: 4rpx;
+  text-shadow: 0 1rpx 2rpx rgba(0, 0, 0, 0.1);
+}
+
+.daily-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.daily-favorite-btn {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 14rpx 24rpx;
+  background: linear-gradient(145deg, #fff 0%, #faf6ed 100%);
+  border-radius: 32rpx;
+  border: 2rpx solid #e0d0c0;
+  box-shadow: 0 3rpx 10rpx rgba(139, 69, 19, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.daily-favorite-btn:hover {
+  transform: translateY(-2rpx);
+  box-shadow: 0 6rpx 16rpx rgba(200, 37, 6, 0.15);
+  border-color: #c82506;
+}
+
+.daily-favorite-btn:active {
+  transform: translateY(-1rpx) scale(0.97);
+}
+
+.favorite-icon {
+  font-size: 32rpx;
+  color: #d0c8c0;
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 1rpx 2rpx rgba(0, 0, 0, 0.05));
+}
+
+.favorite-icon.active {
+  color: #c82506;
+  filter: drop-shadow(0 2rpx 4rpx rgba(200, 37, 6, 0.3));
+  animation: favoritePop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes favoritePop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+.favorite-text {
+  font-size: 26rpx;
+  color: #8b7355;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.favorite-text.active {
+  color: #c82506;
+  font-weight: 600;
+}
+
+.daily-share-btn {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 14rpx 24rpx;
+  background: linear-gradient(145deg, #fff8d8 0%, #f5e6c8 50%, #f0dcc0 100%);
+  border-radius: 32rpx;
+  border: 2rpx solid #e8b860;
+  box-shadow:
+    0 3rpx 10rpx rgba(232, 184, 96, 0.2),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.5);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.daily-share-btn:hover {
+  transform: translateY(-2rpx);
+  box-shadow:
+    0 6rpx 18rpx rgba(232, 184, 96, 0.3),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.5);
+  border-color: #d4a030;
+}
+
+.daily-share-btn:active {
+  transform: translateY(-1rpx) scale(0.97);
+}
+
+.share-icon {
+  font-size: 26rpx;
+  filter: drop-shadow(0 1rpx 1rpx rgba(0, 0, 0, 0.05));
+}
+
+.share-text {
+  font-size: 26rpx;
+  color: #8b6914;
+  font-weight: 500;
+}
+
+/* ========== 我的收藏快捷入口 ========== */
+.favorites-shortcut-wrapper {
+  margin-top: 50rpx;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.5s ease;
+}
+
+.favorites-shortcut-wrapper.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.favorites-shortcut {
+  display: flex;
+  align-items: center;
+  gap: 32rpx;
+  padding: 36rpx 44rpx;
+  background: linear-gradient(135deg, #fffef9 0%, #faf6ed 50%, #f5ede0 100%);
+  border-radius: 28rpx;
+  border: 2rpx solid #e8d8c8;
+  box-shadow:
+    0 12rpx 40rpx rgba(139, 69, 19, 0.1),
+    0 4rpx 12rpx rgba(139, 69, 19, 0.05),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.favorites-shortcut::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5rpx;
+  background: linear-gradient(90deg, #c82506 0%, #e8b860 30%, #e8b860 70%, #c82506 100%);
+  opacity: 0.9;
+}
+
+.favorites-shortcut::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.6s ease;
+}
+
+.favorites-shortcut:hover {
+  transform: translateY(-3rpx);
+  box-shadow:
+    0 20rpx 48rpx rgba(139, 69, 19, 0.14),
+    0 6rpx 16rpx rgba(139, 69, 19, 0.06);
+}
+
+.favorites-shortcut:hover::after {
+  left: 100%;
+}
+
+.favorites-shortcut:active {
+  transform: translateY(-2rpx) scale(0.98);
+  box-shadow: 0 8rpx 24rpx rgba(139, 69, 19, 0.1);
+}
+
+.favorites-icon-wrapper {
+  position: relative;
+  width: 88rpx;
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #fff8d8 0%, #f5e6c8 50%, #f0dcc0 100%);
+  border-radius: 50%;
+  border: 3rpx solid #e8b860;
+  box-shadow:
+    0 6rpx 16rpx rgba(232, 184, 96, 0.3),
+    inset 0 2rpx 4rpx rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.favorites-shortcut:hover .favorites-icon-wrapper {
+  transform: scale(1.06) rotate(3deg);
+  box-shadow:
+    0 10rpx 24rpx rgba(232, 184, 96, 0.4),
+    inset 0 2rpx 4rpx rgba(255, 255, 255, 0.8);
+}
+
+.favorites-icon {
+  font-size: 46rpx;
+  filter: drop-shadow(0 2rpx 4rpx rgba(200, 37, 6, 0.2));
+  transition: transform 0.3s ease;
+}
+
+.favorites-shortcut:hover .favorites-icon {
+  transform: scale(1.12);
+}
+
+.favorites-badge {
+  position: absolute;
+  top: -8rpx;
+  right: -8rpx;
+  min-width: 36rpx;
+  height: 36rpx;
+  background: linear-gradient(135deg, #e84a38 0%, #c82506 100%);
+  border-radius: 18rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10rpx;
+  box-shadow:
+    0 3rpx 10rpx rgba(200, 37, 6, 0.4),
+    0 0 0 2rpx #fffef9;
+  font-size: 20rpx;
+  color: #fff;
+  font-weight: bold;
+  border: 2rpx solid rgba(255, 255, 255, 0.3);
+  animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.favorites-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+  padding: 4rpx 0;
+}
+
+.favorites-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #3c2a1d;
+  letter-spacing: 8rpx;
+  font-family: 'ZCOOL XiaoWei', serif;
+  line-height: 1.2;
+}
+
+.favorites-count {
+  font-size: 26rpx;
+  color: #a08060;
+  font-weight: 500;
+  letter-spacing: 2rpx;
+}
+
+.favorites-arrow-wrapper {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(200, 37, 6, 0.1) 0%, rgba(232, 184, 96, 0.1) 100%);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  border: 1rpx solid rgba(200, 37, 6, 0.15);
+}
+
+.favorites-shortcut:hover .favorites-arrow-wrapper {
+  background: linear-gradient(135deg, rgba(200, 37, 6, 0.18) 0%, rgba(232, 184, 96, 0.18) 100%);
+  border-color: rgba(200, 37, 6, 0.25);
+}
+
+.favorites-arrow {
+  font-size: 28rpx;
+  color: #c82506;
+  font-weight: bold;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.favorites-shortcut:hover .favorites-arrow {
+  transform: translateX(4rpx);
+  opacity: 1;
+}
+
+.favorites-shortcut:active .favorites-arrow {
+  transform: translateX(8rpx);
+}
+
+/* 响应式适配 */
+@media screen and (max-width: 700rpx) {
+  .daily-card {
+    flex-direction: column;
+  }
+  
+  .daily-image-section {
+    width: 100%;
+    height: 280rpx;
+    min-height: auto;
+  }
+  
+  .daily-image-section::after {
+    display: none;
+  }
+  
+  .daily-content-section {
+    padding: 28rpx 32rpx;
+  }
+  
+  .daily-name {
+    font-size: 38rpx;
+    letter-spacing: 6rpx;
+  }
+}
+
+.daily-share {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 20rpx;
+  background: linear-gradient(135deg, #fff8d8 0%, #f5e6c8 100%);
+  border-radius: 30rpx;
+  border: 1rpx solid #e8b860;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.daily-share:active {
+  transform: scale(0.95);
+}
+
+.share-icon {
+  font-size: 24rpx;
+}
+
+.share-text {
+  font-size: 24rpx;
+  color: #a81c07;
+  font-weight: 500;
 }
 
 /* 区块标题 */

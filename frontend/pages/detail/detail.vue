@@ -4,7 +4,16 @@
     <view class="header">
       <button class="back-btn" @click="goBack">← 返回</button>
       <text class="header-title">古建筑详情</text>
-      <view class="placeholder"></view>
+      <view class="header-actions">
+        <view
+          class="favorite-btn"
+          :class="{ 'active': isFavorite }"
+          @click="toggleFavorite"
+        >
+          <text class="favorite-icon">{{ isFavorite ? '★' : '☆' }}</text>
+          <text class="favorite-label">{{ isFavorite ? '已收藏' : '收藏' }}</text>
+        </view>
+      </view>
     </view>
 
     <!-- 素材展示区域 -->
@@ -59,14 +68,24 @@
       </view>
 
       <!-- 占位展示 -->
-      <view v-else class="placeholder">
+      <view v-else class="placeholder-section">
         <view class="placeholder-icon">🏯</view>
         <text class="placeholder-text">素材ID: {{ materialId }}</text>
         <text class="placeholder-sub">暂无素材，已展示建筑文字详情</text>
       </view>
 
       <view v-if="!loading && !error" class="detail-card">
-        <text class="detail-title">建筑详情</text>
+        <view class="detail-header">
+          <text class="detail-title">建筑详情</text>
+          <view
+            class="detail-favorite-btn"
+            :class="{ 'active': isFavorite }"
+            @click="toggleFavorite"
+          >
+            <text class="detail-favorite-icon">{{ isFavorite ? '★' : '☆' }}</text>
+            <text class="detail-favorite-text">{{ isFavorite ? '已收藏' : '收藏' }}</text>
+          </view>
+        </view>
         <view class="detail-row">
           <text class="detail-label">名称</text>
           <text class="detail-value">{{ materialTitle }}</text>
@@ -158,6 +177,7 @@ export default {
       materialNotice: "",
       loading: false,
       error: null,
+      favorites: [],
     };
   },
 
@@ -183,11 +203,19 @@ export default {
       };
       return map[this.building.category] || "未分类";
     },
+
+    isFavorite() {
+      return this.favorites.some(f => f.id === this.materialId);
+    },
   },
 
   onLoad(options) {
     this.materialId = options.materialId || "";
     this.materialName = options.name ? decodeURIComponent(options.name) : "";
+
+    // 加载收藏列表
+    this.loadFavorites();
+
     if (this.materialId) {
       this.loadDetailData();
     } else {
@@ -255,6 +283,64 @@ export default {
         url: `/pages/viewer/viewer?materialId=${this.materialId}&name=${name}`,
       });
     },
+
+    // ========== 收藏功能 ==========
+
+    // 加载收藏列表
+    loadFavorites() {
+      try {
+        const favorites = uni.getStorageSync('FAVORITE_BUILDINGS');
+        if (favorites && Array.isArray(favorites)) {
+          this.favorites = favorites;
+        }
+      } catch (e) {
+        console.warn('加载收藏失败:', e);
+      }
+    },
+
+    // 保存收藏列表
+    saveFavorites() {
+      try {
+        uni.setStorageSync('FAVORITE_BUILDINGS', this.favorites);
+      } catch (e) {
+        console.warn('保存收藏失败:', e);
+      }
+    },
+
+    // 切换收藏状态
+    toggleFavorite() {
+      const index = this.favorites.findIndex(f => f.id === this.materialId);
+
+      if (index > -1) {
+        // 取消收藏
+        this.favorites.splice(index, 1);
+        uni.showToast({
+          title: '已取消收藏',
+          icon: 'none',
+          duration: 1500
+        });
+      } else {
+        // 添加收藏
+        this.favorites.push({
+          id: this.materialId,
+          name: this.materialTitle,
+          image: this.material.url || '',
+          location: this.building.location || '',
+          dynasty: '',
+          description: this.building.description || '',
+          tags: this.building.tags || [],
+          category: this.building.category || '',
+          addedAt: Date.now()
+        });
+        uni.showToast({
+          title: '收藏成功',
+          icon: 'success',
+          duration: 1500
+        });
+      }
+
+      this.saveFavorites();
+    },
   },
 };
 </script>
@@ -268,25 +354,25 @@ export default {
 .header {
   display: flex;
   align-items: center;
-  background: #8b4513;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #8b4513 0%, #6b3410 100%);
   padding: 30rpx 30rpx 40rpx;
+  box-shadow: 0 4rpx 16rpx rgba(139, 69, 19, 0.3);
 }
 
 .back-btn {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
   color: #fff;
   font-size: 28rpx;
-  padding: 16rpx 24rpx;
-  border-radius: 30rpx;
-  border: none;
-  margin-right: 20rpx;
-  transform: translateZ(0);
-  transition: all 0.2s;
+  padding: 16rpx 28rpx;
+  border-radius: 32rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
 }
 
 .back-btn:active {
-  background: rgba(255, 255, 255, 0.35);
-  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(0.96);
 }
 
 .header-title {
@@ -295,12 +381,55 @@ export default {
   color: #fff;
   font-size: 34rpx;
   font-weight: bold;
-  letter-spacing: 4rpx;
-  margin-right: 120rpx;
+  letter-spacing: 6rpx;
+  font-family: 'ZCOOL XiaoWei', serif;
 }
 
-.placeholder {
-  width: 100rpx;
+.header-actions {
+  display: flex;
+  align-items: center;
+}
+
+.favorite-btn {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 14rpx 24rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2rpx solid rgba(255, 255, 255, 0.3);
+  border-radius: 32rpx;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.favorite-btn.active {
+  background: rgba(200, 37, 6, 0.2);
+  border-color: rgba(255, 200, 100, 0.6);
+}
+
+.favorite-btn:active {
+  transform: scale(0.95);
+}
+
+.favorite-icon {
+  font-size: 32rpx;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.3s ease;
+}
+
+.favorite-btn.active .favorite-icon {
+  color: #ffd700;
+  filter: drop-shadow(0 2rpx 4rpx rgba(255, 215, 0, 0.4));
+}
+
+.favorite-label {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.favorite-btn.active .favorite-label {
+  color: #ffd700;
 }
 
 .content {
@@ -321,10 +450,12 @@ export default {
 
 .material-wrapper {
   background: #fff;
-  border-radius: 12rpx;
+  border-radius: 24rpx;
   overflow: hidden;
-  box-shadow: 0 4rpx 16rpx rgba(139, 69, 19, 0.12);
-  border: 1rpx solid #e8dcc8;
+  box-shadow:
+    0 8rpx 32rpx rgba(139, 69, 19, 0.12),
+    0 2rpx 8rpx rgba(139, 69, 19, 0.06);
+  border: 2rpx solid #e8dcc8;
 }
 
 .material-image {
@@ -338,50 +469,120 @@ export default {
 }
 
 .material-info {
-  padding: 30rpx;
+  padding: 32rpx;
 }
 
 .material-title {
   display: block;
-  font-size: 36rpx;
+  font-size: 40rpx;
   font-weight: bold;
   color: #3c2a1d;
-  margin-bottom: 16rpx;
+  font-family: 'ZCOOL XiaoWei', serif;
+  letter-spacing: 4rpx;
+  margin-bottom: 20rpx;
 }
 
 .material-source {
   display: block;
   font-size: 26rpx;
-  color: #6b5643;
+  color: #8b7355;
+  margin-bottom: 12rpx;
 }
 
 .material-notice {
   display: block;
-  margin-top: 10rpx;
   font-size: 24rpx;
   color: #b85450;
+  padding: 16rpx 20rpx;
+  background: rgba(184, 84, 80, 0.08);
+  border-radius: 12rpx;
+  border-left: 4rpx solid #b85450;
 }
 
 .detail-card {
-  margin-top: 24rpx;
+  margin-top: 30rpx;
   background: #fff;
-  border-radius: 12rpx;
-  border: 1rpx solid #e8dcc8;
-  padding: 24rpx;
+  border-radius: 24rpx;
+  border: 2rpx solid #e8dcc8;
+  padding: 32rpx;
+  box-shadow:
+    0 8rpx 32rpx rgba(139, 69, 19, 0.1),
+    0 2rpx 8rpx rgba(139, 69, 19, 0.05);
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28rpx;
+  padding-bottom: 20rpx;
+  border-bottom: 2rpx solid #f0e6d8;
 }
 
 .detail-title {
-  display: block;
-  font-size: 32rpx;
+  font-size: 36rpx;
   color: #3c2a1d;
   font-weight: bold;
-  margin-bottom: 18rpx;
+  font-family: 'ZCOOL XiaoWei', serif;
+  letter-spacing: 4rpx;
+}
+
+.detail-favorite-btn {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 14rpx 28rpx;
+  background: linear-gradient(145deg, #fff 0%, #faf6ed 100%);
+  border: 2rpx solid #e0d0c0;
+  border-radius: 32rpx;
+  box-shadow: 0 4rpx 12rpx rgba(139, 69, 19, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.detail-favorite-btn.active {
+  background: linear-gradient(145deg, #fff8d8 0%, #f5e6c8 100%);
+  border-color: #e8b860;
+  box-shadow: 0 6rpx 18rpx rgba(232, 184, 96, 0.25);
+}
+
+.detail-favorite-btn:active {
+  transform: scale(0.96);
+}
+
+.detail-favorite-icon {
+  font-size: 32rpx;
+  color: #d0c8c0;
+  transition: all 0.3s ease;
+}
+
+.detail-favorite-btn.active .detail-favorite-icon {
+  color: #c82506;
+  filter: drop-shadow(0 2rpx 4rpx rgba(200, 37, 6, 0.3));
+  animation: favoritePop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.detail-favorite-text {
+  font-size: 26rpx;
+  color: #8b7355;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.detail-favorite-btn.active .detail-favorite-text {
+  color: #c82506;
+  font-weight: 600;
 }
 
 .detail-row {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 12rpx;
+  margin-bottom: 20rpx;
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f5efe6;
+}
+
+.detail-row:last-of-type {
+  border-bottom: none;
 }
 
 .detail-row.detail-col {
@@ -391,16 +592,17 @@ export default {
 .detail-label {
   width: 120rpx;
   flex-shrink: 0;
-  font-size: 26rpx;
+  font-size: 28rpx;
   color: #8b735c;
+  font-weight: 500;
 }
 
 .detail-value {
   flex: 1;
   min-width: 0;
-  font-size: 26rpx;
+  font-size: 28rpx;
   color: #3c2a1d;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
 .wrap {
@@ -411,63 +613,66 @@ export default {
 .tag-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 10rpx;
-  margin-top: 12rpx;
+  gap: 14rpx;
+  margin-top: 24rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #f0e6d8;
 }
 
 .tag-item {
-  padding: 6rpx 14rpx;
-  border-radius: 20rpx;
-  border: 1rpx solid #d9c8b0;
-  background: #f8f4e9;
-  font-size: 22rpx;
+  padding: 10rpx 22rpx;
+  border-radius: 24rpx;
+  border: 1rpx solid #e0d4c0;
+  background: linear-gradient(145deg, #f8f4e9 0%, #f0e9d8 100%);
+  font-size: 24rpx;
   color: #6b5643;
+  font-weight: 500;
+  transition: all 0.25s ease;
+}
+
+.tag-item:hover {
+  background: linear-gradient(145deg, #f5e6c8 0%, #f0dcc0 100%);
+  border-color: #e8b860;
 }
 
 .action-row {
-  margin-top: 20rpx;
+  margin-top: 32rpx;
 }
 
 .action-btn {
   width: 100%;
-  border: 1rpx solid #8b4513;
-  background: #8b4513;
+  border: none;
+  background: linear-gradient(145deg, #c41e3a 0%, #8b0000 100%);
   color: #fff;
-  border-radius: 12rpx;
-  font-size: 28rpx;
-  padding: 14rpx 0;
+  border-radius: 16rpx;
+  font-size: 30rpx;
+  padding: 24rpx 0;
+  font-weight: 600;
+  letter-spacing: 6rpx;
+  box-shadow:
+    0 8rpx 24rpx rgba(196, 30, 58, 0.35),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .action-btn:active {
-  opacity: 0.92;
+  transform: translateY(-2rpx) scale(0.98);
+  box-shadow: 0 12rpx 32rpx rgba(196, 30, 58, 0.45);
 }
 
-.material-location {
-  display: block;
-  font-size: 26rpx;
-  color: #8b4513;
-  margin-bottom: 10rpx;
-}
-
-.material-desc {
-  display: block;
-  font-size: 26rpx;
-  color: #6b5643;
-  line-height: 1.6;
-  margin-bottom: 14rpx;
-}
-
-.placeholder {
+.placeholder-section {
   text-align: center;
   padding: 100rpx 40rpx;
   background: #fff;
-  border-radius: 12rpx;
-  border: 1rpx solid #e8dcc8;
+  border-radius: 24rpx;
+  border: 2rpx solid #e8dcc8;
+  box-shadow: 0 8rpx 32rpx rgba(139, 69, 19, 0.08);
 }
 
 .placeholder-icon {
   font-size: 120rpx;
   margin-bottom: 30rpx;
+  filter: drop-shadow(0 4rpx 8rpx rgba(139, 69, 19, 0.15));
 }
 
 .placeholder-text {
@@ -475,6 +680,7 @@ export default {
   font-size: 32rpx;
   color: #3c2a1d;
   margin-bottom: 20rpx;
+  font-weight: 500;
 }
 
 .placeholder-sub {
