@@ -1,39 +1,93 @@
 <template>
   <view class="container">
-    <!-- 动态祥云背景层 -->
-    <view class="cloud-background"></view>
+    <!-- 底层：径向渐变打底 -->
+    <view class="radial-gradient-bg"></view>
+    <!-- 中层：水墨古建远景 -->
+    <view class="ink-architecture-bg"></view>
     <!-- 水墨山水纹理背景层 -->
     <view class="ink-background"></view>
+    <!-- 顶层：动态祥云 -->
+    <view class="cloud-background"></view>
     
     <!-- 主内容区域 -->
-    <scroll-view scroll-y class="scroll-view" @scroll="onScroll">
-      <!-- 顶部 Hero 区 -->
+    <scroll-view scroll-y class="scroll-view" @scroll="onScroll" scroll-with-animation :scroll-top="scrollTop">
+      <!-- 顶部 Hero 区 - 简化版 -->
       <view class="hero-section">
-        <!-- 左侧故宫角楼剪影装饰 -->
-        <view class="silhouette left"></view>
-        <!-- 右侧园林亭台剪影装饰 -->
-        <view class="silhouette right"></view>
-        
-        <!-- 印章装饰 -->
-        <view class="seal-decor" :class="{ 'visible': sections.hero.seal }">古建</view>
+        <!-- 简化的角落装饰 -->
+        <view class="corner-decoration top-left"></view>
+        <view class="corner-decoration top-right"></view>
+        <view class="corner-decoration bottom-left"></view>
+        <view class="corner-decoration bottom-right"></view>
         
         <!-- 标题区域 -->
         <view class="title-area">
-          <text class="main-title" :class="{ 'visible': sections.hero.title }">中华古建筑导览</text>
+          <view class="title-wrapper">
+            <text class="main-title" :class="{ 'visible': sections.hero.title }">中华古建筑导览</text>
+            <!-- 精致朱砂印章 -->
+            <view class="seal-decor" :class="{ 'visible': sections.hero.seal }" @click="goToAbout">古建</view>
+          </view>
+          
           <text class="subtitle" :class="{ 'visible': sections.hero.subtitle }">探索千年文明，感受建筑之美</text>
           <text class="description" :class="{ 'visible': sections.hero.description }">
             从宫殿庙宇到园林民居，从古城墙到古桥梁，让我们一起穿越时空，领略中国古代建筑的辉煌与魅力
           </text>
+          
+          <!-- 统计信息 - 移到标题下方 -->
+          <view class="hero-stats" :class="{ 'visible': sections.hero.statCards }">
+            <view class="stat-item">
+              <text class="stat-number">17</text>
+              <text class="stat-label">处古建</text>
+            </view>
+            <view class="stat-divider"></view>
+            <view class="stat-item">
+              <text class="stat-number">4</text>
+              <text class="stat-label">大分类</text>
+            </view>
+            <view class="stat-divider"></view>
+            <view class="stat-item">
+              <text class="stat-number">AI</text>
+              <text class="stat-label">智能导览</text>
+            </view>
+          </view>
+          
+          <!-- 中式分隔线 -->
+          <view class="hero-divider" :class="{ 'visible': sections.hero.divider }">
+            <view class="window-divider">
+              <view class="window-pattern"></view>
+            </view>
+          </view>
         </view>
         
         <!-- 入口按钮 -->
         <view class="hero-buttons">
           <button class="hero-btn primary" :class="{ 'visible': sections.hero.btn1 }" @click="goToMap">
+            <text class="btn-icon">📋</text>
             <text class="btn-text">查看古建筑名录</text>
           </button>
           <button class="hero-btn secondary" :class="{ 'visible': sections.hero.btn2 }" @click="goToChat">
+            <text class="btn-icon">🤖</text>
             <text class="btn-text">开始 AI 导览</text>
           </button>
+          
+          <!-- 按钮下方的分类快捷入口 -->
+          <view class="category-shortcuts" :class="{ 'visible': sections.hero.categoryShortcuts }">
+            <view class="category-item" @click="goToCategory('palace')">
+              <text class="category-icon">🏯</text>
+              <text class="category-text">宫殿</text>
+            </view>
+            <view class="category-item" @click="goToCategory('garden')">
+              <text class="category-icon">🌳</text>
+              <text class="category-text">园林</text>
+            </view>
+            <view class="category-item" @click="goToCategory('bridge')">
+              <text class="category-icon">🌉</text>
+              <text class="category-text">桥梁</text>
+            </view>
+            <view class="category-item" @click="goToCategory('defense')">
+              <text class="category-icon">🏰</text>
+              <text class="category-text">城防</text>
+            </view>
+          </view>
         </view>
       </view>
       
@@ -77,61 +131,89 @@
         
         <view class="features-grid">
           <view class="feature-card">
-            <view class="feature-icon">🏛️</view>
+            <view class="feature-icon">
+              <svg viewBox="0 0 64 64" class="svg-icon">
+                <path d="M32 8 L48 16 L48 48 L32 56 L16 48 L16 16 Z" fill="none" stroke="currentColor" stroke-width="3"/>
+                <path d="M32 16 L40 20 L40 40 L32 44 L24 40 L24 20 Z" fill="none" stroke="currentColor" stroke-width="2"/>
+              </svg>
+            </view>
             <text class="feature-title">17 处古建全覆盖</text>
-            <text class="feature-desc">覆盖宫殿、园林、桥梁、城防全类型</text>
+            <text class="feature-desc">从明清皇家宫殿到客家民居，跨越千年的17处代表性古建精华，带你走遍大江南北</text>
           </view>
           
           <view class="feature-card">
-            <view class="feature-icon">🤖</view>
+            <view class="feature-icon">
+              <svg viewBox="0 0 64 64" class="svg-icon">
+                <circle cx="32" cy="24" r="12" fill="none" stroke="currentColor" stroke-width="3"/>
+                <path d="M20 48 Q32 32 44 48" fill="none" stroke="currentColor" stroke-width="3"/>
+                <circle cx="32" cy="24" r="4" fill="currentColor"/>
+              </svg>
+            </view>
             <text class="feature-title">AI 智能导览</text>
-            <text class="feature-desc">实时问答，秒懂古建背后的文化故事</text>
+            <text class="feature-desc">基于大模型的智能问答，不管是古建历史还是构造细节，你想问的都能秒速解答</text>
           </view>
           
           <view class="feature-card">
-            <view class="feature-icon">📋</view>
+            <view class="feature-icon">
+              <svg viewBox="0 0 64 64" class="svg-icon">
+                <rect x="12" y="12" width="40" height="8" rx="2" fill="none" stroke="currentColor" stroke-width="2.5"/>
+                <rect x="12" y="24" width="40" height="8" rx="2" fill="none" stroke="currentColor" stroke-width="2.5"/>
+                <rect x="12" y="36" width="30" height="8" rx="2" fill="none" stroke="currentColor" stroke-width="2.5"/>
+              </svg>
+            </view>
             <text class="feature-title">分类快速浏览</text>
-            <text class="feature-desc">按类型筛选，一键找到你想看的古建</text>
+            <text class="feature-desc">宫殿/园林/桥梁/城防四大分类，一键筛选，快速定位你感兴趣的古建</text>
           </view>
           
           <view class="feature-card">
-            <view class="feature-icon">🎨</view>
+            <view class="feature-icon">
+              <svg viewBox="0 0 64 64" class="svg-icon">
+                <path d="M12 48 L24 24 L32 32 L40 24 L52 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+                <circle cx="24" cy="20" r="2" fill="currentColor"/>
+                <circle cx="40" cy="20" r="2" fill="currentColor"/>
+              </svg>
+            </view>
             <text class="feature-title">沉浸式体验</text>
-            <text class="feature-desc">新中式 UI 设计，身临其境的探索体验</text>
+            <text class="feature-desc">全新的新中式UI与动效，滚动渐入+悬浮交互，给你身临其境的探索体验</text>
           </view>
         </view>
       </view>
       
-      <!-- 古建小知识区 -->
+      <!-- 古建小知识区 - 横向滑动卡片 -->
       <view class="section-knowledge" :class="{ 'visible': sections.knowledge }">
-        <view class="knowledge-card">
-          <view class="bamboo-strip top"></view>
-          <view class="bamboo-strip bottom"></view>
-          
-          <view class="knowledge-content">
-            <view class="knowledge-icon">📜</view>
-            <text class="knowledge-title">古建小知识</text>
-            <view class="knowledge-text-wrapper">
-              <text class="knowledge-text" :key="currentKnowledgeIndex">
-                {{ knowledgeItems[currentKnowledgeIndex].text }}
-              </text>
+        <view class="section-header">
+          <text class="section-title">古建小知识</text>
+          <text class="section-subtitle">探索中国传统建筑的奥秘</text>
+        </view>
+        
+        <scroll-view 
+          class="knowledge-scroll" 
+          scroll-x 
+          show-scrollbar="false"
+          @scroll="onKnowledgeScroll"
+        >
+          <view 
+            v-for="(item, index) in knowledgeItems" 
+            :key="index"
+            class="knowledge-card-horizontal"
+            :class="{ 'visible': sections.knowledge }"
+            :style="{ 'transition-delay': index * 0.1 + 's' }"
+          >
+            <view class="knowledge-number">{{ String(index + 1).padStart(2, '0') }}</view>
+            <view class="knowledge-content">
+              <text class="knowledge-card-title">{{ item.title }}</text>
+              <text class="knowledge-card-text">{{ item.text }}</text>
             </view>
+            <view class="knowledge-accent"></view>
           </view>
-          
-          <view class="knowledge-dots">
-            <view 
-              v-for="(item, index) in knowledgeItems" 
-              :key="index"
-              class="knowledge-dot"
-              :class="{ active: currentKnowledgeIndex === index }"
-              @click="goToKnowledge(index)"
-            ></view>
+        </scroll-view>
+        
+        <!-- 滑动指示器 -->
+        <view class="scroll-indicator">
+          <view class="indicator-line">
+            <view class="indicator-progress" :style="{ width: knowledgeScrollProgress + '%' }"></view>
           </view>
-          
-          <view class="knowledge-nav">
-            <view class="nav-btn prev" @click="prevKnowledge"></view>
-            <view class="nav-btn next" @click="nextKnowledge"></view>
-          </view>
+          <text class="indicator-text">左右滑动查看更多</text>
         </view>
       </view>
       
@@ -141,6 +223,16 @@
         <text class="footer-copyright">© 2026 中华古建筑导览</text>
       </view>
     </scroll-view>
+    
+    <!-- 回到顶部按钮 -->
+    <view 
+      class="back-to-top" 
+      :class="{ 'visible': showBackToTop }"
+      @click="scrollToTop"
+    >
+      <text class="back-to-top-text">↑</text>
+      <text class="back-to-top-seal">古建</text>
+    </view>
   </view>
 </template>
 
@@ -148,14 +240,19 @@
 export default {
   data() {
     return {
+      scrollTop: 0,
       sections: {
         hero: {
           seal: false,
           title: false,
           subtitle: false,
           description: false,
+          divider: false,
           btn1: false,
-          btn2: false
+          btn2: false,
+          cornerBtns: false,
+          statCards: false,
+          categoryShortcuts: false
         },
         preview: false,
         previewCards: [false, false, false, false, false, false, false, false],
@@ -176,50 +273,60 @@ export default {
       knowledgeItems: [
         { title: '斗拱', text: '斗拱，中国古建筑的灵魂构件，不用一钉一卯，就能撑起千斤重量，是古人榫卯智慧的极致体现。' },
         { title: '榫卯', text: '榫卯，木头之间的"海誓山盟"，一凸一凹严密扣合，越压越紧，让古建历经千年不倒。' },
-        { title: '飞檐', text: '飞檐，屋角翘伸宛若飞鸟，既扩大了采光面，又让建筑多了灵动的美感，是中式建筑的标志性符号。' }
+        { title: '飞檐', text: '飞檐，屋角翘伸宛若飞鸟，既扩大了采光面，又让建筑多了灵动的美感，是中式建筑的标志性符号。' },
+        { title: '瓦当', text: '瓦当，屋檐最前端的一片瓦，既有保护椽头的实用功能，又有精美纹饰的艺术价值，是古建的点睛之笔。' },
+        { title: '台基', text: '台基，建筑的底座，不仅承重防潮，更体现等级尊卑，须弥座更是皇家建筑的专属标志。' },
+        { title: '歇山顶', text: '歇山顶，中国古建筑中最优美的屋顶形式之一，既有庑殿顶的庄重，又有攒尖顶的灵动，故宫太和殿就是典型代表。' },
+        { title: '庑殿顶', text: '庑殿顶，中国古建筑中等级最高的屋顶形式，四面斜坡一条正脊，庄重威严，是皇家建筑的首选。' },
+        { title: '悬山顶', text: '悬山顶，屋顶两端伸出山墙之外，既保护墙体免受雨淋，又增添了建筑的层次感，是民居常用的屋顶形式。' },
+        { title: '硬山顶', text: '硬山顶，屋顶与山墙齐平，构造简单防火性好，是民间建筑中最常见的屋顶形式之一。' },
+        { title: '攒尖顶', text: '攒尖顶，屋顶呈锥形汇聚于一点，没有正脊，多用于亭、塔、阁等建筑，天坛祈年殿就是经典之作。' },
+        { title: '雀替', text: '雀替，梁枋与柱交接处的装饰构件，既加固结构又增添美感，形如展翅的云雀，故名雀替。' },
+        { title: '藻井', text: '藻井，室内天花板上的高级装饰，形如凹井绘有藻纹，不仅美观更有象征吉祥的寓意，故宫太和殿的蟠龙藻井最为精美。' },
+        { title: '开间', text: '开间，古建筑的平面计量单位，两根柱子之间为一开间，开间越多等级越高，故宫太和殿有十一开间。' },
+        { title: '须弥座', text: '须弥座，源于佛教的台基形式，由多层组成，雕刻精美，是皇家建筑和重要寺庙的专用基座。' },
+        { title: '影壁', text: '影壁，又称照壁，大门内外的屏障建筑，既有风水讲究，又有装饰作用，九龙壁就是最著名的影壁。' }
       ],
-      currentKnowledgeIndex: 0,
-      knowledgeTimer: null
+      knowledgeScrollProgress: 0,
+      showBackToTop: false
     };
   },
   
   mounted() {
     this.startHeroAnimation();
-    this.startKnowledgeCarousel();
+    this.shuffleKnowledgeItems();
   },
   
   beforeDestroy() {
-    if (this.knowledgeTimer) {
-      clearInterval(this.knowledgeTimer);
-    }
+    // 清理工作
   },
   
   methods: {
+    shuffleKnowledgeItems() {
+      const array = [...this.knowledgeItems];
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      this.knowledgeItems = array;
+    },
+
     startHeroAnimation() {
-      setTimeout(() => this.sections.hero.seal = true, 200);
-      setTimeout(() => this.sections.hero.title = true, 500);
-      setTimeout(() => this.sections.hero.subtitle = true, 800);
-      setTimeout(() => this.sections.hero.description = true, 1100);
-      setTimeout(() => this.sections.hero.btn1 = true, 1400);
-      setTimeout(() => this.sections.hero.btn2 = true, 1700);
+      setTimeout(() => this.sections.hero.title = true, 200);
+      setTimeout(() => this.sections.hero.seal = true, 400);
+      setTimeout(() => this.sections.hero.subtitle = true, 700);
+      setTimeout(() => this.sections.hero.description = true, 1000);
+      setTimeout(() => this.sections.hero.divider = true, 1300);
+      setTimeout(() => this.sections.hero.btn1 = true, 1600);
+      setTimeout(() => this.sections.hero.btn2 = true, 1900);
+      setTimeout(() => this.sections.hero.statCards = true, 2100);
+      setTimeout(() => this.sections.hero.categoryShortcuts = true, 2300);
     },
-    
-    startKnowledgeCarousel() {
-      this.knowledgeTimer = setInterval(() => {
-        this.nextKnowledge();
-      }, 4000);
-    },
-    
-    nextKnowledge() {
-      this.currentKnowledgeIndex = (this.currentKnowledgeIndex + 1) % this.knowledgeItems.length;
-    },
-    
-    prevKnowledge() {
-      this.currentKnowledgeIndex = (this.currentKnowledgeIndex - 1 + this.knowledgeItems.length) % this.knowledgeItems.length;
-    },
-    
-    goToKnowledge(index) {
-      this.currentKnowledgeIndex = index;
+
+    onKnowledgeScroll(e) {
+      const { scrollLeft, scrollWidth } = e.detail;
+      const windowWidth = uni.getSystemInfoSync().windowWidth;
+      this.knowledgeScrollProgress = (scrollLeft / (scrollWidth - windowWidth)) * 100;
     },
     
     goToDetail(building) {
@@ -244,6 +351,9 @@ export default {
       const scrollTop = e.detail.scrollTop;
       const windowHeight = uni.getSystemInfoSync().windowHeight;
       
+      // 回到顶部按钮显示
+      this.showBackToTop = scrollTop > windowHeight;
+      
       this.sections.preview = scrollTop > windowHeight * 0.3;
       
       if (this.sections.preview) {
@@ -257,13 +367,88 @@ export default {
       this.sections.features = scrollTop > windowHeight * 0.8;
       this.sections.knowledge = scrollTop > windowHeight * 1.4;
       this.sections.footer = scrollTop > windowHeight * 1.8;
+    },
+    
+    scrollToTop() {
+      this.scrollTop = 1;
+      this.$nextTick(() => {
+        this.scrollTop = 0;
+      });
+    },
+    
+    goToAbout() {
+      uni.navigateTo({
+        url: "/pages/about/about"
+      });
+    },
+    
+    goToRandomBuilding() {
+      const randomIndex = Math.floor(Math.random() * this.previewBuildings.length);
+      const randomBuilding = this.previewBuildings[randomIndex];
+      this.goToDetail(randomBuilding);
+    },
+    
+    goToCategory(category) {
+      uni.navigateTo({
+        url: `/pages/map/map?category=${category}`
+      });
     }
   }
 };
 </script>
 
 <style scoped>
-/* 动态祥云背景层 */
+/* 霞鹜文楷书法字体 */
+@import url('https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&display=swap');
+
+/* 自定义滚动条样式 */
+.scroll-view::-webkit-scrollbar {
+  width: 12rpx;
+}
+
+.scroll-view::-webkit-scrollbar-track {
+  background: #f8f4e8;
+  border-radius: 6rpx;
+}
+
+.scroll-view::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #c41e3a 0%, #8b0000 100%);
+  border-radius: 6rpx;
+  border: 2rpx solid #f8f4e8;
+}
+
+.scroll-view::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #a01830 0%, #6b0000 100%);
+}
+
+/* 底层：径向渐变打底 */
+.radial-gradient-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(ellipse at center, #f8f4e8 0%, #f0e9d8 40%, #e8dcc8 70%, #dcc8b0 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* 中层：水墨古建远景 */
+.ink-architecture-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800'%3E%3Cpath fill='%235c3d2e' d='M0,700 Q200,600 400,650 Q600,550 800,600 Q1000,500 1200,550 L1200,800 L0,800 Z' opacity='0.05'/%3E%3Cpath fill='%238b4513' d='M100,700 L150,500 L200,550 L250,450 L300,500 L350,600 L400,550 L450,400 L500,500 L550,450 L600,550 L650,400 L700,500 L750,450 L800,550 L850,500 L900,600 L950,550 L1000,650 L1000,700 Z' opacity='0.06'/%3E%3Cpath fill='%238b4513' d='M300,700 L350,550 L400,600 L450,450 L500,500 L550,400 L600,480 L650,550 L700,600 L700,700 Z' opacity='0.08'/%3E%3C/svg%3E");
+  background-size: cover;
+  background-position: bottom;
+  opacity: 0.08;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 顶层：动态祥云（调慢） */
 .cloud-background {
   position: fixed;
   top: 0;
@@ -273,10 +458,10 @@ export default {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800'%3E%3Cpath fill='%238b4513' d='M400,100 Q300,50 200,100 Q100,150 200,200 Q300,250 400,200 Q500,150 600,200 Q700,250 600,100 Q500,50 400,100'/%3E%3C/svg%3E");
   background-size: 400rpx 400rpx;
   background-repeat: repeat;
-  opacity: 0.08;
-  animation: cloudMove 30s linear infinite;
+  opacity: 0.06;
+  animation: cloudMove 60s linear infinite;
   pointer-events: none;
-  z-index: 0;
+  z-index: 2;
 }
 
 @keyframes cloudMove {
@@ -288,7 +473,7 @@ export default {
   }
 }
 
-/* 水墨山水纹理背景层 */
+/* 水墨山水纹理背景层（保留但z-index调整） */
 .ink-background {
   position: fixed;
   top: 0;
@@ -296,9 +481,9 @@ export default {
   right: 0;
   bottom: 0;
   background: 
-    radial-gradient(ellipse at 20% 80%, rgba(139, 69, 19, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 60%, rgba(139, 69, 19, 0.05) 0%, transparent 40%),
-    radial-gradient(ellipse at 50% 90%, rgba(139, 69, 19, 0.06) 0%, transparent 50%);
+    radial-gradient(ellipse at 20% 80%, rgba(139, 69, 19, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 60%, rgba(139, 69, 19, 0.03) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 90%, rgba(139, 69, 19, 0.035) 0%, transparent 50%);
   pointer-events: none;
   z-index: 0;
 }
@@ -318,6 +503,56 @@ export default {
   z-index: 1;
 }
 
+/* 回到顶部按钮 */
+.back-to-top {
+  position: fixed;
+  bottom: 80rpx;
+  right: 40rpx;
+  width: 100rpx;
+  height: 100rpx;
+  background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+  border-radius: 12rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 24rpx rgba(139, 0, 0, 0.4);
+  transform: rotate(-12deg) translateY(100rpx) scale(0);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  z-index: 100;
+}
+
+.back-to-top.visible {
+  transform: rotate(-12deg) translateY(0) scale(1);
+  opacity: 1;
+}
+
+.back-to-top:hover {
+  transform: rotate(-12deg) translateY(-6rpx) scale(1.05);
+  box-shadow: 0 12rpx 32rpx rgba(139, 0, 0, 0.5);
+}
+
+.back-to-top:active {
+  transform: rotate(-12deg) translateY(-2rpx) scale(0.98);
+}
+
+.back-to-top-text {
+  font-size: 36rpx;
+  color: #fff8e6;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.back-to-top-seal {
+  font-size: 20rpx;
+  color: #fff8e6;
+  font-weight: bold;
+  line-height: 1;
+  letter-spacing: 1rpx;
+}
+
 /* Hero 区 */
 .hero-section {
   min-height: 100vh;
@@ -330,67 +565,57 @@ export default {
   overflow: hidden;
 }
 
-/* 古建剪影装饰 */
-.silhouette {
+/* 简化的角落装饰 */
+.corner-decoration {
   position: absolute;
-  bottom: 0;
-  width: 300rpx;
-  height: 400rpx;
-  opacity: 0.12;
+  width: 60rpx;
+  height: 60rpx;
+  opacity: 0.08;
   pointer-events: none;
   z-index: 0;
+  border: 2rpx solid #8b4513;
 }
 
-.silhouette.left {
-  left: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 300'%3E%3Cpath fill='%238b4513' d='M100,0 L160,60 L160,80 L180,80 L180,100 L140,100 L140,140 L150,140 L150,160 L130,160 L130,300 L70,300 L70,160 L50,160 L50,140 L60,140 L60,100 L20,100 L20,80 L40,80 L40,60 Z'/%3E%3C/svg%3E");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: bottom left;
+.corner-decoration.top-left {
+  top: 30rpx;
+  left: 30rpx;
+  border-right: none;
+  border-bottom: none;
 }
 
-.silhouette.right {
-  right: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 300'%3E%3Cpath fill='%238b4513' d='M100,20 L140,60 L140,80 L160,80 L160,100 L120,100 L120,150 L130,150 L130,170 L110,170 L110,300 L90,300 L90,170 L70,170 L70,150 L80,150 L80,100 L40,100 L40,80 L60,80 L60,60 Z'/%3E%3C/svg%3E");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: bottom right;
+.corner-decoration.top-right {
+  top: 30rpx;
+  right: 30rpx;
+  border-left: none;
+  border-bottom: none;
 }
 
-/* 印章装饰 */
-.seal-decor {
-  position: absolute;
-  top: 120rpx;
-  left: 60rpx;
-  width: 100rpx;
-  height: 100rpx;
-  background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
-  color: #fff8e6;
-  font-size: 32rpx;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8rpx;
-  letter-spacing: 4rpx;
-  box-shadow: 0 4rpx 12rpx rgba(139, 0, 0, 0.3);
-  transform: rotate(-5deg);
-  opacity: 0;
-  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 2;
+.corner-decoration.bottom-left {
+  bottom: 30rpx;
+  left: 30rpx;
+  border-right: none;
+  border-top: none;
 }
 
-.seal-decor.visible {
-  opacity: 0.9;
+.corner-decoration.bottom-right {
+  bottom: 30rpx;
+  right: 30rpx;
+  border-left: none;
+  border-top: none;
 }
 
 /* 标题区域 */
 .title-area {
   text-align: center;
   max-width: 600rpx;
-  margin-bottom: 60rpx;
+  margin-bottom: 40rpx;
   position: relative;
   z-index: 2;
+}
+
+.title-wrapper {
+  position: relative;
+  display: inline-block;
 }
 
 .main-title {
@@ -404,11 +629,40 @@ export default {
   opacity: 0;
   transform: translateY(30px);
   transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: 'ZCOOL XiaoWei', serif;
 }
 
 .main-title.visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* 精致朱砂印章（放大） */
+.seal-decor {
+  position: absolute;
+  top: -30rpx;
+  right: -80rpx;
+  width: 100rpx;
+  height: 100rpx;
+  background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+  color: #fff8e6;
+  font-size: 34rpx;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8rpx;
+  letter-spacing: 2rpx;
+  box-shadow: 0 6rpx 16rpx rgba(139, 0, 0, 0.35);
+  transform: rotate(-12deg);
+  opacity: 0;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 3;
+  border: 3rpx solid rgba(255, 248, 230, 0.2);
+}
+
+.seal-decor.visible {
+  opacity: 0.95;
 }
 
 .subtitle {
@@ -420,6 +674,7 @@ export default {
   opacity: 0;
   transform: translateY(30px);
   transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: 'ZCOOL XiaoWei', serif;
 }
 
 .subtitle.visible {
@@ -438,6 +693,19 @@ export default {
 }
 
 .description.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Hero分隔线 */
+.hero-divider {
+  margin-top: 32rpx;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hero-divider.visible {
   opacity: 1;
   transform: translateY(0);
 }
@@ -461,10 +729,13 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 12rpx;
   transform: translateZ(0) translateY(0);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   opacity: 0;
+  position: relative;
+  overflow: hidden;
 }
 
 .hero-btn.visible {
@@ -500,9 +771,57 @@ export default {
   transform: translateY(-2px) scale(0.98);
 }
 
+.btn-icon {
+  font-size: 36rpx;
+}
+
 .btn-text {
   font-weight: 500;
   letter-spacing: 4rpx;
+}
+
+/* Hero 统计信息 - 新的简化设计 */
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 32rpx;
+  margin-top: 32rpx;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hero-stats.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.stat-number {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #c41e3a;
+  line-height: 1;
+  font-family: 'ZCOOL XiaoWei', serif;
+}
+
+.stat-label {
+  font-size: 22rpx;
+  color: #8b7355;
+  letter-spacing: 2rpx;
+}
+
+.stat-divider {
+  width: 1rpx;
+  height: 40rpx;
+  background: linear-gradient(180deg, transparent, #dcc8b0, transparent);
 }
 
 /* 通用区块样式 */
@@ -537,6 +856,7 @@ export default {
   letter-spacing: 8rpx;
   display: block;
   margin-bottom: 16rpx;
+  font-family: 'ZCOOL XiaoWei', serif;
 }
 
 /* 窗棂分隔线 */
@@ -592,12 +912,13 @@ export default {
   }
 }
 
+/* 轻量化卡片设计 */
 .preview-card {
   background: #fff;
-  border-radius: 20rpx;
+  border-radius: 16rpx;
   overflow: hidden;
-  box-shadow: 0 6rpx 20rpx rgba(139, 69, 19, 0.15);
-  transform: translateZ(0) translateY(0);
+  box-shadow: 0 2rpx 12rpx rgba(139, 69, 19, 0.08);
+  border: 1rpx solid rgba(139, 69, 19, 0.06);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   opacity: 0;
@@ -610,70 +931,84 @@ export default {
 }
 
 .preview-card:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 12rpx 32rpx rgba(139, 69, 19, 0.25);
+  transform: translateY(-4px);
+  box-shadow: 0 8rpx 24rpx rgba(139, 69, 19, 0.15);
+  border-color: rgba(139, 69, 19, 0.12);
 }
 
 .preview-card:active {
-  transform: translateY(-4px) scale(0.99);
+  transform: translateY(-2px);
 }
 
+/* 统一图片比例 4:3 */
 .card-image {
   width: 100%;
-  height: 220rpx;
+  aspect-ratio: 4/3;
   background-size: cover;
   background-position: center;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .preview-card:hover .card-image {
-  transform: scale(1.08);
+  transform: scale(1.04);
 }
 
 .card-info {
-  padding: 24rpx;
+  padding: 20rpx;
   display: flex;
   flex-direction: column;
-  gap: 8rpx;
+  gap: 6rpx;
 }
 
 .card-name {
   font-size: 28rpx;
-  font-weight: bold;
-  color: #8b4513;
+  font-weight: 600;
+  color: #3c2a1d;
+  line-height: 1.4;
 }
 
 .card-desc {
   font-size: 22rpx;
   color: #8b7355;
-  line-height: 1.6;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .card-tags {
   display: flex;
   gap: 8rpx;
-  margin-top: 8rpx;
+  margin-top: 10rpx;
+  flex-wrap: wrap;
 }
 
 .card-tag {
-  font-size: 18rpx;
-  color: #c41e3a;
-  background: rgba(196, 30, 58, 0.08);
+  font-size: 20rpx;
+  color: #8b4513;
+  background: rgba(139, 69, 19, 0.08);
   padding: 4rpx 12rpx;
-  border-radius: 12rpx;
+  border-radius: 10rpx;
+  font-weight: 500;
+  transition: all 0.25s ease;
+}
+
+.card-tag:hover {
+  background: rgba(139, 69, 19, 0.15);
 }
 
 /* 项目亮点 */
 .features-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 24rpx;
+  gap: 28rpx;
 }
 
 .feature-card {
   background: #fff;
-  border-radius: 20rpx;
-  padding: 32rpx 24rpx;
+  border-radius: 24rpx;
+  padding: 40rpx 28rpx;
   text-align: center;
   box-shadow: 0 4rpx 16rpx rgba(139, 69, 19, 0.1);
   transform: translateZ(0) translateY(0);
@@ -686,8 +1021,17 @@ export default {
 }
 
 .feature-icon {
-  font-size: 56rpx;
-  margin-bottom: 16rpx;
+  font-size: 64rpx;
+  margin-bottom: 20rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.svg-icon {
+  width: 64rpx;
+  height: 64rpx;
+  color: #c41e3a;
 }
 
 .feature-title {
@@ -695,182 +1039,144 @@ export default {
   font-size: 32rpx;
   font-weight: bold;
   color: #8b4513;
-  margin-bottom: 12rpx;
+  margin-bottom: 14rpx;
+  letter-spacing: 2rpx;
 }
 
 .feature-desc {
   display: block;
   font-size: 28rpx;
   color: #8b7355;
-  line-height: 1.6;
+  line-height: 1.7;
+  letter-spacing: 1rpx;
 }
 
-/* 古建小知识 - 竹简质感 */
+/* 古建小知识 - 横向滑动卡片 */
 .section-knowledge {
   padding-top: 0;
 }
 
-.knowledge-card {
-  background: linear-gradient(90deg, #d4a574 0%, #e6c9a8 5%, #f0dbb8 15%, #f5e3c8 50%, #f0dbb8 85%, #e6c9a8 95%, #d4a574 100%);
-  border-radius: 16rpx;
-  padding: 48rpx 32rpx;
+.section-header {
   text-align: center;
-  border: 3rpx solid #a67c52;
+  margin-bottom: 40rpx;
+}
+
+.section-title {
+  display: block;
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #3c2a1d;
+  margin-bottom: 12rpx;
+  font-family: 'ZCOOL XiaoWei', serif;
+}
+
+.section-subtitle {
+  display: block;
+  font-size: 26rpx;
+  color: #8b7355;
+}
+
+.knowledge-scroll {
+  white-space: nowrap;
+  padding: 0 30rpx 20rpx;
+}
+
+.knowledge-card-horizontal {
+  display: inline-block;
+  width: 560rpx;
+  margin-right: 24rpx;
+  background: linear-gradient(135deg, #fff 0%, #f8f4e8 100%);
+  border-radius: 20rpx;
+  padding: 40rpx 32rpx;
+  border-left: 6rpx solid #c41e3a;
+  box-shadow: 0 4rpx 16rpx rgba(139, 69, 19, 0.1);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 8rpx 24rpx rgba(139, 69, 19, 0.2);
+  opacity: 0;
+  transform: translateX(30px);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  vertical-align: top;
 }
 
-/* 竹简条纹 */
-.knowledge-card::before {
-  content: '';
+.knowledge-card-horizontal.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.knowledge-card-horizontal:last-child {
+  margin-right: 60rpx;
+}
+
+.knowledge-number {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: repeating-linear-gradient(
-    90deg,
-    transparent,
-    transparent 39rpx,
-    rgba(166, 124, 82, 0.15) 39rpx,
-    rgba(166, 124, 82, 0.15) 40rpx
-  );
-  pointer-events: none;
-  z-index: 0;
-}
-
-.bamboo-strip {
-  position: absolute;
-  left: 20rpx;
-  right: 20rpx;
-  height: 12rpx;
-  background: linear-gradient(90deg, #8b5a2b, #a67c52, #8b5a2b);
-  border-radius: 4rpx;
-  z-index: 1;
-}
-
-.bamboo-strip.top {
-  top: 12rpx;
-}
-
-.bamboo-strip.bottom {
-  bottom: 12rpx;
+  top: 20rpx;
+  right: 24rpx;
+  font-size: 48rpx;
+  font-weight: bold;
+  color: rgba(196, 30, 58, 0.15);
+  font-family: 'ZCOOL XiaoWei', serif;
+  line-height: 1;
 }
 
 .knowledge-content {
   position: relative;
-  z-index: 2;
+  z-index: 1;
 }
 
-.knowledge-icon {
-  font-size: 48rpx;
-  margin-bottom: 16rpx;
-}
-
-.knowledge-title {
-  display: block;
-  font-size: 36rpx;
-  font-weight: bold;
-  color: #5c3d2e;
-  margin-bottom: 20rpx;
-}
-
-.knowledge-text-wrapper {
-  min-height: 140rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.knowledge-text {
+.knowledge-card-title {
   display: block;
   font-size: 32rpx;
-  color: #5c3d2e;
-  line-height: 1.9;
-  animation: knowledgeFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: bold;
+  color: #3c2a1d;
+  margin-bottom: 16rpx;
+  font-family: 'ZCOOL XiaoWei', serif;
 }
 
-@keyframes knowledgeFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.knowledge-card-text {
+  display: block;
+  font-size: 26rpx;
+  color: #6b5643;
+  line-height: 1.8;
+  white-space: normal;
 }
 
-.knowledge-dots {
-  display: flex;
-  justify-content: center;
-  gap: 12rpx;
-  margin-top: 24rpx;
-  position: relative;
-  z-index: 2;
-}
-
-.knowledge-dot {
-  width: 16rpx;
-  height: 16rpx;
-  border-radius: 50%;
-  background: rgba(139, 69, 19, 0.3);
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.knowledge-dot.active {
-  background: #8b4513;
-  transform: scale(1.3);
-}
-
-.knowledge-nav {
+.knowledge-accent {
   position: absolute;
-  top: 50%;
+  bottom: 0;
   left: 0;
   right: 0;
-  transform: translateY(-50%);
+  height: 4rpx;
+  background: linear-gradient(90deg, #c41e3a, #8b4513);
+  opacity: 0.3;
+}
+
+/* 滑动指示器 */
+.scroll-indicator {
   display: flex;
-  justify-content: space-between;
-  padding: 0 16rpx;
-  pointer-events: none;
-  z-index: 3;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 32rpx;
+  gap: 16rpx;
 }
 
-.nav-btn {
-  width: 48rpx;
-  height: 48rpx;
-  border-radius: 50%;
-  background: rgba(139, 69, 19, 0.15);
-  cursor: pointer;
-  pointer-events: auto;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
+.indicator-line {
+  width: 120rpx;
+  height: 4rpx;
+  background: #e8dcc8;
+  border-radius: 2rpx;
+  overflow: hidden;
 }
 
-.nav-btn::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  width: 12rpx;
-  height: 12rpx;
-  border-top: 3rpx solid #8b4513;
-  border-right: 3rpx solid #8b4513;
+.indicator-progress {
+  height: 100%;
+  background: linear-gradient(90deg, #c41e3a, #8b4513);
+  border-radius: 2rpx;
+  transition: width 0.1s ease;
 }
 
-.nav-btn.prev::after {
-  left: 55%;
-  transform: translate(-50%, -50%) rotate(-135deg);
-}
-
-.nav-btn.next::after {
-  left: 45%;
-  transform: translate(-50%, -50%) rotate(45deg);
-}
-
-.nav-btn:hover {
-  background: rgba(139, 69, 19, 0.25);
+.indicator-text {
+  font-size: 22rpx;
+  color: #a89078;
 }
 
 /* Footer */
@@ -885,11 +1191,115 @@ export default {
   color: #8b4513;
   letter-spacing: 4rpx;
   margin-bottom: 16rpx;
+  font-family: 'ZCOOL XiaoWei', serif;
 }
 
 .footer-copyright {
   display: block;
   font-size: 22rpx;
   color: #8b7355;
+}
+
+/* 按钮下方的分类快捷入口 */
+.category-shortcuts {
+  display: flex;
+  justify-content: center;
+  gap: 32rpx;
+  margin-top: 32rpx;
+  opacity: 0;
+  transform: translateY(20rpx);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
+}
+
+.category-shortcuts.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.category-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6rpx;
+  padding: 16rpx 12rpx;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12rpx;
+}
+
+.category-item:hover {
+  transform: translateY(-4rpx);
+  background: rgba(196, 30, 58, 0.08);
+}
+
+.category-item:active {
+  transform: translateY(-2rpx) scale(0.98);
+}
+
+.category-icon {
+  font-size: 32rpx;
+  line-height: 1;
+}
+
+.category-text {
+  font-size: 20rpx;
+  color: #8b4513;
+  font-weight: 500;
+  letter-spacing: 1rpx;
+  line-height: 1;
+}
+
+/* 印章可点击样式调整 */
+.seal-decor {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.seal-decor:hover {
+  transform: rotate(-12deg) scale(1.1);
+  box-shadow: 0 10rpx 24rpx rgba(139, 0, 0, 0.45);
+}
+
+.seal-decor:active {
+  transform: rotate(-12deg) scale(0.98);
+}
+
+/* 响应式：手机端适配 */
+@media (max-width: 767px) {
+  .main-title {
+    font-size: 56rpx;
+    letter-spacing: 12rpx;
+  }
+  
+  .subtitle {
+    font-size: 28rpx;
+  }
+  
+  .description {
+    font-size: 24rpx;
+    padding: 0 40rpx;
+  }
+  
+  .hero-stats {
+    gap: 24rpx;
+  }
+  
+  .stat-number {
+    font-size: 32rpx;
+  }
+  
+  .category-shortcuts {
+    flex-wrap: wrap;
+    gap: 16rpx;
+  }
+  
+  .seal-decor {
+    width: 70rpx;
+    height: 70rpx;
+    font-size: 24rpx;
+    right: -60rpx;
+    top: -20rpx;
+  }
 }
 </style>
