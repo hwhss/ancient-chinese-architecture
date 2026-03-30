@@ -16,12 +16,18 @@ async function postChat(req, res, next) {
 
     const result = await getChatResponse(question);
 
-    return sendSuccess(res, {
+    const responseData = {
       question,
       answer: result.answer,
       source: result.source,
       materialId: result.materialId
-    });
+    };
+
+    if (result.debug) {
+      responseData.debug = result.debug;
+    }
+
+    return sendSuccess(res, responseData);
   } catch (error) {
     return next(error);
   }

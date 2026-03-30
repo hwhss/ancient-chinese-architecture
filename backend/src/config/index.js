@@ -39,16 +39,29 @@ const config = {
   chatKeywordStrongThreshold: toNumber(process.env.CHAT_KEYWORD_STRONG_THRESHOLD, 60),
   chatKeywordTopK: toNumber(process.env.CHAT_KEYWORD_TOP_K, 5),
   enableVectorRetrieval: toBoolean(process.env.ENABLE_VECTOR_RETRIEVAL, false),
-  chatVectorSimilarityThreshold: toNumber(process.env.CHAT_VECTOR_SIMILARITY_THRESHOLD, 0.78),
+  chatVectorSimilarityThreshold: toNumber(process.env.CHAT_VECTOR_SIMILARITY_THRESHOLD, 0.2),
+  chatVectorMinDomainSimilarity: toNumber(process.env.CHAT_VECTOR_MIN_DOMAIN_SIMILARITY, 0.45),
   chatVectorTopK: toNumber(process.env.CHAT_VECTOR_TOP_K, 5),
-  chatHybridScoreThreshold: toNumber(process.env.CHAT_HYBRID_SCORE_THRESHOLD, 0.35),
+  chatHybridScoreThreshold: toNumber(process.env.CHAT_HYBRID_SCORE_THRESHOLD, 0.2),
   chatHybridKeywordWeight: toNumber(process.env.CHAT_HYBRID_KEYWORD_WEIGHT, 0.45),
   chatHybridVectorWeight: toNumber(process.env.CHAT_HYBRID_VECTOR_WEIGHT, 0.55),
   embeddingProvider: String(process.env.EMBEDDING_PROVIDER || 'dashscope').trim().toLowerCase(),
   embeddingApiUrl: String(process.env.EMBEDDING_API_URL || 'https://dashscope.aliyuncs.com/compatible-mode/v1').trim(),
   embeddingApiKey: String(process.env.EMBEDDING_API_KEY || String(process.env.DASHSCOPE_API_KEY || '')).trim(),
   embeddingModel: String(process.env.EMBEDDING_MODEL || 'text-embedding-v4').trim(),
-  embeddingDim: toNumber(process.env.EMBEDDING_DIM, 1024)
+  embeddingDim: toNumber(process.env.EMBEDDING_DIM, 1024),
+  llmProvider: String(process.env.LLM_PROVIDER || 'dashscope').trim().toLowerCase(),
+  llmApiUrl: String(process.env.LLM_API_URL || 'https://dashscope.aliyuncs.com/compatible-mode/v1').trim(),
+  llmApiKey: String(
+    process.env.LLM_API_KEY
+    || process.env.DASHSCOPE_API_KEY
+    || process.env.EMBEDDING_API_KEY
+    || ''
+  ).trim(),
+  llmChatModel: String(process.env.LLM_CHAT_MODEL || 'qwen-turbo').trim(),
+  enableQuestionNormalize: toBoolean(process.env.ENABLE_QUESTION_NORMALIZE, true),
+  enableChatRewrite: toBoolean(process.env.ENABLE_CHAT_REWRITE, true),
+  chatDebugEnabled: toBoolean(process.env.CHAT_DEBUG_ENABLED, process.env.NODE_ENV !== 'production')
 };
 
 module.exports = config;

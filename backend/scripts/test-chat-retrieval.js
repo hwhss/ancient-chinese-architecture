@@ -21,6 +21,15 @@ async function main() {
     console.log(`\nQ: ${q}`);
     console.log(`source: ${result.source}`);
     console.log(`materialId: ${result.materialId || 'null'}`);
+    if (result.debug) {
+      const score = result.debug.matchScore || {};
+      console.log(`debug.retrievalQuestion: ${result.debug.retrievalQuestion}`);
+      console.log(`debug.matchedBy: ${result.debug.matchedBy}`);
+      console.log(`debug.keywordScore: ${score.keywordScore || 0}`);
+      console.log(`debug.vectorSimilarity: ${score.vectorSimilarity || 0}`);
+      console.log(`debug.hybridScore: ${score.hybridScore || 0}`);
+      console.log(`debug.rewriteApplied: ${result.debug.rewriteApplied}`);
+    }
     console.log(`answer: ${String(result.answer || '').slice(0, 120)}...`);
   }
 }

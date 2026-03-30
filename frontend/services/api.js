@@ -186,3 +186,19 @@ export async function refreshSignedAssetToken(token) {
 export async function getMaterialById(materialId) {
   return request("/api/material", "GET", { materialId });
 }
+
+export async function getVisualizationOverview() {
+  return request('/api/visualization/overview', 'GET');
+}
+
+export async function getVisualizationMapPoints() {
+  return request('/api/visualization/map-points', 'GET');
+}
+
+export async function getVisualizationTimeline(params = {}) {
+  return request('/api/visualization/timeline', 'GET', params);
+}
+
+export async function getVisualizationStats(params = {}) {
+  return request('/api/visualization/stats', 'GET', params);
+}

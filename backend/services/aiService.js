@@ -1,23 +1,58 @@
 const axios = require('axios');
+const config = require('../src/config');
 
 // ==================== 配置区域 ====================
 
-// Kimi API配置（推荐）
-const KIMI_CONFIG = {
-  apiKey: process.env.KIMI_API_KEY || 'your_kimi_api_key_here',
-  apiUrl: 'https://api.moonshot.cn/v1/chat/completions',
-  model: 'moonshot-v1-8k'
-};
+function buildChatCompletionsUrl(baseUrl) {
+  const normalized = String(baseUrl || '').replace(/\/$/, '');
+  if (normalized.endsWith('/chat/completions')) {
+    return normalized;
+  }
+  return `${normalized}/chat/completions`;
+}
 
-// 豆包API配置（备选）
-const DOUBAO_CONFIG = {
-  apiKey: process.env.DOUBAO_API_KEY || 'your_doubao_api_key_here',
-  apiUrl: 'https://ark.cn-beijing.volces.com/api/v3/chat/completions',
-  model: 'doubao-lite-4k'
-};
+function hasUsableApiKey() {
+  return Boolean(String(config.llmApiKey || '').trim());
+}
 
-// 当前使用的AI配置
-const AI_CONFIG = KIMI_CONFIG;
+async function requestChatCompletion({
+  userContent,
+  systemPrompt = SYSTEM_PROMPT,
+  temperature = 0.4,
+  maxTokens = 500
+}) {
+  if (!hasUsableApiKey()) {
+    return null;
+  }
+
+  const apiUrl = buildChatCompletionsUrl(config.llmApiUrl);
+  const response = await axios.post(
+    apiUrl,
+    {
+      model: config.llmChatModel,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userContent }
+      ],
+      temperature,
+      max_tokens: maxTokens
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${config.llmApiKey}`,
+        'Content-Type': 'application/json'
+      },
+      timeout: 12000
+    }
+  );
+
+  return response && response.data
+    && response.data.choices
+    && response.data.choices[0]
+    && response.data.choices[0].message
+    ? String(response.data.choices[0].message.content || '').trim()
+    : '';
+}
 
 // ==================== 系统提示词 ====================
 
@@ -46,36 +81,23 @@ const SYSTEM_PROMPT = `你是一个专业的中国古建筑导览助手，专门
  * @returns {Promise<string>} - AI回答
  */
 async function getAIAnswer(question) {
-  // 检查API Key是否配置
-  if (AI_CONFIG.apiKey === 'your_kimi_api_key_here' ||
-      AI_CONFIG.apiKey === 'your_doubao_api_key_here' ||
-      !AI_CONFIG.apiKey) {
+  if (!hasUsableApiKey()) {
     console.log('⚠️ API Key未配置，返回模拟回答');
     return getMockAnswer(question);
   }
 
   try {
-    const response = await axios.post(
-      AI_CONFIG.apiUrl,
-      {
-        model: AI_CONFIG.model,
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: question }
-        ],
-        temperature: 0.7,
-        max_tokens: 500
-      },
-      {
-        headers: {
-          'Authorization': `Bearer ${AI_CONFIG.apiKey}`,
-          'Content-Type': 'application/json'
-        },
-        timeout: 10000 // 10秒超时
-      }
-    );
+    const answer = await requestChatCompletion({
+      userContent: question,
+      systemPrompt: SYSTEM_PROMPT,
+      temperature: 0.7,
+      maxTokens: 500
+    });
 
-    const answer = response.data.choices[0].message.content;
+    if (!answer) {
+      return getMockAnswer(question);
+    }
+
     console.log('✅ AI API调用成功');
     return answer;
   } catch (error) {
@@ -130,6 +152,65 @@ function getMockAnswer(question) {
 如果您有其他关于故宫的问题，欢迎继续提问！`;
 }
 
+async function normalizeQuestion(question) {
+  const rawQuestion = String(question || '').trim();
+  if (!rawQuestion || !hasUsableApiKey()) {
+    return rawQuestion;
+  }
+
+  const normalizePrompt = `你是中文古建筑问答系统的输入纠错器。请仅做轻量纠错与标准化，不扩写、不解释。
+要求：
+1. 修正明显错别字和常见口误。
+2. 保留原问题意图。
+3. 只返回一句纠正后的问题文本，不要任何额外说明。`;
+
+  try {
+    const normalized = await requestChatCompletion({
+      userContent: rawQuestion,
+      systemPrompt: normalizePrompt,
+      temperature: 0,
+      maxTokens: 120
+    });
+
+    return String(normalized || rawQuestion).trim() || rawQuestion;
+  } catch (error) {
+    console.warn('⚠️ 问题纠正失败，回退原问题:', error.message);
+    return rawQuestion;
+  }
+}
+
+async function rewriteKnowledgeAnswer(question, knowledgeAnswer) {
+  const q = String(question || '').trim();
+  const a = String(knowledgeAnswer || '').trim();
+
+  if (!q || !a || !hasUsableApiKey()) {
+    return a;
+  }
+
+  const rewritePrompt = `你是古建筑导览讲解编辑器。
+请把“知识库原答案”润色成更自然、简洁、对游客友好的中文回答。
+要求：
+1. 忠于原答案事实，不新增未经给出的事实。
+2. 控制在120-220字。
+3. 语气自然，适合前端直接展示。
+4. 只返回最终答案，不要解释过程。`;
+
+  try {
+    const content = `用户问题：${q}\n\n知识库原答案：${a}`;
+    const rewritten = await requestChatCompletion({
+      userContent: content,
+      systemPrompt: rewritePrompt,
+      temperature: 0.3,
+      maxTokens: 320
+    });
+
+    return String(rewritten || a).trim() || a;
+  } catch (error) {
+    console.warn('⚠️ 答案润色失败，回退原答案:', error.message);
+    return a;
+  }
+}
+
 /**
  * 测试AI服务
  */
@@ -160,6 +241,8 @@ if (require.main === module) {
 
 module.exports = {
   getAIAnswer,
+  normalizeQuestion,
+  rewriteKnowledgeAnswer,
   getMockAnswer,
   testAIService
 };

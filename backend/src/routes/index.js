@@ -36,6 +36,10 @@ router.get('/api/visualization/map-points', getMapPoints);
 router.get('/api/visualization/timeline', getTimeline);
 router.get('/api/visualization/stats', getStats);
 
+// 兼容别名（面向可视化开发约定）
+router.get('/api/visual/info-graphic', getTimeline);
+router.get('/api/visual/chart', getStats);
+
 router.get('/api/buildings', getBuildingList);
 router.get('/api/buildings/:id', getBuildingDetail);
 router.get('/api/buildings/:id/model3d', getBuildingModel);

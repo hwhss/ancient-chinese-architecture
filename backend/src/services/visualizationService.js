@@ -35,6 +35,28 @@ function hasViewableModel(profile) {
   return model3d.versions.some((item) => item && item.modelUrl);
 }
 
+function getPrimaryModelMeta(profile) {
+  const model3d = profile && profile.model3d ? profile.model3d : null;
+  if (!model3d) {
+    return {
+      status: 'none',
+      viewerType: 'model-viewer',
+      modelUrl: '',
+      poster: ''
+    };
+  }
+
+  const versions = Array.isArray(model3d.versions) ? model3d.versions : [];
+  const firstWithUrl = versions.find((item) => item && item.modelUrl);
+
+  return {
+    status: String(model3d.status || 'none'),
+    viewerType: String(model3d.viewerType || 'model-viewer'),
+    modelUrl: String((model3d.modelUrl || (firstWithUrl && firstWithUrl.modelUrl) || '')).trim(),
+    poster: String(model3d.poster || '').trim()
+  };
+}
+
 function getEraBucket(mainEraStart) {
   const year = toNumberOrNull(mainEraStart);
   if (year === null) {
@@ -84,6 +106,58 @@ function toRatioItems(items, total) {
     ...item,
     ratio: base > 0 ? Number((item.count / base).toFixed(4)) : 0
   }));
+}
+
+function buildChartPayload(title, items, unit = '座') {
+  return {
+    title,
+    unit,
+    xAxis: items.map((item) => item.key),
+    series: [
+      {
+        name: title,
+        type: 'bar',
+        data: items.map((item) => item.count)
+      }
+    ],
+    legend: [title],
+    tooltip: true
+  };
+}
+
+function buildInfographicPayload(events) {
+  const nodes = events.map((event) => ({
+    id: event.id,
+    name: event.buildingName,
+    desc: event.yearLabel,
+    meta: {
+      category: event.category,
+      eraBucket: event.eraBucket,
+      region: event.region
+    }
+  }));
+
+  const edges = [];
+  for (let i = 1; i < events.length; i += 1) {
+    edges.push({
+      source: events[i - 1].id,
+      target: events[i].id,
+      relation: 'time-next'
+    });
+  }
+
+  return {
+    type: 'infographic',
+    title: '古建筑时间信息图',
+    layout: 'vertical',
+    nodes,
+    edges,
+    labels: ['年代', '建筑', '区域'],
+    links: events.map((event) => ({
+      nodeId: event.id,
+      url: `/pages/detail/detail?id=${event.buildingId}`
+    }))
+  };
 }
 
 function normalizeFilters(query = {}) {
@@ -166,8 +240,10 @@ async function getVisualizationTimeline(query = {}) {
     });
 
   return {
+    type: 'timeline',
     filters,
     timeline: events,
+    infographic: buildInfographicPayload(events),
     distributions: {
       byEraBucket: tallyBy(list, (item) => getEraBucket(item.mainEraStart)),
       byCategory: tallyBy(list, (item) => toSafeText(item.category))
@@ -202,9 +278,11 @@ async function getVisualizationStats(query = {}) {
   }
 
   return {
+    type: 'chart',
     filters,
     dimension,
     items: toRatioItems(rawItems, list.length),
+    chart: buildChartPayload(`古建筑统计-${dimension}`, rawItems),
     meta: {
       totalBuildings: source.length,
       matchedBuildings: list.length
@@ -231,6 +309,7 @@ async function getVisualizationOverview() {
   const with3d = list.filter((item) => hasViewableModel(profileMap.get(item.id)));
 
   return {
+    type: 'overview',
     summary: {
       totalBuildings: list.length,
       withCoordinates: withCoordinates.length,
@@ -243,6 +322,12 @@ async function getVisualizationOverview() {
       byHeritageLevel: tallyBy(list, (item) => toSafeText(item.heritageLevel)),
       byEraBucket: tallyBy(list, (item) => getEraBucket(item.mainEraStart))
     },
+    kpis: [
+      { key: 'totalBuildings', label: '建筑总数', value: list.length, unit: '座' },
+      { key: 'withCoordinates', label: '可定位建筑', value: withCoordinates.length, unit: '座' },
+      { key: 'with3d', label: '可3D浏览', value: with3d.length, unit: '座' },
+      { key: 'coverageRatio', label: '定位覆盖率', value: list.length ? Number((withCoordinates.length / list.length).toFixed(4)) : 0, unit: 'ratio' }
+    ],
     updatedAt: new Date().toISOString()
   };
 }
@@ -267,6 +352,7 @@ async function getVisualizationMapPoints() {
 
       const profile = profileMap.get(item.id) || {};
       const model3d = profile.model3d || {};
+      const primaryModel = getPrimaryModelMeta(profile);
 
       return {
         id: item.id,
@@ -283,13 +369,38 @@ async function getVisualizationMapPoints() {
           end: toNumberOrNull(item.mainEraEnd)
         },
         model3dStatus: toSafeText(model3d.status, 'none'),
-        has3d: hasViewableModel(profile)
+        has3d: hasViewableModel(profile),
+        model3d: primaryModel
       };
     })
     .filter(Boolean);
 
   return {
+    type: 'map-points',
     points,
+    markers: points,
+    geoJson: {
+      type: 'FeatureCollection',
+      features: points.map((item) => ({
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [item.coordinates.lng, item.coordinates.lat]
+        },
+        properties: {
+          id: item.id,
+          name: item.name,
+          category: item.category,
+          location: item.location,
+          province: item.province,
+          city: item.city,
+          heritageLevel: item.heritageLevel,
+          openStatus: item.openStatus,
+          model3dStatus: item.model3dStatus,
+          has3d: item.has3d
+        }
+      }))
+    },
     meta: {
       totalBuildings: source.length,
       returnedPoints: points.length,

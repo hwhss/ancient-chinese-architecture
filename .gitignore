@@ -25,6 +25,10 @@ pids/
 *.seed
 *.pid.lock
 
+# Local environment files (keep template only)
+backend/.env*
+!backend/.env.example
+
 # Build outputs
 dist/
 build/

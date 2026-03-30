@@ -55,8 +55,12 @@ function mergeCandidates(keywordCandidates, vectorCandidates) {
 function resolveSource(candidate) {
   const hasKeyword = (candidate.keywordScore || 0) >= config.chatKeywordStrongThreshold;
   const hasVector = (candidate.vectorSimilarity || 0) >= config.chatVectorSimilarityThreshold;
+  const hasHybrid = (candidate.hybridScore || 0) >= config.chatHybridScoreThreshold;
 
   if (hasKeyword && hasVector) {
+    return 'knowledge_hybrid';
+  }
+  if (hasHybrid) {
     return 'knowledge_hybrid';
   }
   if (hasKeyword) {
@@ -96,6 +100,16 @@ async function findBestKnowledgeByHybrid(question) {
   const passHybrid = best.hybridScore >= config.chatHybridScoreThreshold;
   const passKeyword = (best.keywordScore || 0) >= config.chatKeywordStrongThreshold;
   const passVector = (best.vectorSimilarity || 0) >= config.chatVectorSimilarityThreshold;
+
+  const keywordScore = Number(best.keywordScore || 0);
+  const vectorSimilarity = Number(best.vectorSimilarity || 0);
+  const shouldGuardLowDomainSimilarity =
+    keywordScore <= 0 &&
+    vectorSimilarity < config.chatVectorMinDomainSimilarity;
+
+  if (shouldGuardLowDomainSimilarity) {
+    return null;
+  }
 
   if (!passHybrid && !passKeyword && !passVector) {
     return null;

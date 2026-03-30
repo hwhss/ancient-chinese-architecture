@@ -12,7 +12,10 @@
     "test:embedding": "node scripts/test-embedding.js",
     "import:vectors": "node scripts/import-vectors.js",
     "query:vectors": "node scripts/query-vectors.js",
-    "test:phase3": "node scripts/phase3-compare.js"
+    "test:phase3": "node scripts/phase3-compare.js",
+    "test:chat-retrieval": "node scripts/test-chat-retrieval.js",
+    "test:chat-regression": "node scripts/test-chat-regression.js",
+    "scan:chat-thresholds": "node scripts/scan-chat-thresholds.js"
   },
   "dependencies": {
     "axios": "^1.6.0",
