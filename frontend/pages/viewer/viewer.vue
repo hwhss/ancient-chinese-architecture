@@ -42,6 +42,13 @@
             <view v-if="!isH5" class="model-overlay model-overlay-error">
               <text class="model-overlay-text">当前环境不支持 three.js 实时渲染，请切换到 H5 预览。</text>
             </view>
+            <view v-if="selectedHotspotInfo" class="hotspot-popup">
+              <view class="hotspot-popup-header">
+                <text class="hotspot-popup-title">{{ selectedHotspotInfo.title }}</text>
+                <button class="hotspot-popup-close" @click="closeHotspotPopup">×</button>
+              </view>
+              <text class="hotspot-popup-body">{{ selectedHotspotInfo.narration || "暂无讲解内容" }}</text>
+            </view>
           </view>
 
           <view v-else class="panorama-wrapper">
@@ -113,6 +120,13 @@ const THREE_LIBS = [
   "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js",
   "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js",
   "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js",
+  "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/DRACOLoader.js",
+  "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js",
+  "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/Pass.js",
+  "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js",
+  "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js",
+  "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js",
+  "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/OutlinePass.js",
 ];
 
 let libsReadyPromise = null;
@@ -207,6 +221,7 @@ export default {
       error: "",
       activeMode: "model",
       selectedHotspotId: "",
+      selectedHotspotInfo: null,
       manifest: {
         buildingId: "",
         buildingName: "",
@@ -247,6 +262,15 @@ export default {
         rootModel: null,
         frameHandle: 0,
         resizeHandler: null,
+        composer: null,
+        outlinePass: null,
+        renderPass: null,
+        raycaster: null,
+        mouse: null,
+        clickHandler: null,
+        mouseMoveHandler: null,
+        selectedObjects: [],
+        hotspotMeshes: new Map(),
       },
     };
   },
@@ -414,27 +438,108 @@ export default {
       const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
       renderer.setSize(width, height);
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.0;
+      renderer.outputEncoding = THREE.sRGBEncoding;
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       host.innerHTML = "";
       host.appendChild(renderer.domElement);
 
-      const hemi = new THREE.HemisphereLight(0xfff4d6, 0x2f1f13, 0.8);
+      const hemi = new THREE.HemisphereLight(0xffecd2, 0x3d2817, 0.6);
       scene.add(hemi);
-      const directional = new THREE.DirectionalLight(0xffe8c7, 0.9);
-      directional.position.set(3, 5, 4);
+
+      const ambient = new THREE.AmbientLight(0xffe4c4, 0.4);
+      scene.add(ambient);
+
+      const directional = new THREE.DirectionalLight(0xfff0d6, 1.2);
+      directional.position.set(5, 8, 6);
+      directional.castShadow = true;
+      directional.shadow.mapSize.width = 2048;
+      directional.shadow.mapSize.height = 2048;
+      directional.shadow.camera.near = 0.5;
+      directional.shadow.camera.far = 50;
       scene.add(directional);
+
+      const warmFill = new THREE.DirectionalLight(0xffd4a3, 0.5);
+      warmFill.position.set(-3, 2, -4);
+      scene.add(warmFill);
 
       const controls = new THREE.OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.06;
       controls.target.set(0, 0.6, 0);
+      controls.autoRotate = true;
+      controls.autoRotateSpeed = 0.5;
 
       const grid = new THREE.GridHelper(8, 16, 0xb08c64, 0x8e6e4b);
       grid.position.y = -0.01;
       scene.add(grid);
 
+      const composer = new THREE.EffectComposer(renderer);
+      const renderPass = new THREE.RenderPass(scene, camera);
+      composer.addPass(renderPass);
+
+      const outlinePass = new THREE.OutlinePass(
+        new THREE.Vector2(width, height),
+        scene,
+        camera
+      );
+      outlinePass.edgeStrength = 3.0;
+      outlinePass.edgeGlow = 0.5;
+      outlinePass.edgeThickness = 2.0;
+      outlinePass.visibleEdgeColor.set(0xc82506);
+      outlinePass.hiddenEdgeColor.set(0x8b4513);
+      outlinePass.pulsePeriod = 2;
+      composer.addPass(outlinePass);
+
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+
+      const onMouseClick = (event) => {
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+
+        const intersects = raycaster.intersectObjects(scene.children, true);
+
+        if (intersects.length > 0) {
+          const hit = intersects[0];
+          let targetObject = hit.object;
+
+          while (targetObject.parent && targetObject.parent !== scene) {
+            targetObject = targetObject.parent;
+          }
+
+          this.handleObjectClick(targetObject);
+        } else {
+          this.clearSelection();
+        }
+      };
+
+      const onMouseMove = (event) => {
+        const rect = renderer.domElement.getBoundingClientRect();
+        mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(scene.children, true);
+
+        if (intersects.length > 0) {
+          renderer.domElement.style.cursor = "pointer";
+        } else {
+          renderer.domElement.style.cursor = "default";
+        }
+      };
+
+      renderer.domElement.addEventListener("click", onMouseClick);
+      renderer.domElement.addEventListener("mousemove", onMouseMove);
+
       const animate = () => {
         controls.update();
-        renderer.render(scene, camera);
+        composer.render();
         this.renderState.frameHandle = requestAnimationFrame(animate);
       };
       animate();
@@ -445,6 +550,7 @@ export default {
         camera.aspect = nextWidth / nextHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(nextWidth, nextHeight);
+        composer.setSize(nextWidth, nextHeight);
       };
       window.addEventListener("resize", onResize);
 
@@ -455,8 +561,47 @@ export default {
         camera,
         renderer,
         controls,
+        composer,
+        renderPass,
+        outlinePass,
+        raycaster,
+        mouse,
+        clickHandler: onMouseClick,
+        mouseMoveHandler: onMouseMove,
         resizeHandler: onResize,
       };
+    },
+
+    handleObjectClick(object) {
+      const { outlinePass, hotspotMeshes } = this.renderState;
+
+      const hotspotId = hotspotMeshes.get(object.uuid);
+      if (hotspotId) {
+        const hotspot = this.hotspotGuide.find((h) => h.id === hotspotId);
+        if (hotspot) {
+          this.selectedHotspotId = hotspotId;
+          this.selectedHotspotInfo = hotspot;
+        }
+      }
+
+      if (outlinePass) {
+        outlinePass.selectedObjects = [object];
+        this.renderState.selectedObjects = [object];
+      }
+    },
+
+    clearSelection() {
+      const { outlinePass } = this.renderState;
+      if (outlinePass) {
+        outlinePass.selectedObjects = [];
+        this.renderState.selectedObjects = [];
+      }
+      this.selectedHotspotInfo = null;
+    },
+
+    closeHotspotPopup() {
+      this.selectedHotspotInfo = null;
+      this.clearSelection();
     },
 
     resolveLodPlan() {
@@ -503,7 +648,6 @@ export default {
         await this.loadMainModel(lod0Url, 0);
         this.lodPhase = "lod0_ready";
 
-        // 占位模型先可见，随后静默加载高清资源并替换。
         this.lodHdTimer = setTimeout(async () => {
           try {
             this.lodPhase = "loading_hd";
@@ -545,6 +689,38 @@ export default {
       });
     },
 
+    enhanceMaterials(model) {
+      const { THREE } = this.renderState;
+
+      model.traverse((node) => {
+        if (node.isMesh && node.material) {
+          const oldMat = node.material;
+
+          if (oldMat.isMeshStandardMaterial || oldMat.isMeshPhysicalMaterial) {
+            oldMat.roughness = Math.max(0.3, oldMat.roughness * 0.8);
+            oldMat.metalness = Math.min(0.6, oldMat.metalness * 1.2);
+            oldMat.envMapIntensity = 1.0;
+          } else {
+            const newMat = new THREE.MeshStandardMaterial({
+              color: oldMat.color || 0xffffff,
+              map: oldMat.map || null,
+              roughness: 0.6,
+              metalness: 0.2,
+            });
+
+            if (oldMat.map) {
+              newMat.map = oldMat.map;
+            }
+
+            node.material = newMat;
+          }
+
+          node.castShadow = true;
+          node.receiveShadow = true;
+        }
+      });
+    },
+
     async loadMainModel(url, lodLevel) {
       if (!url) {
         throw new Error("model url is empty");
@@ -556,6 +732,13 @@ export default {
       }
 
       const loader = new THREE.GLTFLoader();
+
+      if (THREE.DRACOLoader) {
+        const dracoLoader = new THREE.DRACOLoader();
+        dracoLoader.setDecoderPath("https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/draco/");
+        loader.setDRACOLoader(dracoLoader);
+      }
+
       const model = await new Promise((resolve, reject) => {
         loader.load(
           url,
@@ -575,10 +758,24 @@ export default {
         this.renderState.rootModel = null;
       }
 
+      this.enhanceMaterials(model);
+
       model.position.set(0, 0, 0);
       scene.add(model);
       this.renderState.rootModel = model;
       this.lodActiveUrl = `L${lodLevel}`;
+
+      this.renderState.hotspotMeshes.clear();
+      this.hotspotGuide.forEach((hotspot) => {
+        if (hotspot.meshName || hotspot.targetName) {
+          const targetName = hotspot.meshName || hotspot.targetName;
+          model.traverse((node) => {
+            if (node.isMesh && node.name === targetName) {
+              this.renderState.hotspotMeshes.set(node.uuid, hotspot.id);
+            }
+          });
+        }
+      });
     },
 
     switchMode(mode) {
@@ -595,7 +792,20 @@ export default {
 
     selectHotspot(item) {
       this.selectedHotspotId = item.id;
-      // 预留：后续在这里接入相机飞行与讲解联动。
+      this.selectedHotspotInfo = item;
+
+      const { rootModel, outlinePass } = this.renderState;
+      if (rootModel && outlinePass) {
+        const targetName = item.meshName || item.targetName;
+        if (targetName) {
+          rootModel.traverse((node) => {
+            if (node.isMesh && node.name === targetName) {
+              outlinePass.selectedObjects = [node];
+              this.renderState.selectedObjects = [node];
+            }
+          });
+        }
+      }
     },
 
     destroyThree() {
@@ -608,8 +818,17 @@ export default {
       if (state.resizeHandler && this.isH5) {
         window.removeEventListener("resize", state.resizeHandler);
       }
+      if (state.clickHandler && state.renderer) {
+        state.renderer.domElement.removeEventListener("click", state.clickHandler);
+      }
+      if (state.mouseMoveHandler && state.renderer) {
+        state.renderer.domElement.removeEventListener("mousemove", state.mouseMoveHandler);
+      }
       if (state.controls) {
         state.controls.dispose();
+      }
+      if (state.composer) {
+        state.composer.dispose();
       }
       if (state.renderer) {
         state.renderer.dispose();
@@ -628,10 +847,20 @@ export default {
         rootModel: null,
         frameHandle: 0,
         resizeHandler: null,
+        composer: null,
+        outlinePass: null,
+        renderPass: null,
+        raycaster: null,
+        mouse: null,
+        clickHandler: null,
+        mouseMoveHandler: null,
+        selectedObjects: [],
+        hotspotMeshes: new Map(),
       };
       this.lodPhase = "idle";
       this.lodActiveUrl = "";
       this.rendererStarted = false;
+      this.selectedHotspotInfo = null;
     },
 
     goBack() {
@@ -817,6 +1046,58 @@ export default {
   text-align: center;
 }
 
+.hotspot-popup {
+  position: absolute;
+  right: 18rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 280rpx;
+  max-height: 300rpx;
+  background: rgba(248, 244, 233, 0.95);
+  border: 2rpx solid #c82506;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  z-index: 10;
+  box-shadow: 0 4rpx 20rpx rgba(200, 37, 6, 0.3);
+}
+
+.hotspot-popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+  padding-bottom: 12rpx;
+  border-bottom: 1rpx solid #e3cfb2;
+}
+
+.hotspot-popup-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #8b4513;
+  flex: 1;
+}
+
+.hotspot-popup-close {
+  width: 40rpx;
+  height: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #8b4513;
+  font-size: 36rpx;
+  line-height: 1;
+  padding: 0;
+  margin-left: 10rpx;
+}
+
+.hotspot-popup-body {
+  font-size: 24rpx;
+  color: #5e4530;
+  line-height: 1.6;
+}
+
 .panorama-wrapper {
   position: relative;
   z-index: 2;
@@ -906,8 +1187,9 @@ export default {
 }
 
 .guide-item.selected {
-  border-color: #91572f;
+  border-color: #c82506;
   background: #f5e3ca;
+  box-shadow: 0 2rpx 8rpx rgba(200, 37, 6, 0.15);
 }
 
 .guide-item-title {

@@ -6,6 +6,13 @@
       <text class="header-title">古建筑详情</text>
       <view class="header-actions">
         <view
+          class="share-btn-header"
+          @click="openShareCard"
+        >
+          <text class="share-icon-header">📤</text>
+          <text class="share-label-header">分享</text>
+        </view>
+        <view
           class="favorite-btn"
           :class="{ 'active': isFavorite }"
           @click="toggleFavorite"
@@ -15,6 +22,14 @@
         </view>
       </view>
     </view>
+
+    <!-- 分享卡片弹窗 -->
+    <ShareCard
+      :visible="showShareCard"
+      :building="shareBuilding"
+      @close="showShareCard = false"
+      @share="onShareCard"
+    />
 
     <!-- 素材展示区域 -->
     <view class="content">
@@ -74,44 +89,97 @@
         <text class="placeholder-sub">暂无素材，已展示建筑文字详情</text>
       </view>
 
-      <view v-if="!loading && !error" class="detail-card">
-        <view class="detail-header">
-          <text class="detail-title">建筑详情</text>
-          <view
-            class="detail-favorite-btn"
-            :class="{ 'active': isFavorite }"
-            @click="toggleFavorite"
-          >
-            <text class="detail-favorite-icon">{{ isFavorite ? '★' : '☆' }}</text>
-            <text class="detail-favorite-text">{{ isFavorite ? '已收藏' : '收藏' }}</text>
+      <!-- Tab 切换栏 -->
+      <view v-if="!loading && !error && visibleTabs.length > 0" class="tab-bar">
+        <view
+          v-for="tab in visibleTabs"
+          :key="tab.key"
+          class="tab-item"
+          :class="{ active: activeTab === tab.key }"
+          @click="switchTab(tab.key)"
+        >
+          <text class="tab-text">{{ tab.label }}</text>
+        </view>
+      </view>
+
+      <!-- Tab 内容区域 -->
+      <view v-if="!loading && !error" class="tab-content">
+        <!-- 基础信息 Tab -->
+        <view v-if="activeTab === 'basic'" class="detail-card">
+          <view class="detail-header">
+            <text class="detail-title">建筑详情</text>
+            <view
+              class="detail-favorite-btn"
+              :class="{ 'active': isFavorite }"
+              @click="toggleFavorite"
+            >
+              <text class="detail-favorite-icon">{{ isFavorite ? '★' : '☆' }}</text>
+              <text class="detail-favorite-text">{{ isFavorite ? '已收藏' : '收藏' }}</text>
+            </view>
+          </view>
+          <view class="detail-row">
+            <text class="detail-label">名称</text>
+            <text class="detail-value">{{ materialTitle }}</text>
+          </view>
+          <view class="detail-row">
+            <text class="detail-label">分类</text>
+            <text class="detail-value">{{ categoryText }}</text>
+          </view>
+          <view class="detail-row">
+            <text class="detail-label">位置</text>
+            <text class="detail-value">{{ building.location || "暂无" }}</text>
+          </view>
+          <view class="detail-row detail-col">
+            <text class="detail-label">简介</text>
+            <text class="detail-value wrap">{{
+              building.description || "暂无介绍"
+            }}</text>
+          </view>
+          <view v-if="building.tags && building.tags.length" class="tag-list">
+            <text v-for="tag in building.tags" :key="tag" class="tag-item">{{
+              tag
+            }}</text>
+          </view>
+
+          <view class="action-row">
+            <button class="action-btn" @click="goToViewer">进入3D导览</button>
           </view>
         </view>
-        <view class="detail-row">
-          <text class="detail-label">名称</text>
-          <text class="detail-value">{{ materialTitle }}</text>
-        </view>
-        <view class="detail-row">
-          <text class="detail-label">分类</text>
-          <text class="detail-value">{{ categoryText }}</text>
-        </view>
-        <view class="detail-row">
-          <text class="detail-label">位置</text>
-          <text class="detail-value">{{ building.location || "暂无" }}</text>
-        </view>
-        <view class="detail-row detail-col">
-          <text class="detail-label">简介</text>
-          <text class="detail-value wrap">{{
-            building.description || "暂无介绍"
-          }}</text>
-        </view>
-        <view v-if="building.tags && building.tags.length" class="tag-list">
-          <text v-for="tag in building.tags" :key="tag" class="tag-item">{{
-            tag
-          }}</text>
+
+        <!-- 结构解析 Tab -->
+        <view v-if="activeTab === 'infographic' && visualizationData.infographic" class="detail-card">
+          <view class="detail-header">
+            <text class="detail-title">结构解析</text>
+          </view>
+          <InfoGraphic
+            :nodes="visualizationData.infographic.nodes"
+            :edges="visualizationData.infographic.edges"
+            :layout="visualizationData.infographic.layout"
+            @node-click="onInfographicNodeClick"
+          />
         </view>
 
-        <view class="action-row">
-          <button class="action-btn" @click="goToViewer">进入3D导览</button>
+        <!-- 动态演示 Tab -->
+        <view v-if="activeTab === 'animation' && visualizationData.animationId" class="detail-card">
+          <view class="detail-header">
+            <text class="detail-title">动态演示</text>
+          </view>
+          <LottieAnimation
+            :animation-id="visualizationData.animationId"
+            :loop="true"
+            :autoplay="true"
+          />
+        </view>
+
+        <!-- 数据概览 Tab -->
+        <view v-if="activeTab === 'chart' && visualizationData.chartData" class="detail-card">
+          <view class="detail-header">
+            <text class="detail-title">数据概览</text>
+          </view>
+          <VisualChart
+            :chart-data="visualizationData.chartData"
+            :chart-type="visualizationData.chartData.type || 'bar'"
+          />
         </view>
       </view>
     </view>
@@ -120,6 +188,10 @@
 
 <script>
 import { getBuildingById, getMaterialById } from "../../services/api";
+import ShareCard from "../../components/ShareCard.vue";
+import InfoGraphic from "../../components/InfoGraphic.vue";
+import LottieAnimation from "../../components/LottieAnimation.vue";
+import VisualChart from "../../components/VisualChart.vue";
 
 // 素材ID到名称的映射 - 静态常量
 const MATERIAL_NAMES = {
@@ -156,7 +228,21 @@ const MATERIAL_NAMES = {
   kanerjing_01: "坎儿井",
 };
 
+// Tab 配置
+const TAB_CONFIG = [
+  { key: 'basic', label: '基础信息', required: true },
+  { key: 'infographic', label: '结构解析', dataKey: 'infographic' },
+  { key: 'animation', label: '动态演示', dataKey: 'animationId' },
+  { key: 'chart', label: '数据概览', dataKey: 'chartData' },
+];
+
 export default {
+  components: {
+    ShareCard,
+    InfoGraphic,
+    LottieAnimation,
+    VisualChart,
+  },
   data() {
     return {
       materialId: "",
@@ -178,6 +264,14 @@ export default {
       loading: false,
       error: null,
       favorites: [],
+      showShareCard: false,
+      shareBuilding: {},
+      activeTab: 'basic',
+      visualizationData: {
+        infographic: null,
+        animationId: null,
+        chartData: null,
+      },
     };
   },
 
@@ -207,6 +301,13 @@ export default {
     isFavorite() {
       return this.favorites.some(f => f.id === this.materialId);
     },
+
+    visibleTabs() {
+      return TAB_CONFIG.filter(tab => {
+        if (tab.required) return true;
+        return !!this.visualizationData[tab.dataKey];
+      });
+    },
   },
 
   onLoad(options) {
@@ -229,7 +330,11 @@ export default {
       this.error = null;
       this.materialNotice = "";
 
-      await Promise.allSettled([this.loadBuilding(), this.loadMaterial()]);
+      await Promise.allSettled([
+        this.loadBuilding(),
+        this.loadMaterial(),
+        this.loadVisualizationData(),
+      ]);
 
       if (!this.building || !this.building.id) {
         this.error = "未找到建筑详情";
@@ -257,6 +362,44 @@ export default {
       }
     },
 
+    async loadVisualizationData() {
+      try {
+        const data = await this.fetchVisualizationData(this.materialId);
+        this.visualizationData = {
+          infographic: data.infographic || null,
+          animationId: data.animationId || null,
+          chartData: data.chartData || null,
+        };
+      } catch (error) {
+        console.error("加载可视化数据失败:", error);
+        // 可视化数据加载失败不影响页面主要功能
+        this.visualizationData = {
+          infographic: null,
+          animationId: null,
+          chartData: null,
+        };
+      }
+    },
+
+    async fetchVisualizationData(buildingId) {
+      return new Promise((resolve) => {
+        uni.request({
+          url: `/api/visualization/${buildingId}`,
+          method: 'GET',
+          success: (res) => {
+            if (res.statusCode === 200 && res.data) {
+              resolve(res.data);
+            } else {
+              resolve({});
+            }
+          },
+          fail: () => {
+            resolve({});
+          },
+        });
+      });
+    },
+
     setPlaceholderData() {
       // 模拟数据，为每个建筑ID生成对应的图片
       const randomNum =
@@ -282,6 +425,20 @@ export default {
       uni.navigateTo({
         url: `/pages/viewer/viewer?materialId=${this.materialId}&name=${name}`,
       });
+    },
+
+    switchTab(tabKey) {
+      this.activeTab = tabKey;
+    },
+
+    onInfographicNodeClick(node) {
+      console.log('点击了节点:', node);
+      // 可以在这里添加节点点击后的逻辑，比如跳转到详情页
+      if (node.link) {
+        uni.navigateTo({
+          url: node.link,
+        });
+      }
     },
 
     // ========== 收藏功能 ==========
@@ -341,7 +498,45 @@ export default {
 
       this.saveFavorites();
     },
+
+    // 打开分享卡片
+    openShareCard() {
+      this.shareBuilding = {
+        id: this.materialId,
+        name: this.materialTitle,
+        image: this.material.url || '',
+        location: this.building.location || '',
+        dynasty: '',
+        description: this.building.description || '',
+        tags: this.building.tags || []
+      };
+      this.showShareCard = true;
+    },
+
+    // 分享卡片回调
+    onShareCard(shareData) {
+      console.log('分享数据:', shareData);
+    }
   },
+
+  // 微信小程序分享配置
+  // #ifdef MP-WEIXIN
+  onShareAppMessage() {
+    return {
+      title: `${this.materialTitle} - 中华古建筑导览`,
+      path: `/pages/detail/detail?materialId=${this.materialId}&name=${encodeURIComponent(this.materialTitle)}`,
+      imageUrl: this.material.url || 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=400&h=300&fit=crop'
+    };
+  },
+
+  onShareTimeline() {
+    return {
+      title: `${this.materialTitle} - 中华古建筑导览`,
+      query: `materialId=${this.materialId}&name=${encodeURIComponent(this.materialTitle)}`,
+      imageUrl: this.material.url || 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=400&h=300&fit=crop'
+    };
+  }
+  // #endif
 };
 </script>
 
@@ -388,6 +583,34 @@ export default {
 .header-actions {
   display: flex;
   align-items: center;
+  gap: 16rpx;
+}
+
+.share-btn-header {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 14rpx 24rpx;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2rpx solid rgba(255, 255, 255, 0.3);
+  border-radius: 32rpx;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.share-btn-header:active {
+  transform: scale(0.95);
+  background: rgba(232, 184, 96, 0.2);
+  border-color: rgba(255, 200, 100, 0.5);
+}
+
+.share-icon-header {
+  font-size: 28rpx;
+}
+
+.share-label-header {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
 }
 
 .favorite-btn {
@@ -499,8 +722,49 @@ export default {
   border-left: 4rpx solid #b85450;
 }
 
-.detail-card {
+/* Tab 栏样式 */
+.tab-bar {
+  display: flex;
   margin-top: 30rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  border: 2rpx solid #e8dcc8;
+  padding: 8rpx;
+  box-shadow: 0 4rpx 16rpx rgba(139, 69, 19, 0.08);
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx 16rpx;
+  border-radius: 12rpx;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.tab-item.active {
+  background: #8b4513;
+}
+
+.tab-text {
+  font-size: 26rpx;
+  color: #6b5643;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.tab-item.active .tab-text {
+  color: #f8f4e9;
+  font-weight: 600;
+}
+
+.tab-content {
+  margin-top: 20rpx;
+}
+
+.detail-card {
   background: #fff;
   border-radius: 24rpx;
   border: 2rpx solid #e8dcc8;

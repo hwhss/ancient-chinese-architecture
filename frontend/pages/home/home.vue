@@ -17,6 +17,14 @@
       :card-count="4"
     />
 
+    <!-- 分享卡片弹窗 -->
+    <ShareCard
+      :visible="showShareCard"
+      :building="shareBuilding"
+      @close="showShareCard = false"
+      @share="onShareCard"
+    />
+
     <!-- 主内容区域 -->
     <scroll-view
       v-show="!loading"
@@ -117,6 +125,22 @@
               </view>
               <view class="favorites-arrow-wrapper">
                 <text class="favorites-arrow">→</text>
+              </view>
+            </view>
+          </view>
+
+          <!-- 设置入口 -->
+          <view class="settings-shortcut-wrapper" :class="{ 'visible': sections.hero.categoryShortcuts }">
+            <view class="settings-shortcut" @click="goToSettings">
+              <view class="settings-icon-wrapper">
+                <text class="settings-icon">⚙️</text>
+              </view>
+              <view class="settings-info">
+                <text class="settings-title">设置</text>
+                <text class="settings-desc">主题、偏好设置</text>
+              </view>
+              <view class="settings-arrow-wrapper">
+                <text class="settings-arrow">→</text>
               </view>
             </view>
           </view>
@@ -352,10 +376,12 @@
 
 <script>
 import SkeletonScreen from "../../components/SkeletonScreen.vue";
+import ShareCard from "../../components/ShareCard.vue";
 
 export default {
   components: {
-    SkeletonScreen
+    SkeletonScreen,
+    ShareCard
   },
   data() {
     return {
@@ -411,7 +437,9 @@ export default {
         { title: '影壁', text: '影壁，又称照壁，大门内外的屏障建筑，既有风水讲究，又有装饰作用，九龙壁就是最著名的影壁。' }
       ],
       knowledgeScrollProgress: 0,
-      showBackToTop: false
+      showBackToTop: false,
+      showShareCard: false,
+      shareBuilding: {}
     };
   },
   
@@ -490,16 +518,23 @@ export default {
     shareDailyBuilding() {
       if (!this.dailyBuilding) return;
 
-      uni.showShareMenu({
-        withShareTicket: true,
-        menus: ['shareAppMessage', 'shareTimeline']
-      });
+      // 打开分享卡片弹窗
+      this.shareBuilding = {
+        id: this.dailyBuilding.id,
+        name: this.dailyBuilding.name,
+        image: this.dailyBuilding.image,
+        location: this.dailyBuilding.location,
+        dynasty: this.dailyBuilding.dynasty,
+        description: this.dailyBuilding.description,
+        tags: this.dailyBuilding.tags
+      };
+      this.showShareCard = true;
+    },
 
-      uni.showToast({
-        title: '点击右上角分享',
-        icon: 'none',
-        duration: 2000
-      });
+    // 分享卡片回调
+    onShareCard(shareData) {
+      console.log('分享数据:', shareData);
+      // 可以在这里处理分享统计等逻辑
     },
 
     // ========== 收藏功能 ==========
@@ -569,6 +604,13 @@ export default {
     goToFavorites() {
       uni.navigateTo({
         url: '/pages/favorites/favorites'
+      });
+    },
+
+    // 跳转到设置页面
+    goToSettings() {
+      uni.navigateTo({
+        url: '/pages/settings/settings'
       });
     },
 
@@ -655,7 +697,40 @@ export default {
         url: `/pages/map/map?category=${category}`
       });
     }
+  },
+
+  // 微信小程序分享配置
+  // #ifdef MP-WEIXIN
+  onShareAppMessage() {
+    if (this.dailyBuilding) {
+      return {
+        title: `${this.dailyBuilding.name} - 每日一建 | 中华古建筑导览`,
+        path: `/pages/detail/detail?materialId=${this.dailyBuilding.id}&name=${encodeURIComponent(this.dailyBuilding.name)}`,
+        imageUrl: this.dailyBuilding.image
+      };
+    }
+    return {
+      title: '中华古建筑导览 - 探索千年文明',
+      path: '/pages/home/home',
+      imageUrl: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=400&h=300&fit=crop'
+    };
+  },
+
+  onShareTimeline() {
+    if (this.dailyBuilding) {
+      return {
+        title: `${this.dailyBuilding.name} - 每日一建 | 中华古建筑导览`,
+        query: `materialId=${this.dailyBuilding.id}&name=${encodeURIComponent(this.dailyBuilding.name)}`,
+        imageUrl: this.dailyBuilding.image
+      };
+    }
+    return {
+      title: '中华古建筑导览 - 探索千年文明',
+      query: '',
+      imageUrl: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=400&h=300&fit=crop'
+    };
   }
+  // #endif
 };
 </script>
 
@@ -1945,6 +2020,157 @@ export default {
 
 .favorites-shortcut:active .favorites-arrow {
   transform: translateX(8rpx);
+}
+
+/* ========== 设置快捷入口 ========== */
+.settings-shortcut-wrapper {
+  margin-top: 24rpx;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.5s ease;
+}
+
+.settings-shortcut-wrapper.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.settings-shortcut {
+  display: flex;
+  align-items: center;
+  gap: 28rpx;
+  padding: 28rpx 36rpx;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
+  border-radius: 24rpx;
+  border: 2rpx solid #ced4da;
+  box-shadow:
+    0 12rpx 36rpx rgba(108, 117, 125, 0.12),
+    0 4rpx 12rpx rgba(108, 117, 125, 0.06),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.settings-shortcut::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4rpx;
+  background: linear-gradient(90deg, #6c757d 0%, #adb5bd 50%, #6c757d 100%);
+  opacity: 0.8;
+}
+
+.settings-shortcut::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.6s ease;
+}
+
+.settings-shortcut:hover::after {
+  left: 100%;
+}
+
+.settings-shortcut:hover {
+  transform: translateY(-4rpx);
+  box-shadow:
+    0 20rpx 48rpx rgba(108, 117, 125, 0.16),
+    0 8rpx 20rpx rgba(108, 117, 125, 0.08);
+}
+
+.settings-shortcut:active {
+  transform: translateY(-2rpx) scale(0.98);
+  box-shadow: 0 8rpx 24rpx rgba(108, 117, 125, 0.1);
+}
+
+.settings-icon-wrapper {
+  width: 72rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(145deg, #ffffff 0%, #f1f3f4 50%, #e8eaed 100%);
+  border-radius: 50%;
+  border: 2rpx solid #dadce0;
+  box-shadow:
+    0 4rpx 12rpx rgba(108, 117, 125, 0.15),
+    inset 0 2rpx 4rpx rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+}
+
+.settings-shortcut:hover .settings-icon-wrapper {
+  transform: scale(1.08) rotate(10deg);
+  box-shadow:
+    0 8rpx 20rpx rgba(108, 117, 125, 0.2),
+    inset 0 2rpx 4rpx rgba(255, 255, 255, 0.8);
+}
+
+.settings-icon {
+  font-size: 40rpx;
+  filter: drop-shadow(0 2rpx 4rpx rgba(108, 117, 125, 0.2));
+  transition: transform 0.3s ease;
+}
+
+.settings-shortcut:hover .settings-icon {
+  transform: scale(1.15) rotate(-10deg);
+}
+
+.settings-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.settings-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #495057;
+  letter-spacing: 4rpx;
+  font-family: 'ZCOOL XiaoWei', serif;
+}
+
+.settings-desc {
+  font-size: 24rpx;
+  color: #6c757d;
+}
+
+.settings-arrow-wrapper {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(108, 117, 125, 0.1) 0%, rgba(173, 181, 189, 0.1) 100%);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  border: 1rpx solid rgba(108, 117, 125, 0.15);
+}
+
+.settings-shortcut:hover .settings-arrow-wrapper {
+  background: linear-gradient(135deg, rgba(108, 117, 125, 0.15) 0%, rgba(173, 181, 189, 0.15) 100%);
+  border-color: rgba(108, 117, 125, 0.25);
+}
+
+.settings-arrow {
+  font-size: 28rpx;
+  color: #6c757d;
+  font-weight: bold;
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.settings-shortcut:hover .settings-arrow {
+  transform: translateX(4rpx);
+  opacity: 1;
 }
 
 /* 响应式适配 */
