@@ -2,11 +2,19 @@ const fs = require('fs');
 const path = require('path');
 const { query } = require('../config/database');
 
-const dataDir = path.join(__dirname, '..', '..', 'data');
+const legacyDataDir = path.join(__dirname, '..', '..', 'data');
+const defaultJsonDbDir = path.join(__dirname, '..', '..', 'data-jsondb');
 const dataSource = String(process.env.DATA_SOURCE || 'json').trim().toLowerCase();
+const dataJsonDbDir = (() => {
+  const raw = String(process.env.DATA_JSON_DB_DIR || '').trim();
+  if (!raw) {
+    return defaultJsonDbDir;
+  }
+  return path.isAbsolute(raw) ? raw : path.join(__dirname, '..', '..', raw);
+})();
 
-function readJsonFile(filename, defaultValue) {
-  const filePath = path.join(dataDir, filename);
+function readJsonFile(baseDir, filename, defaultValue) {
+  const filePath = path.join(baseDir, filename);
   if (!fs.existsSync(filePath)) {
     return defaultValue;
   }
@@ -20,21 +28,145 @@ function readJsonFile(filename, defaultValue) {
   }
 }
 
-const knowledgeBase = readJsonFile('knowledge_base.json', []);
-const materialLinks = readJsonFile('material_links.json', []);
-const buildings = readJsonFile('buildings.json', []);
-const buildingProfiles = readJsonFile('building_profiles.json', []);
-
-const materialMap = new Map(materialLinks.map((item) => [item.materialId, item]));
-const buildingMap = new Map(buildings.map((item) => [item.id, item]));
-const buildingProfileMap = new Map(buildingProfiles.map((item) => [item.id, item]));
-
 function toArray(value, fallback = []) {
   if (Array.isArray(value)) {
     return value;
   }
   return fallback;
 }
+
+function inferModelFormat(url) {
+  const value = String(url || '').trim().toLowerCase();
+  if (!value) {
+    return 'glb';
+  }
+  if (value.endsWith('.gltf')) {
+    return 'gltf';
+  }
+  if (value.endsWith('.fbx')) {
+    return 'fbx';
+  }
+  return 'glb';
+}
+
+function loadLegacyJsonData() {
+  return {
+    knowledgeBase: readJsonFile(legacyDataDir, 'knowledge_base.json', []),
+    materialLinks: readJsonFile(legacyDataDir, 'material_links.json', []),
+    buildings: readJsonFile(legacyDataDir, 'buildings.json', []),
+    buildingProfiles: readJsonFile(legacyDataDir, 'building_profiles.json', [])
+  };
+}
+
+function buildProfilesFromVisualizationModels(modelList) {
+  const list = toArray(modelList, []);
+  return list
+    .filter((item) => item && item.buildingId)
+    .map((item, index) => {
+      const modelUrl = String(item.modelUrl || '').trim();
+      const markers = toArray(item.markers, []);
+
+      return {
+        id: String(item.buildingId),
+        era: '',
+        style: '',
+        overviewSummary: String(item.modelName || '').trim(),
+        keyPoints: markers.map((marker) => String(marker.name || '').trim()).filter(Boolean),
+        history: '',
+        architectureHighlights: markers
+          .map((marker) => String(marker.desc || '').trim())
+          .filter(Boolean),
+        culturalValue: '',
+        model3d: {
+          status: modelUrl ? 'ready' : 'planned',
+          viewerType: 'model-viewer',
+          poster: '',
+          preload: {},
+          note: '',
+          versions: modelUrl ? [{
+            version: 'v1',
+            label: String(item.modelName || `版本 ${index + 1}`).trim() || `版本 ${index + 1}`,
+            modelUrl,
+            format: inferModelFormat(modelUrl),
+            allowedRoles: ['viewer', 'admin'],
+            draco: false,
+            ktx2: false,
+            lod: [],
+            preload: {},
+            hotspots: markers.map((marker, markerIndex) => ({
+              id: String(marker.id || `hotspot-${markerIndex + 1}`),
+              title: String(marker.name || `讲解点 ${markerIndex + 1}`),
+              name: String(marker.name || `讲解点 ${markerIndex + 1}`),
+              description: String(marker.desc || '').trim(),
+              narration: String(marker.desc || '').trim(),
+              position: Array.isArray(marker.position) ? marker.position : null
+            })),
+            camera: item.initConfig || null
+          }] : []
+        }
+      };
+    });
+}
+
+function loadJsonDbData() {
+  const indexPath = path.join(dataJsonDbDir, 'index.json');
+  if (!fs.existsSync(indexPath)) {
+    return null;
+  }
+
+  const manifest = readJsonFile(dataJsonDbDir, 'index.json', {});
+  const buildingsConfig = manifest && manifest.buildings && typeof manifest.buildings === 'object'
+    ? manifest.buildings
+    : {};
+
+  const buildingFileList = Object.entries(buildingsConfig)
+    .map(([category, configItem]) => ({
+      category,
+      file: configItem && configItem.file ? String(configItem.file) : ''
+    }))
+    .filter((item) => item.file);
+
+  const buildings = [];
+  for (const item of buildingFileList) {
+    const rows = readJsonFile(dataJsonDbDir, item.file, []);
+    for (const row of toArray(rows, [])) {
+      buildings.push({
+        ...row,
+        category: row && row.category ? row.category : item.category
+      });
+    }
+  }
+
+  const knowledgeFile = manifest
+    && manifest.knowledge
+    && manifest.knowledge.qa
+    && manifest.knowledge.qa.file
+    ? String(manifest.knowledge.qa.file)
+    : 'knowledge/qa.json';
+
+  const knowledgeBase = readJsonFile(dataJsonDbDir, knowledgeFile, []);
+  const modelConfig = readJsonFile(dataJsonDbDir, 'visualization/3d-model.json', []);
+  const buildingProfiles = buildProfilesFromVisualizationModels(modelConfig);
+
+  return {
+    knowledgeBase,
+    materialLinks: [],
+    buildings,
+    buildingProfiles
+  };
+}
+
+const jsonDbData = loadJsonDbData();
+const selectedJsonData = jsonDbData || loadLegacyJsonData();
+
+const knowledgeBase = toArray(selectedJsonData.knowledgeBase, []);
+const materialLinks = toArray(selectedJsonData.materialLinks, []);
+const buildings = toArray(selectedJsonData.buildings, []);
+const buildingProfiles = toArray(selectedJsonData.buildingProfiles, []);
+
+const materialMap = new Map(materialLinks.map((item) => [item.materialId, item]));
+const buildingMap = new Map(buildings.map((item) => [item.id, item]));
+const buildingProfileMap = new Map(buildingProfiles.map((item) => [item.id, item]));
 
 function mapMaterialRow(row) {
   return {
@@ -64,7 +196,7 @@ function mapBuildingRow(row) {
       ? Number(row.main_era_end || row.mainEraEnd)
       : null,
     description: row.description,
-    image: row.image,
+    image: row.image || row.coverImage || '',
     tags: toArray(row.tags, [])
   };
 }
@@ -74,8 +206,9 @@ function mapKnowledgeRow(row) {
     id: row.id || null,
     question: row.question,
     answer: row.answer,
-    materialId: row.material_id,
-    keywords: toArray(row.keywords, [])
+    materialId: row.material_id || row.materialId || null,
+    keywords: toArray(row.keywords, []),
+    category: row.category || ''
   };
 }
 
