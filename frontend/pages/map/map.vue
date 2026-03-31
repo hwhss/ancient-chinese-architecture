@@ -29,7 +29,7 @@
         <!-- 视图切换按钮 -->
         <view class="view-toggle">
           <view 
-            class="toggle-btn" 
+            class="toggle-btn tap-feedback" 
             :class="{ active: currentView === 'list' }"
             @click="switchView('list')"
           >
@@ -37,7 +37,7 @@
             <text class="toggle-text">列表</text>
           </view>
           <view 
-            class="toggle-btn" 
+            class="toggle-btn tap-feedback" 
             :class="{ active: currentView === 'map' }"
             @click="switchView('map')"
           >
@@ -71,14 +71,14 @@
             <view class="filter-group">
               <text class="filter-label">分类</text>
               <view
-                v-for="cat in categories"
-                :key="cat.key"
-                class="filter-tab"
-                :class="{ active: currentCategory === cat.key }"
-                @click="selectCategory(cat.key)"
-              >
-                {{ cat.name }}
-              </view>
+              v-for="cat in categories"
+              :key="cat.key"
+              class="filter-tab tap-feedback"
+              :class="{ active: currentCategory === cat.key }"
+              @click="selectCategory(cat.key)"
+            >
+              {{ cat.name }}
+            </view>
             </view>
             
             <!-- 分隔线 -->
@@ -88,19 +88,19 @@
             <view class="filter-group">
               <text class="filter-label">朝代</text>
               <view
-                v-for="dynasty in dynasties"
-                :key="dynasty.key"
-                class="filter-tab"
-                :class="{ active: currentDynasty === dynasty.key }"
-                @click="selectDynasty(dynasty.key)"
-              >
-                {{ dynasty.name }}
-              </view>
+              v-for="dynasty in dynasties"
+              :key="dynasty.key"
+              class="filter-tab tap-feedback"
+              :class="{ active: currentDynasty === dynasty.key }"
+              @click="selectDynasty(dynasty.key)"
+            >
+              {{ dynasty.name }}
+            </view>
             </view>
           </scroll-view>
           
           <!-- 排序按钮 - 移到右侧 -->
-          <view class="sort-btn" @click="toggleSort">
+          <view class="sort-btn tap-feedback" @click="toggleSort">
             <text class="sort-icon">{{ sortOrder === 'name' ? '🔤' : '�' }}</text>
           </view>
         </view>
@@ -140,7 +140,7 @@
             <view
               v-for="(building, index) in filteredBuildings"
               :key="building.id"
-              class="building-card preview-card"
+              class="building-card preview-card card-ink"
               :class="{ 'visible': visibleCards[index] }"
               @click="goToDetail(building)"
             >
@@ -157,8 +157,9 @@
 
           <!-- 底部按钮 -->
           <view class="bottom-actions">
-            <button class="action-btn secondary" @click="goToChat">
-              💬 返回AI问答
+            <button class="action-btn secondary ink-ripple" @click="goToChat">
+              <text class="btn-icon">💬</text>
+              <text class="btn-text">返回AI问答</text>
             </button>
           </view>
         </scroll-view>
@@ -1707,6 +1708,18 @@ export default {
 
 .action-btn.secondary:active {
   box-shadow: 0 4rpx 12rpx rgba(139, 69, 19, 0.2);
+}
+
+.action-btn .btn-icon {
+  display: inline-block;
+  margin-right: 8rpx;
+  font-size: 28rpx;
+  vertical-align: middle;
+}
+
+.action-btn .btn-text {
+  display: inline-block;
+  vertical-align: middle;
 }
 
 /* 回到顶部按钮 */
