@@ -1,4 +1,4 @@
-const DEFAULT_API_BASE_URL = "http://localhost:9527";
+const DEFAULT_API_BASE_URL = "http://39.106.6.53";
 
 function normalizeBaseUrl(url) {
   const value = String(url || "").trim();

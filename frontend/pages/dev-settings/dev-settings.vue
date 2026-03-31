@@ -85,7 +85,8 @@ import {
   healthCheck,
 } from "../../services/api";
 
-const DEFAULT_API_BASE_URL = "http://localhost:9527";
+const DEFAULT_API_BASE_URL = "http://39.106.6.53";
+const REMOTE_SERVER_URL = "http://39.106.6.53";
 const PRESET_TEST_KEY = "API_PRESET_TEST";
 const PRESET_PROD_KEY = "API_PRESET_PROD";
 
@@ -159,9 +160,10 @@ export default {
       this.presetProdUrl = savedProd || getEnvPresetProd();
 
       this.presets = [
-        { key: "local", name: "本地", url: DEFAULT_API_BASE_URL },
-        { key: "test", name: "测试", url: this.presetTestUrl },
-        { key: "prod", name: "生产", url: this.presetProdUrl },
+        { key: "remote", name: "远程服务器", url: REMOTE_SERVER_URL },
+        { key: "local", name: "本地开发", url: "http://localhost:9527" },
+        { key: "test", name: "测试环境", url: this.presetTestUrl },
+        { key: "prod", name: "生产环境", url: this.presetProdUrl },
       ];
     },
 
