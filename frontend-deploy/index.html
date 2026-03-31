@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>中华古建筑导览</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #f8f4e8 0%, #e8dcc8 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .header {
+            margin-bottom: 40px;
+        }
+        
+        .title {
+            font-size: 42px;
+            color: #8b4513;
+            font-weight: bold;
+            margin-bottom: 16px;
+            text-shadow: 2px 2px 4px rgba(139, 69, 19, 0.1);
+        }
+        
+        .subtitle {
+            font-size: 20px;
+            color: #6b5643;
+            line-height: 1.6;
+        }
+        
+        .status-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 8px 32px rgba(139, 69, 19, 0.1);
+            border: 1px solid #e8dcc8;
+        }
+        
+        .status-title {
+            font-size: 24px;
+            color: #3c2a1d;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f0e9d8;
+        }
+        
+        .status-item:last-child {
+            border-bottom: none;
+        }
+        
+        .status-label {
+            color: #6b5643;
+            font-size: 16px;
+        }
+        
+        .status-value {
+            color: #2f7d32;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .status-value.error {
+            color: #c41e3a;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 16px 32px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #8b4513 0%, #6b3410 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 16px rgba(139, 69, 19, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 69, 19, 0.4);
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #8b4513;
+            border: 2px solid #8b4513;
+        }
+        
+        .btn-secondary:hover {
+            background: #f8f4e9;
+        }
+        
+        .footer {
+            margin-top: 40px;
+            color: #8b7355;
+            font-size: 14px;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e8dcc8;
+            border-top-color: #8b4513;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .info-section {
+            background: #faf8f3;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+        }
+        
+        .info-title {
+            font-size: 18px;
+            color: #3c2a1d;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+        
+        .info-text {
+            font-size: 14px;
+            color: #6b5643;
+            line-height: 1.8;
+        }
+        
+        .api-config {
+            background: #f0f8ff;
+            border: 1px solid #b0d4f1;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 16px;
+            font-family: monospace;
+            font-size: 13px;
+            color: #0066cc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🏛️ 中华古建筑导览</h1>
+            <p class="subtitle">以数字之眼，窥千年古建之美</p>
+        </div>
+        
+        <div class="status-card">
+            <h2 class="status-title">系统状态</h2>
+            <div id="status-list">
+                <div class="status-item">
+                    <span class="status-label">后端服务</span>
+                    <span class="status-value" id="backend-status">
+                        <span class="loading"></span> 检测中...
+                    </span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">建筑数据</span>
+                    <span class="status-value" id="buildings-status">--</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">知识库</span>
+                    <span class="status-value" id="knowledge-status">--</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">API地址</span>
+                    <span class="status-value" id="api-url">--</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="btn-group">
+            <a href="/" class="btn btn-primary" onclick="enterApp(); return false;">进入应用</a>
+            <a href="/dev-settings" class="btn btn-secondary" onclick="goToDevSettings(); return false;">开发设置</a>
+        </div>
+        
+        <div class="info-section">
+            <h3 class="info-title">📋 部署信息</h3>
+            <p class="info-text">
+                • 后端服务：Node.js + PostgreSQL<br>
+                • 前端部署：Nginx 静态资源<br>
+                • 建筑数据：33座古建筑<br>
+                • 知识库：23条记录<br>
+                • 服务器：阿里云轻量应用服务器
+            </p>
+            <div class="api-config">
+                当前API: <span id="current-api">http://39.106.6.53</span>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2026 中华古建筑导览 | 部署时间: 2026-03-31</p>
+        </div>
+    </div>
+    
+    <script>
+        // API基础地址
+        const API_BASE_URL = window.location.origin;
+        
+        // 检测后端服务状态
+        async function checkBackendStatus() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                
+                if (data.code === 200) {
+                    document.getElementById('backend-status').innerHTML = '✅ 正常运行';
+                    document.getElementById('buildings-status').textContent = data.data.datasets.buildings + '座建筑';
+                    document.getElementById('knowledge-status').textContent = data.data.datasets.knowledge + '条记录';
+                } else {
+                    throw new Error('服务异常');
+                }
+            } catch (error) {
+                document.getElementById('backend-status').innerHTML = '<span class="error">❌ 连接失败</span>';
+                document.getElementById('buildings-status').textContent = '--';
+                document.getElementById('knowledge-status').textContent = '--';
+            }
+            
+            document.getElementById('api-url').textContent = API_BASE_URL;
+            document.getElementById('current-api').textContent = API_BASE_URL;
+        }
+        
+        // 进入应用
+        function enterApp() {
+            // 设置API地址到本地存储
+            localStorage.setItem('API_BASE_URL', API_BASE_URL);
+            alert('API地址已配置为: ' + API_BASE_URL + '\n\n请使用 UniApp 开发工具打开项目并运行到浏览器。');
+        }
+        
+        // 进入开发设置
+        function goToDevSettings() {
+            alert('开发设置页面需要在 UniApp 项目中访问。\n\n请使用 HBuilderX 打开项目，运行到浏览器后访问 /pages/dev-settings/dev-settings 页面。');
+        }
+        
+        // 页面加载时检测状态
+        document.addEventListener('DOMContentLoaded', checkBackendStatus);
+    </script>
+</body>
+</html>
