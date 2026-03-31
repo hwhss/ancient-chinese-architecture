@@ -1,0 +1,114 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 数据库 + pgvector 向量扩展
+  postgres:
+    image: pgvector/pgvector:pg16-latest
+    container_name: ancient-arch-postgres
+    environment:
+      POSTGRES_DB: ${DB_NAME:-ancient_architecture}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres123}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      # 持久化数据库数据
+      - postgres_data:/var/lib/postgresql/data
+      # 初始化脚本（可选）- 注意：路径相对于 docker-compose.yml 的位置
+      # 现在在 deploy/docker/ 目录，所以 backend 在 ../../backend
+      - ../../backend/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ancient-arch-network
+    restart: unless-stopped
+
+  # Node.js 后端服务
+  backend:
+    build:
+      # 现在在 deploy/docker/ 目录，backend 在 ../../backend
+      context: ../../backend
+      dockerfile: Dockerfile
+    container_name: ancient-arch-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${BACKEND_PORT:-3000}
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres123}@postgres:5432/${DB_NAME:-ancient_architecture}
+      DB_POOL_MAX: ${DB_POOL_MAX:-20}
+      DB_POOL_IDLE_TIMEOUT: ${DB_POOL_IDLE_TIMEOUT:-30000}
+      DB_CONNECTION_TIMEOUT: ${DB_CONNECTION_TIMEOUT:-5000}
+      # 数据源：'json' 或 'postgres'
+      DATA_SOURCE: ${DATA_SOURCE:-json}
+      # AI 服务配置
+      DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY}
+      # CORS 配置
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:8080}
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    volumes:
+      # 挂载 JSON 数据文件（如果使用 JSON 作为数据源）
+      # 现在在 deploy/docker/ 目录，路径改为 ../../backend/data
+      - ../../backend/data:/app/data:ro
+      - ../../backend/data-jsondb:/app/data-jsondb:ro
+      # 挂载日志目录（可选）
+      - ../../logs/backend:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - ancient-arch-network
+    restart: unless-stopped
+    # 日志配置
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Nginx 反向代理 + 前端应用
+  nginx:
+    image: nginx:alpine
+    container_name: ancient-arch-web
+    depends_on:
+      - backend
+    ports:
+      - "${WEB_PORT:-80}:80"
+      - "443:443"
+    volumes:
+      # 前端构建的静态文件
+      # 现在在 deploy/docker/ 目录，路径改为 ../../frontend/dist
+      - ../../frontend/dist:/usr/share/nginx/html:ro
+      # Nginx 配置 - 在同目录下，所以是 ./
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx-default.conf:/etc/nginx/conf.d/default.conf:ro
+      # SSL 证书（可选，自己生成）
+      # - ./certs:/etc/nginx/certs:ro
+    environment:
+      BACKEND_HOST: backend
+      BACKEND_PORT: 3000
+    networks:
+      - ancient-arch-network
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  ancient-arch-network:
+    driver: bridge
