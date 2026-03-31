@@ -1,0 +1,208 @@
+{
+  "title": "中国古建筑数据库",
+  "schemaVersion": "1.1.0",
+  "version": "1.0.0",
+  "collectedAt": "2026-03-30",
+  "updatedAt": "2026-03-31",
+  "batchId": "data-batch-20260330-01",
+  "description": "基于《数据供数与检索执行手册》规范采集的中国古建筑结构化数据",
+  "syncManifest": {
+    "transportProfiles": {
+      "vps": {
+        "enabled": false,
+        "mode": "https-pull",
+        "baseUrl": "",
+        "auth": "token",
+        "notes": "用于生产环境从VPS拉取增量数据"
+      },
+      "intranetTunnel": {
+        "enabled": false,
+        "mode": "https-push",
+        "tunnelProvider": "",
+        "endpoint": "",
+        "auth": "token",
+        "notes": "用于联调期通过内网穿透推送数据"
+      }
+    },
+    "recommendedFlow": "manifest-first",
+    "fallbackOrder": ["vps", "intranetTunnel"],
+    "datasetFiles": [
+      {
+        "id": "building_palace",
+        "file": "buildings/palace.json",
+        "type": "building",
+        "recordCount": 8,
+        "checksumSha256": "pending"
+      },
+      {
+        "id": "building_garden",
+        "file": "buildings/garden.json",
+        "type": "building",
+        "recordCount": 7,
+        "checksumSha256": "pending"
+      },
+      {
+        "id": "building_bridge",
+        "file": "buildings/bridge.json",
+        "type": "building",
+        "recordCount": 4,
+        "checksumSha256": "pending"
+      },
+      {
+        "id": "building_tower",
+        "file": "buildings/tower.json",
+        "type": "building",
+        "recordCount": 3,
+        "checksumSha256": "pending"
+      },
+      {
+        "id": "building_defense",
+        "file": "buildings/defense.json",
+        "type": "building",
+        "recordCount": 3,
+        "checksumSha256": "pending"
+      },
+      {
+        "id": "building_water",
+        "file": "buildings/water.json",
+        "type": "building",
+        "recordCount": 3,
+        "checksumSha256": "pending"
+      },
+      {
+        "id": "building_residence",
+        "file": "buildings/residence.json",
+        "type": "building",
+        "recordCount": 5,
+        "checksumSha256": "pending"
+      },
+      {
+        "id": "knowledge_qa",
+        "file": "knowledge/qa.json",
+        "type": "knowledge",
+        "recordCount": 23,
+        "checksumSha256": "pending"
+      },
+      {
+        "id": "viz_info_graphic",
+        "file": "visualization/info-graphic.json",
+        "type": "visualization",
+        "recordCount": 1,
+        "checksumSha256": "pending"
+      },
+      {
+        "id": "viz_mg_animation",
+        "file": "visualization/mg-animation.json",
+        "type": "visualization",
+        "recordCount": 1,
+        "checksumSha256": "pending"
+      },
+      {
+        "id": "viz_model3d",
+        "file": "visualization/3d-model.json",
+        "type": "visualization",
+        "recordCount": 1,
+        "checksumSha256": "pending"
+      },
+      {
+        "id": "viz_chart",
+        "file": "visualization/chart.json",
+        "type": "visualization",
+        "recordCount": 1,
+        "checksumSha256": "pending"
+      }
+    ]
+  },
+  "buildings": {
+    "palace": {
+      "file": "buildings/palace.json",
+      "count": 8,
+      "description": "宫殿建筑数据，包括故宫三大殿、布达拉宫、沈阳故宫、唐代建筑等"
+    },
+    "garden": {
+      "file": "buildings/garden.json",
+      "count": 7,
+      "description": "园林建筑数据，包括苏州园林、皇家园林等"
+    },
+    "bridge": {
+      "file": "buildings/bridge.json",
+      "count": 4,
+      "description": "桥梁建筑数据，包括中国四大古桥"
+    },
+    "tower": {
+      "file": "buildings/tower.json",
+      "count": 3,
+      "description": "塔楼建筑数据，包括应县木塔、大雁塔、小雁塔等"
+    },
+    "defense": {
+      "file": "buildings/defense.json",
+      "count": 3,
+      "description": "防御建筑数据，包括长城、关隘等"
+    },
+    "water": {
+      "file": "buildings/water.json",
+      "count": 3,
+      "description": "水利建筑数据，包括都江堰、灵渠、大运河等"
+    },
+    "residence": {
+      "file": "buildings/residence.json",
+      "count": 5,
+      "description": "民居建筑数据，包括四合院、土楼、晋商大院、徽派建筑等"
+    }
+  },
+  "knowledge": {
+    "qa": {
+      "file": "knowledge/qa.json",
+      "count": 23,
+      "description": "知识问答数据，涵盖建筑结构、建筑历史、建筑知识三大类别"
+    }
+  },
+  "visualization": {
+    "infoGraphic": {
+      "file": "visualization/info-graphic.json",
+      "description": "信息图形数据：古建筑结构体系节点与关系图"
+    },
+    "mgAnimation": {
+      "file": "visualization/mg-animation.json",
+      "description": "MG动画数据：古建筑建造流程关键帧配置"
+    },
+    "model3d": {
+      "file": "visualization/3d-model.json",
+      "description": "3D模型数据：建筑模型标注点配置（4座代表性建筑）"
+    },
+    "chart": {
+      "file": "visualization/chart.json",
+      "description": "图表数据：朝代分布、省份分布、类型分布、保护级别等5类统计图表"
+    }
+  },
+  "totalBuildings": 33,
+  "totalQA": 23,
+  "fieldStandard": {
+    "id": "唯一标识，snake_case格式",
+    "sourceId": "来源系统中的原始ID（可选）",
+    "syncTag": "用于增量同步的版本标签（可选）",
+    "name": "建筑名称",
+    "name_en": "英文名称",
+    "alias": "别名",
+    "category": "分类：palace|bridge|garden|defense|residence|tower|water",
+    "location": "详细地址",
+    "province": "省份",
+    "city": "城市",
+    "lat": "纬度",
+    "lng": "经度",
+    "heritage_level": "保护级别",
+    "open_status": "开放状态",
+    "main_era_start": "始建年代（公元纪年）",
+    "main_era_end": "建成/重建年代",
+    "dynasty": "朝代",
+    "description": "建筑描述",
+    "architecture_highlights": "建筑亮点",
+    "tags": "标签数组",
+    "sourceUrl": "数据来源URL",
+    "sourceName": "数据来源名称",
+    "sourceLicense": "数据来源授权信息（可选）",
+    "confidence": "置信度：high|medium|low",
+    "collectedAt": "采集日期",
+    "updatedAt": "更新日期（可选）"
+  }
+}

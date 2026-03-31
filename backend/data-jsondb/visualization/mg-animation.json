@@ -1,0 +1,102 @@
+{
+  "animationId": "build_process_001",
+  "title": "古建筑建造流程动画",
+  "duration": 24000,
+  "lottieUrl": "/assets/animations/building-construction.json",
+  "autoPlay": true,
+  "loop": false,
+  "keyPoints": [
+    {
+      "time": 0,
+      "phase": "选址定位",
+      "desc": "相地选址，确定建筑朝向与布局",
+      "icon": "compass"
+    },
+    {
+      "time": 2000,
+      "phase": "夯土筑基",
+      "desc": "开挖基槽，夯筑台基，奠定建筑基础",
+      "icon": "foundation"
+    },
+    {
+      "time": 5000,
+      "phase": "立柱上梁",
+      "desc": "竖立柱子，架设梁枋，形成主体框架",
+      "icon": "pillar"
+    },
+    {
+      "time": 9000,
+      "phase": "安斗铺拱",
+      "desc": "安装斗拱构件，层层出跳，承托屋檐",
+      "icon": "dougong"
+    },
+    {
+      "time": 13000,
+      "phase": "架椽盖瓦",
+      "desc": "铺设椽子望板，覆盖琉璃瓦屋面",
+      "icon": "roof"
+    },
+    {
+      "time": 17000,
+      "phase": "砌墙安门",
+      "desc": "砌筑墙体，安装门窗，围合空间",
+      "icon": "wall"
+    },
+    {
+      "time": 20000,
+      "phase": "油漆彩画",
+      "desc": "木构涂漆防腐，绘制彩画装饰",
+      "icon": "paint"
+    },
+    {
+      "time": 23000,
+      "phase": "竣工落成",
+      "desc": "建筑完工，举行落成典礼",
+      "icon": "complete"
+    }
+  ],
+  "phases": [
+    {
+      "id": "phase_1",
+      "name": "土作",
+      "duration_ms": 3000,
+      "description": "夯筑台基、开挖基槽"
+    },
+    {
+      "id": "phase_2",
+      "name": "木作",
+      "duration_ms": 8000,
+      "description": "立柱、上梁、安斗拱"
+    },
+    {
+      "id": "phase_3",
+      "name": "瓦作",
+      "duration_ms": 4000,
+      "description": "盖瓦、砌墙"
+    },
+    {
+      "id": "phase_4",
+      "name": "油漆彩画作",
+      "duration_ms": 3000,
+      "description": "涂漆、彩画"
+    }
+  ],
+  "relatedKnowledge": [
+    {
+      "term": "八大作",
+      "url": "/knowledge/badazuof"
+    },
+    {
+      "term": "斗拱",
+      "url": "/knowledge/dougong"
+    },
+    {
+      "term": "榫卯",
+      "url": "/knowledge/sunmao"
+    }
+  ],
+  "sourceUrl": "https://baike.baidu.com/item/中国古代建筑工艺",
+  "sourceName": "百度百科",
+  "confidence": "high",
+  "collectedAt": "2026-03-31"
+}

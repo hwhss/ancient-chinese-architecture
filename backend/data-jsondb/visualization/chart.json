@@ -1,0 +1,109 @@
+{
+  "charts": [
+    {
+      "id": "dynasty_distribution",
+      "title": "历代建筑数量统计",
+      "unit": "座",
+      "xAxis": ["战国", "秦", "汉", "三国", "晋", "南北朝", "隋", "唐", "五代", "宋", "辽", "金", "元", "明", "清"],
+      "series": [
+        {
+          "name": "现存建筑",
+          "data": [1, 1, 0, 0, 0, 0, 1, 4, 0, 4, 1, 1, 1, 8, 6],
+          "type": "bar"
+        }
+      ],
+      "legend": ["现存建筑"],
+      "tooltip": true,
+      "description": "根据数据库中33座建筑的朝代统计，现存古建筑以明清两代为主，唐代建筑主要保存在山西"
+    },
+    {
+      "id": "province_distribution",
+      "title": "省份建筑分布",
+      "unit": "座",
+      "xAxis": ["北京", "山西", "江苏", "河北", "陕西", "福建", "四川", "广东", "甘肃", "西藏", "辽宁", "广西", "安徽"],
+      "series": [
+        {
+          "name": "建筑数量",
+          "data": [6, 5, 5, 3, 2, 2, 1, 1, 1, 1, 1, 1, 1],
+          "type": "bar"
+        }
+      ],
+      "legend": ["建筑数量"],
+      "tooltip": true,
+      "description": "北京市建筑最多（故宫、天坛、颐和园等），江苏以苏州园林为主，山西以古建筑著称"
+    },
+    {
+      "id": "type_distribution",
+      "title": "建筑类型分布",
+      "unit": "座",
+      "series": [
+        {
+          "name": "建筑类型",
+          "type": "pie",
+          "radius": ["40%", "70%"],
+          "data": [
+            { "value": 8, "name": "宫殿" },
+            { "value": 7, "name": "园林" },
+            { "value": 5, "name": "民居" },
+            { "value": 4, "name": "桥梁" },
+            { "value": 3, "name": "塔楼" },
+            { "value": 3, "name": "防御" },
+            { "value": 3, "name": "水利" }
+          ]
+        }
+      ],
+      "legend": ["宫殿", "园林", "民居", "桥梁", "塔楼", "防御", "水利"],
+      "tooltip": true,
+      "description": "宫殿建筑数量最多，涵盖故宫三大殿、布达拉宫等；园林以苏州园林和皇家园林为主"
+    },
+    {
+      "id": "heritage_level",
+      "title": "保护级别统计",
+      "unit": "座",
+      "series": [
+        {
+          "name": "保护级别",
+          "type": "pie",
+          "radius": ["30%", "60%"],
+          "data": [
+            { "value": 20, "name": "世界文化遗产" },
+            { "value": 31, "name": "全国重点文保" },
+            { "value": 2, "name": "省级文保" }
+          ]
+        }
+      ],
+      "legend": ["世界文化遗产", "全国重点文保", "省级文保"],
+      "tooltip": true,
+      "description": "大部分建筑为全国重点文物保护单位，20座为世界文化遗产"
+    },
+    {
+      "id": "dynasty_timeline",
+      "title": "建筑年代时间线",
+      "unit": "公元",
+      "xAxis": ["战国(-256)", "秦(-214)", "隋(595)", "唐(652)", "唐(782)", "唐(857)", "宋(1045)", "宋(1053)", "辽(1056)", "金(1189)", "明(1420)", "清(1703)"],
+      "series": [
+        {
+          "name": "始建年代",
+          "data": [-256, -214, 595, 652, 782, 857, 1045, 1053, 1056, 1189, 1420, 1703],
+          "type": "line"
+        }
+      ],
+      "legend": ["始建年代"],
+      "tooltip": true,
+      "description": "展示从战国到清代代表性建筑的始建年代"
+    }
+  ],
+  "summary": {
+    "totalBuildings": 33,
+    "worldHeritage": 20,
+    "nationalHeritage": 31,
+    "earliestYear": -256,
+    "latestYear": 1751,
+    "topProvince": "北京市",
+    "topDynasty": "明清"
+  },
+  "sourceUrl": "https://baike.baidu.com/item/中国古代建筑",
+  "sourceName": "百度百科",
+  "confidence": "high",
+  "collectedAt": "2026-03-31"
+}

@@ -44,9 +44,12 @@
 │   ├── app.js                  # 服务入口
 │   ├── services/
 │   │   └── aiService.js        # AI服务封装
-│   └── data/
-│       ├── knowledge_base.json # 知识库数据
-│       └── material_links.json # 素材链接
+│   ├── data-jsondb/            # 主数据源（分文件JSON数据库）
+│   │   ├── index.json
+│   │   ├── buildings/
+│   │   ├── knowledge/
+│   │   └── visualization/
+│   └── data/                   # 兼容回退数据目录（legacy）
 └── README.md                   # 项目说明
 ```
 
@@ -105,14 +108,23 @@ npm run db:seed
 
 后端启动时会读取 `.env`：
 
-1. `DATA_SOURCE=json`：接口从 `backend/data/*.json` 读取。
+1. `DATA_SOURCE=json`：接口优先从 `backend/data-jsondb` 读取；若未找到则回退到 `backend/data`。
 2. `DATA_SOURCE=postgres`：接口从 PostgreSQL 读取（Phase 2 已完成）。
+
+新增配置：
+
+1. `DATA_JSON_DB_DIR`：JSON 数据库目录，默认值为 `data-jsondb`。
 
 当前结论（2026-03-28）：
 
 1. PostgreSQL 建表和 seed 已可执行并已实测通过。
 2. 仓储层已支持 `DATA_SOURCE=json|postgres` 双模式切换。
 3. 在 `json` 与 `postgres` 双模式下，核心接口返回已完成一致性回归。
+
+当前补充（2026-03-31）：
+
+1. 已接入分文件 JSON 数据库（`backend/data-jsondb`），用于前端可视化与知识检索主链路。
+2. 在不启用向量数据库时，仍可通过关键词检索稳定回答古建筑问题。
 
 相关迁移文档：
 
@@ -144,6 +156,16 @@ npm start
 ```bash
 DATA_SOURCE=postgres
 ```
+
+### 2.4 向量相关脚本说明（可选）
+
+以下脚本仅在你明确启用 PostgreSQL + pgvector 后才需要：
+
+1. `npm run test:embedding`
+2. `npm run import:vectors`
+3. `npm run query:vectors`
+
+如果当前采用纯 JSON 数据源（`DATA_SOURCE=json`），上述脚本可以不执行，不影响前端可视化与基础问答能力。
 
 **接口列表：**
 | 接口 | 方法 | 说明 |

@@ -1,0 +1,274 @@
+{
+  "type": "infographic",
+  "title": "古建筑结构体系",
+  "layout": "hierarchy",
+  "nodes": [
+    {
+      "id": "root",
+      "name": "古建筑结构",
+      "desc": "中国传统建筑三段式结构体系",
+      "level": 0
+    },
+    {
+      "id": "taiji",
+      "name": "台基",
+      "desc": "建筑基座，承载主体结构",
+      "level": 1
+    },
+    {
+      "id": "wushen",
+      "name": "屋身",
+      "desc": "建筑主体，围合空间",
+      "level": 1
+    },
+    {
+      "id": "wuding",
+      "name": "屋顶",
+      "desc": "覆盖结构，排水遮阳",
+      "level": 1
+    },
+    {
+      "id": "taiji-xumizuo",
+      "name": "须弥座",
+      "desc": "高级台基，多用于宫殿寺庙",
+      "level": 2
+    },
+    {
+      "id": "taiji-putai",
+      "name": "普通台基",
+      "desc": "一般建筑基座",
+      "level": 2
+    },
+    {
+      "id": "wushen-zhu",
+      "name": "柱",
+      "desc": "竖向承重构件",
+      "level": 2
+    },
+    {
+      "id": "wushen-liang",
+      "name": "梁",
+      "desc": "横向承重构件",
+      "level": 2
+    },
+    {
+      "id": "wushen-fang",
+      "name": "枋",
+      "desc": "连接柱头的水平构件",
+      "level": 2
+    },
+    {
+      "id": "wushen-dougong",
+      "name": "斗拱",
+      "desc": "承托屋檐的构件组合",
+      "level": 2
+    },
+    {
+      "id": "wushen-qiang",
+      "name": "墙",
+      "desc": "围护分隔构件",
+      "level": 2
+    },
+    {
+      "id": "wuding-wudian",
+      "name": "庑殿顶",
+      "desc": "四坡五脊，等级最高",
+      "level": 2
+    },
+    {
+      "id": "wuding-xieshan",
+      "name": "歇山顶",
+      "desc": "四坡九脊，等级次之",
+      "level": 2
+    },
+    {
+      "id": "wuding-xuanshan",
+      "name": "悬山顶",
+      "desc": "两坡五脊，屋檐伸出",
+      "level": 2
+    },
+    {
+      "id": "wuding-yingshan",
+      "name": "硬山顶",
+      "desc": "两坡五脊，山墙封闭",
+      "level": 2
+    },
+    {
+      "id": "wuding-zanjian",
+      "name": "攒尖顶",
+      "desc": "锥形屋顶，用于亭阁塔",
+      "level": 2
+    },
+    {
+      "id": "dougong-dou",
+      "name": "斗",
+      "desc": "方形木块，承受拱的荷载",
+      "level": 3
+    },
+    {
+      "id": "dougong-sheng",
+      "name": "升",
+      "desc": "斗上开槽的小斗",
+      "level": 3
+    },
+    {
+      "id": "dougong-gong",
+      "name": "拱",
+      "desc": "弓形短木，横向承托",
+      "level": 3
+    },
+    {
+      "id": "dougong-qiao",
+      "name": "翘",
+      "desc": "向外出跳的拱",
+      "level": 3
+    },
+    {
+      "id": "dougong-ang",
+      "name": "昂",
+      "desc": "斜向伸出的杠杆构件",
+      "level": 3
+    }
+  ],
+  "edges": [
+    {
+      "source": "root",
+      "target": "taiji",
+      "relation": "组成"
+    },
+    {
+      "source": "root",
+      "target": "wushen",
+      "relation": "组成"
+    },
+    {
+      "source": "root",
+      "target": "wuding",
+      "relation": "组成"
+    },
+    {
+      "source": "taiji",
+      "target": "taiji-xumizuo",
+      "relation": "类型"
+    },
+    {
+      "source": "taiji",
+      "target": "taiji-putai",
+      "relation": "类型"
+    },
+    {
+      "source": "wushen",
+      "target": "wushen-zhu",
+      "relation": "构件"
+    },
+    {
+      "source": "wushen",
+      "target": "wushen-liang",
+      "relation": "构件"
+    },
+    {
+      "source": "wushen",
+      "target": "wushen-fang",
+      "relation": "构件"
+    },
+    {
+      "source": "wushen",
+      "target": "wushen-dougong",
+      "relation": "构件"
+    },
+    {
+      "source": "wushen",
+      "target": "wushen-qiang",
+      "relation": "构件"
+    },
+    {
+      "source": "wuding",
+      "target": "wuding-wudian",
+      "relation": "类型"
+    },
+    {
+      "source": "wuding",
+      "target": "wuding-xieshan",
+      "relation": "类型"
+    },
+    {
+      "source": "wuding",
+      "target": "wuding-xuanshan",
+      "relation": "类型"
+    },
+    {
+      "source": "wuding",
+      "target": "wuding-yingshan",
+      "relation": "类型"
+    },
+    {
+      "source": "wuding",
+      "target": "wuding-zanjian",
+      "relation": "类型"
+    },
+    {
+      "source": "wushen-dougong",
+      "target": "dougong-dou",
+      "relation": "组成"
+    },
+    {
+      "source": "wushen-dougong",
+      "target": "dougong-sheng",
+      "relation": "组成"
+    },
+    {
+      "source": "wushen-dougong",
+      "target": "dougong-gong",
+      "relation": "组成"
+    },
+    {
+      "source": "wushen-dougong",
+      "target": "dougong-qiao",
+      "relation": "组成"
+    },
+    {
+      "source": "wushen-dougong",
+      "target": "dougong-ang",
+      "relation": "组成"
+    },
+    {
+      "source": "wushen-zhu",
+      "target": "wushen-liang",
+      "relation": "承托"
+    },
+    {
+      "source": "wushen-liang",
+      "target": "wushen-dougong",
+      "relation": "支撑"
+    },
+    {
+      "source": "wushen-dougong",
+      "target": "wuding",
+      "relation": "承托"
+    },
+    {
+      "source": "taiji",
+      "target": "wushen",
+      "relation": "承载"
+    }
+  ],
+  "labels": ["结构分类", "构件说明", "等级体系"],
+  "links": [
+    {
+      "nodeId": "wushen-dougong",
+      "url": "/knowledge/dougong"
+    },
+    {
+      "nodeId": "wuding-wudian",
+      "url": "/knowledge/wudian"
+    },
+    {
+      "nodeId": "taiji-xumizuo",
+      "url": "/knowledge/xumizuo"
+    }
+  ],
+  "sourceUrl": "https://baike.baidu.com/item/中国古代建筑",
+  "sourceName": "百度百科",
+  "confidence": "high",
+  "collectedAt": "2026-03-31"
+}
