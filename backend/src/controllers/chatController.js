@@ -20,7 +20,9 @@ async function postChat(req, res, next) {
       question,
       answer: result.answer,
       source: result.source,
-      materialId: result.materialId
+      materialId: result.materialId,
+      matchedEntity: result.matchedEntity || null,
+      entities: Array.isArray(result.entities) ? result.entities : []
     };
 
     if (result.debug) {

@@ -839,7 +839,7 @@ export default {
 
       try {
         const data = await chat(question);
-        const materialId = data.materialId || matchMaterialId(question);
+        const materialId = data.materialId || (data.matchedEntity && data.matchedEntity.id) || matchMaterialId(question);
         
         // 添加AI消息
         const aiMsg = {

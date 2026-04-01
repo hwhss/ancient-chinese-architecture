@@ -61,6 +61,7 @@ const config = {
   llmChatModel: String(process.env.LLM_CHAT_MODEL || 'qwen-turbo').trim(),
   enableQuestionNormalize: toBoolean(process.env.ENABLE_QUESTION_NORMALIZE, true),
   enableChatRewrite: toBoolean(process.env.ENABLE_CHAT_REWRITE, true),
+  chatEntityMinConfidence: toNumber(process.env.CHAT_ENTITY_MIN_CONFIDENCE, 0.35),
   chatDebugEnabled: toBoolean(process.env.CHAT_DEBUG_ENABLED, process.env.NODE_ENV !== 'production')
 };
 

@@ -5,6 +5,7 @@ const {
   rewriteKnowledgeAnswer
 } = require('../../services/aiService');
 const { findBestKnowledgeByHybrid } = require('./retrieval/hybridRetriever');
+const { resolveBuildingEntities } = require('./entityMatcher');
 
 async function getChatResponse(question) {
   const rawQuestion = String(question || '').trim();
@@ -45,23 +46,45 @@ async function getChatResponse(question) {
       ? await rewriteKnowledgeAnswer(rawQuestion, knowledgeMatched.answer)
       : knowledgeMatched.answer;
 
+    const entityMatch = await resolveBuildingEntities(rawQuestion, answer, {
+      preferredId: knowledgeMatched.materialId || null
+    });
+    const materialId = knowledgeMatched.materialId || (entityMatch.primary ? entityMatch.primary.id : null);
+
     debug.rewriteApplied = Boolean(config.enableChatRewrite);
+    if (config.chatDebugEnabled) {
+      debug.entityPostMatch = {
+        primary: entityMatch.primary,
+        entities: entityMatch.entities
+      };
+    }
 
     return {
       answer,
       source: knowledgeMatched.source,
-      materialId: knowledgeMatched.materialId || null,
+      materialId,
+      matchedEntity: entityMatch.primary,
+      entities: entityMatch.entities,
       debug: config.chatDebugEnabled ? debug : undefined
     };
   }
 
   const answer = await getAIAnswer(rawQuestion);
+  const entityMatch = await resolveBuildingEntities(rawQuestion, answer);
   debug.matchedBy = 'ai_fallback';
+  if (config.chatDebugEnabled) {
+    debug.entityPostMatch = {
+      primary: entityMatch.primary,
+      entities: entityMatch.entities
+    };
+  }
 
   return {
     answer,
     source: 'ai',
-    materialId: null,
+    materialId: entityMatch.primary ? entityMatch.primary.id : null,
+    matchedEntity: entityMatch.primary,
+    entities: entityMatch.entities,
     debug: config.chatDebugEnabled ? debug : undefined
   };
 }
