@@ -82,31 +82,31 @@
         </view>
         
         <!-- 入口按钮 -->
-        <view class="hero-buttons">
-          <button class="hero-btn primary" :class="{ 'visible': sections.hero.btn1 }" @click="goToMap">
-            <text class="btn-icon">📋</text>
-            <text class="btn-text">查看古建筑名录</text>
-          </button>
-          <button class="hero-btn secondary" :class="{ 'visible': sections.hero.btn2 }" @click="goToChat">
-            <text class="btn-icon">🤖</text>
-            <text class="btn-text">开始 AI 导览</text>
-          </button>
+          <view class="hero-buttons">
+            <button class="hero-btn primary ink-ripple" :class="{ 'visible': sections.hero.btn1 }" @click="goToMap">
+              <text class="btn-icon">📋</text>
+              <text class="btn-text">查看古建筑名录</text>
+            </button>
+            <button class="hero-btn secondary ink-ripple" :class="{ 'visible': sections.hero.btn2 }" @click="goToChat">
+              <text class="btn-icon">🤖</text>
+              <text class="btn-text">开始 AI 导览</text>
+            </button>
           
           <!-- 按钮下方的分类快捷入口 -->
           <view class="category-shortcuts" :class="{ 'visible': sections.hero.categoryShortcuts }">
-            <view class="category-item" @click="goToCategory('palace')">
+            <view class="category-item tap-feedback" @click="goToCategory('palace')">
               <text class="category-icon">🏯</text>
               <text class="category-text">宫殿</text>
             </view>
-            <view class="category-item" @click="goToCategory('garden')">
+            <view class="category-item tap-feedback" @click="goToCategory('garden')">
               <text class="category-icon">🌳</text>
               <text class="category-text">园林</text>
             </view>
-            <view class="category-item" @click="goToCategory('bridge')">
+            <view class="category-item tap-feedback" @click="goToCategory('bridge')">
               <text class="category-icon">🌉</text>
               <text class="category-text">桥梁</text>
             </view>
-            <view class="category-item" @click="goToCategory('defense')">
+            <view class="category-item tap-feedback" @click="goToCategory('defense')">
               <text class="category-icon">🏰</text>
               <text class="category-text">城防</text>
             </view>
@@ -114,7 +114,7 @@
 
           <!-- 我的收藏快捷入口 -->
           <view class="favorites-shortcut-wrapper" :class="{ 'visible': sections.hero.categoryShortcuts }">
-            <view class="favorites-shortcut" @click="goToFavorites">
+            <view class="favorites-shortcut card-ink" @click="goToFavorites">
               <view class="favorites-icon-wrapper">
                 <text class="favorites-icon">⭐</text>
                 <view v-if="favoriteCount > 0" class="favorites-badge">{{ favoriteCount }}</view>
@@ -131,7 +131,7 @@
 
           <!-- 设置入口 -->
           <view class="settings-shortcut-wrapper" :class="{ 'visible': sections.hero.categoryShortcuts }">
-            <view class="settings-shortcut" @click="goToSettings">
+            <view class="settings-shortcut card-ink" @click="goToSettings">
               <view class="settings-icon-wrapper">
                 <text class="settings-icon">⚙️</text>
               </view>
@@ -150,17 +150,17 @@
       <!-- 每日推荐区 -->
       <view class="section-daily" :class="{ 'visible': sections.daily }">
         <view class="section-header">
-          <view class="daily-header-left">
-            <text class="section-title">📅 每日一建</text>
-            <text class="daily-date">{{ todayDate }}</text>
+            <view class="daily-header-left">
+              <text class="section-title">📅 每日一建</text>
+              <text class="daily-date">{{ todayDate }}</text>
+            </view>
+            <view class="window-divider">
+              <view class="window-pattern"></view>
+            </view>
           </view>
-          <view class="window-divider">
-            <view class="window-pattern"></view>
-          </view>
-        </view>
 
         <view v-if="dailyBuilding" class="daily-card-wrapper">
-          <view class="daily-card" @click="goToDetail(dailyBuilding)">
+            <view class="daily-card card-ink" @click="goToDetail(dailyBuilding)">
             <!-- 左侧图片 -->
             <view class="daily-image-section">
               <view class="daily-image" :style="{ backgroundImage: 'url(' + dailyBuilding.image + ')' }"></view>
@@ -204,12 +204,12 @@
 
                 <!-- 底部操作区 -->
                 <view class="daily-footer">
-                  <view class="daily-action-btn">
+                  <view class="daily-action-btn ink-ripple">
                     <text class="action-icon">👁️</text>
                     <text class="action-text">查看详情</text>
                   </view>
                   <view class="daily-actions-right">
-                    <view class="daily-favorite-btn" @click.stop="toggleFavorite(dailyBuilding)">
+                    <view class="daily-favorite-btn tap-feedback" @click.stop="toggleFavorite(dailyBuilding)">
                       <text class="favorite-icon" :class="{ 'active': isFavorite(dailyBuilding.id) }">
                         {{ isFavorite(dailyBuilding.id) ? '★' : '☆' }}
                       </text>
@@ -217,7 +217,7 @@
                         {{ isFavorite(dailyBuilding.id) ? '已收藏' : '收藏' }}
                       </text>
                     </view>
-                    <view class="daily-share-btn" @click.stop="shareDailyBuilding">
+                    <view class="daily-share-btn tap-feedback" @click.stop="shareDailyBuilding">
                       <text class="share-icon">📤</text>
                       <text class="share-text">分享</text>
                     </view>
@@ -242,7 +242,7 @@
           <view 
             v-for="(building, index) in previewBuildings" 
             :key="building.id"
-            class="preview-card" 
+            class="preview-card card-ink" 
             :class="{ 'visible': sections.previewCards[index] }"
             @click="goToDetail(building)"
           >
@@ -268,7 +268,7 @@
         </view>
         
         <view class="features-grid">
-          <view class="feature-card">
+          <view class="feature-card card-ink">
             <view class="feature-icon">
               <svg viewBox="0 0 64 64" class="svg-icon">
                 <path d="M32 8 L48 16 L48 48 L32 56 L16 48 L16 16 Z" fill="none" stroke="currentColor" stroke-width="3"/>
@@ -279,7 +279,7 @@
             <text class="feature-desc">从明清皇家宫殿到客家民居，跨越千年的17处代表性古建精华，带你走遍大江南北</text>
           </view>
           
-          <view class="feature-card">
+          <view class="feature-card card-ink">
             <view class="feature-icon">
               <svg viewBox="0 0 64 64" class="svg-icon">
                 <circle cx="32" cy="24" r="12" fill="none" stroke="currentColor" stroke-width="3"/>
@@ -291,7 +291,7 @@
             <text class="feature-desc">基于大模型的智能问答，不管是古建历史还是构造细节，你想问的都能秒速解答</text>
           </view>
           
-          <view class="feature-card">
+          <view class="feature-card card-ink">
             <view class="feature-icon">
               <svg viewBox="0 0 64 64" class="svg-icon">
                 <rect x="12" y="12" width="40" height="8" rx="2" fill="none" stroke="currentColor" stroke-width="2.5"/>
@@ -303,7 +303,7 @@
             <text class="feature-desc">宫殿/园林/桥梁/城防四大分类，一键筛选，快速定位你感兴趣的古建</text>
           </view>
           
-          <view class="feature-card">
+          <view class="feature-card card-ink">
             <view class="feature-icon">
               <svg viewBox="0 0 64 64" class="svg-icon">
                 <path d="M12 48 L24 24 L32 32 L40 24 L52 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
@@ -322,6 +322,9 @@
         <view class="section-header">
           <text class="section-title">古建小知识</text>
           <text class="section-subtitle">探索中国传统建筑的奥秘</text>
+          <view class="window-divider">
+            <view class="window-pattern"></view>
+          </view>
         </view>
         
         <scroll-view 

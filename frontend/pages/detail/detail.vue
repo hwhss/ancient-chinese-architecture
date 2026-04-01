@@ -6,14 +6,14 @@
       <text class="header-title">古建筑详情</text>
       <view class="header-actions">
         <view
-          class="share-btn-header"
+          class="share-btn-header tap-feedback"
           @click="openShareCard"
         >
           <text class="share-icon-header">📤</text>
           <text class="share-label-header">分享</text>
         </view>
         <view
-          class="favorite-btn"
+          class="favorite-btn tap-feedback"
           :class="{ 'active': isFavorite }"
           @click="toggleFavorite"
         >
@@ -94,7 +94,7 @@
         <view
           v-for="tab in visibleTabs"
           :key="tab.key"
-          class="tab-item"
+          class="tab-item tap-feedback"
           :class="{ active: activeTab === tab.key }"
           @click="switchTab(tab.key)"
         >
@@ -109,7 +109,7 @@
           <view class="detail-header">
             <text class="detail-title">建筑详情</text>
             <view
-              class="detail-favorite-btn"
+              class="detail-favorite-btn tap-feedback"
               :class="{ 'active': isFavorite }"
               @click="toggleFavorite"
             >
@@ -142,7 +142,7 @@
           </view>
 
           <view class="action-row">
-            <button class="action-btn" @click="goToViewer">进入3D导览</button>
+            <button class="action-btn ink-ripple" @click="goToViewer">进入3D导览</button>
           </view>
         </view>
 
@@ -842,7 +842,25 @@ export default {
   align-items: flex-start;
   margin-bottom: 20rpx;
   padding: 16rpx 0;
-  border-bottom: 1rpx solid #f5efe6;
+  border-bottom: 1rpx solid rgba(139, 69, 19, 0.1);
+  position: relative;
+}
+
+.detail-row::after {
+  content: '';
+  position: absolute;
+  bottom: -1rpx;
+  left: 0;
+  right: 0;
+  height: 1rpx;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(139, 69, 19, 0.3) 20%,
+    rgba(139, 69, 19, 0.5) 50%,
+    rgba(139, 69, 19, 0.3) 80%,
+    transparent 100%
+  );
 }
 
 .detail-row:last-of-type {
