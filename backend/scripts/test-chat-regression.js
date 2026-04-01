@@ -13,17 +13,17 @@ const CASES = [
   {
     name: '错别字-太和殿',
     question: '太和店的功能是啥',
-    expectMaterialId: 'gugong_01'
+    expectMaterialId: 'taihe_dian'
   },
   {
     name: '别名-紫禁城最大殿',
     question: '紫禁城最大的大殿高度是多少',
-    expectMaterialId: 'gugong_01'
+    expectMaterialId: 'taihe_dian'
   },
   {
     name: '口语-故宫建成时间',
     question: '故宫啥时候建好的',
-    expectMaterialId: 'gugong_01'
+    expectMaterialId: 'taihe_dian'
   }
 ];
 

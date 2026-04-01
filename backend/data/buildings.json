@@ -1,6 +1,6 @@
 [
   {
-    "id": "gugong_01",
+    "id": "taihe_dian",
     "name": "太和殿",
     "category": "palace",
     "location": "北京故宫",
@@ -17,7 +17,7 @@
     "tags": ["皇宫", "明代", "木结构"]
   },
   {
-    "id": "gugong_02",
+    "id": "qiankun_gong",
     "name": "乾清宫",
     "category": "palace",
     "location": "北京故宫",
@@ -34,7 +34,7 @@
     "tags": ["皇宫", "寝宫", "清代"]
   },
   {
-    "id": "shenyang_01",
+    "id": "dazheng_dian",
     "name": "沈阳故宫大政殿",
     "category": "palace",
     "location": "辽宁沈阳",
@@ -51,7 +51,7 @@
     "tags": ["皇宫", "清代", "满族"]
   },
   {
-    "id": "zhaozhou_01",
+    "id": "zhaozhou_bridge",
     "name": "赵州桥",
     "category": "bridge",
     "location": "河北赵县",
@@ -68,7 +68,7 @@
     "tags": ["桥梁", "隋代", "石拱"]
   },
   {
-    "id": "lugou_01",
+    "id": "lugou_bridge",
     "name": "卢沟桥",
     "category": "bridge",
     "location": "北京",
@@ -85,7 +85,7 @@
     "tags": ["桥梁", "金代", "石狮"]
   },
   {
-    "id": "guangji_01",
+    "id": "guangji_bridge",
     "name": "广济桥",
     "category": "bridge",
     "location": "广东潮州",
@@ -102,7 +102,7 @@
     "tags": ["桥梁", "宋代", "启闭式"]
   },
   {
-    "id": "zhuozheng_01",
+    "id": "zhuozheng_garden",
     "name": "拙政园",
     "category": "garden",
     "location": "江苏苏州",
@@ -119,7 +119,7 @@
     "tags": ["园林", "明代", "苏州"]
   },
   {
-    "id": "yiheyuan_01",
+    "id": "yihe_yuan",
     "name": "颐和园",
     "category": "garden",
     "location": "北京",
@@ -136,7 +136,7 @@
     "tags": ["园林", "清代", "皇家"]
   },
   {
-    "id": "xian_01",
+    "id": "xian_wall",
     "name": "西安城墙",
     "category": "defense",
     "location": "陕西西安",
@@ -153,7 +153,7 @@
     "tags": ["城防", "明代", "城墙"]
   },
   {
-    "id": "nanjing_01",
+    "id": "nanjing_wall",
     "name": "南京城墙",
     "category": "defense",
     "location": "江苏南京",
@@ -170,7 +170,7 @@
     "tags": ["城防", "明代", "最长"]
   },
   {
-    "id": "tulou_01",
+    "id": "fujian_tulou",
     "name": "福建土楼",
     "category": "residence",
     "location": "福建龙岩",
@@ -187,7 +187,7 @@
     "tags": ["民居", "客家", "圆形"]
   },
   {
-    "id": "qiaojia_01",
+    "id": "qiaojia_dayuan",
     "name": "乔家大院",
     "category": "residence",
     "location": "山西祁县",
@@ -204,7 +204,7 @@
     "tags": ["民居", "清代", "晋商"]
   },
   {
-    "id": "pingyao_01",
+    "id": "pingyao_city",
     "name": "平遥古城",
     "category": "residence",
     "location": "山西平遥",
@@ -221,7 +221,7 @@
     "tags": ["古城", "明清", "世界遗产"]
   },
   {
-    "id": "yueyang_01",
+    "id": "yueyang_tower",
     "name": "岳阳楼",
     "category": "tower",
     "location": "湖南岳阳",
@@ -238,7 +238,7 @@
     "tags": ["楼阁", "宋代", "名楼"]
   },
   {
-    "id": "kongmiao_01",
+    "id": "qufu_kongmiao",
     "name": "曲阜孔庙",
     "category": "tower",
     "location": "山东曲阜",
@@ -255,7 +255,7 @@
     "tags": ["庙宇", "祭祀", "孔子"]
   },
   {
-    "id": "dujiangyan_01",
+    "id": "dujiangyan",
     "name": "都江堰",
     "category": "water",
     "location": "四川成都",
@@ -272,7 +272,7 @@
     "tags": ["水利", "战国", "李冰"]
   },
   {
-    "id": "kanerjing_01",
+    "id": "kanerjing",
     "name": "坎儿井",
     "category": "water",
     "location": "新疆吐鲁番",

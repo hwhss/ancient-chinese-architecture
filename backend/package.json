@@ -9,6 +9,8 @@
     "db:migrate": "node migrations/000_apply_migration.js",
     "db:seed": "node migrations/002_seed_data.js",
     "db:setup": "npm run db:migrate && npm run db:seed",
+    "db:update-material-ids": "node migrations/007_update_material_ids.js",
+    "db:verify-material-ids": "node scripts/verify-material-id-consistency.js",
     "test:embedding": "node scripts/test-embedding.js",
     "import:vectors": "node scripts/import-vectors.js",
     "query:vectors": "node scripts/query-vectors.js",

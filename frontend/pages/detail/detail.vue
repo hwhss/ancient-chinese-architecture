@@ -194,38 +194,65 @@ import LottieAnimation from "../../components/LottieAnimation.vue";
 import VisualChart from "../../components/VisualChart.vue";
 
 // 素材ID到名称的映射 - 静态常量
+// 注意：这些ID必须与后端 data-jsondb/buildings/*.json 中的 id 字段完全一致
 const MATERIAL_NAMES = {
-  // 皇宫
-  gugong_01: "太和殿",
-  gugong_02: "乾清宫",
-  gugong_03: "中和殿",
-  gugong_04: "保和殿",
-  gugong_05: "养心殿",
-  gugong_06: "御花园",
-  gugong_07: "午门",
-  gugong_08: "天安门",
-  shenyang_01: "沈阳故宫大政殿",
-  // 桥梁
-  zhaozhou_01: "赵州桥",
-  lugou_01: "卢沟桥",
-  guangji_01: "广济桥",
-  // 园林
-  zhuozheng_01: "拙政园",
-  yiheyuan_01: "颐和园",
-  // 城防
-  xian_01: "西安城墙",
-  nanjing_01: "南京城墙",
-  // 民居
-  tulou_01: "福建土楼",
-  qiaojia_01: "乔家大院",
-  pingyao_01: "平遥古城",
-  lijiang_01: "丽江古城",
-  // 楼阁
-  yueyang_01: "岳阳楼",
-  kongmiao_01: "曲阜孔庙",
-  // 水利
-  dujiangyan_01: "都江堰",
-  kanerjing_01: "坎儿井",
+  // 皇宫 (palace.json)
+  taihe_dian: "太和殿",
+  qiankun_gong: "乾清宫",
+  zhonghe_dian: "中和殿",
+  baohe_dian: "保和殿",
+  yangxin_dian: "养心殿",
+  yuhua_yuan: "御花园",
+  wumen: "午门",
+  tiananmen: "天安门",
+  dazheng_dian: "沈阳故宫大政殿",
+  potala_palace: "布达拉宫",
+  foguang_temple: "佛光寺东大殿",
+  nanchan_temple: "南禅寺大殿",
+  temple_of_heaven: "天坛",
+  // 桥梁 (bridge.json)
+  zhaozhou_bridge: "赵州桥",
+  lugou_bridge: "卢沟桥",
+  guangji_bridge: "广济桥",
+  luoyang_bridge: "洛阳桥",
+  anping_bridge: "安平桥",
+  // 园林 (garden.json)
+  zhuozheng_garden: "拙政园",
+  yihe_yuan: "颐和园",
+  liu_yuan: "留园",
+  bishu_shanzhuang: "承德避暑山庄",
+  shizi_lin: "狮子林",
+  canglang_ting: "沧浪亭",
+  wangshi_yuan: "网师园",
+  huanxiu_shanzhuang: "环秀山庄",
+  // 城防 (defense.json)
+  xian_wall: "西安城墙",
+  nanjing_wall: "南京城墙",
+  pingyao_city: "平遥古城",
+  lijiang_city: "丽江古城",
+  fenghuang_city: "凤凰古城",
+  // 民居 (residence.json)
+  fujian_tulou: "福建土楼",
+  qiaojia_dayuan: "乔家大院",
+  wangjia_dayuan: "王家大院",
+  siheyuan: "北京四合院",
+  huizhou_house: "徽派建筑",
+  hongcun: "宏村",
+  xidi: "西递",
+  yaodong: "窑洞",
+  diaojiaolou: "吊脚楼",
+  // 楼阁 (tower.json)
+  yueyang_tower: "岳阳楼",
+  huanghe_tower: "黄鹤楼",
+  tengwang_ge: "滕王阁",
+  qufu_kongmiao: "曲阜孔庙",
+  yingxian_muta: "应县木塔",
+  songyue_tower: "嵩岳寺塔",
+  // 水利 (water.json)
+  dujiangyan: "都江堰",
+  kanerjing: "坎儿井",
+  grand_canal: "京杭大运河",
+  lingqu: "灵渠",
 };
 
 // Tab 配置

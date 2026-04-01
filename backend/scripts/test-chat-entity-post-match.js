@@ -12,13 +12,13 @@ const CASES = [
     name: '故宫泛称映射到实景条目',
     question: '中国最有名的古建筑是哪个？',
     answer: '通常会提到故宫（紫禁城），它是中国最具代表性的古建筑群之一。',
-    expectOneOf: ['gugong_01', 'taihe_dian']
+    expectOneOf: ['taihe_dian']
   },
   {
     name: '明确建筑名直连',
     question: '赵州桥有什么特点？',
     answer: '赵州桥是世界现存最早的敞肩石拱桥。',
-    expectOneOf: ['zhaozhou_01', 'zhaozhou_bridge']
+    expectOneOf: ['zhaozhou_bridge']
   },
   {
     name: '弱相关场景拒绝主实体并返回候选',

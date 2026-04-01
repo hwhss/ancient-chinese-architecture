@@ -15,7 +15,7 @@ const CASES = [
         decisionScore: 0.51,
         question: '太和殿是什么',
         answer: '...',
-        materialId: 'gugong_01'
+        materialId: 'taihe_dian'
       }
     ],
     expectAccepted: true,

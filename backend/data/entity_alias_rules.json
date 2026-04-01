@@ -3,16 +3,88 @@
     "name": "故宫泛称",
     "aliases": ["故宫", "紫禁城", "北京故宫", "故宫博物院"],
     "preferredNames": ["太和殿"],
-    "fallbackIds": ["gugong_01", "taihe_dian"],
+    "fallbackIds": ["taihe_dian"],
     "confidence": 0.98,
+    "strict": true
+  },
+  {
+    "name": "太和殿别名",
+    "aliases": ["太和殿", "金銮殿", "奉天殿"],
+    "preferredNames": ["太和殿"],
+    "fallbackIds": ["taihe_dian"],
+    "confidence": 0.95,
+    "strict": true
+  },
+  {
+    "name": "中和殿别名",
+    "aliases": ["中和殿", "华盖殿", "中极殿"],
+    "preferredNames": ["中和殿"],
+    "fallbackIds": ["zhonghe_dian"],
+    "confidence": 0.95,
+    "strict": true
+  },
+  {
+    "name": "保和殿别名",
+    "aliases": ["保和殿", "谨身殿", "建极殿"],
+    "preferredNames": ["保和殿"],
+    "fallbackIds": ["baohe_dian"],
+    "confidence": 0.95,
     "strict": true
   },
   {
     "name": "苏州园林泛称",
     "aliases": ["苏州园林"],
     "preferredNames": ["拙政园"],
-    "fallbackIds": ["zhuozheng_01", "zhuozheng_garden"],
+    "fallbackIds": ["zhuozheng_garden"],
     "confidence": 0.92,
     "strict": false
+  },
+  {
+    "name": "拙政园别名",
+    "aliases": ["拙政园", "苏州拙政园"],
+    "preferredNames": ["拙政园"],
+    "fallbackIds": ["zhuozheng_garden"],
+    "confidence": 0.95,
+    "strict": true
+  },
+  {
+    "name": "赵州桥别名",
+    "aliases": ["赵州桥", "安济桥", "大石桥"],
+    "preferredNames": ["赵州桥"],
+    "fallbackIds": ["zhaozhou_bridge"],
+    "confidence": 0.95,
+    "strict": true
+  },
+  {
+    "name": "赵州桥设计者",
+    "aliases": ["李春", "赵州桥李春"],
+    "preferredNames": ["赵州桥"],
+    "fallbackIds": ["zhaozhou_bridge"],
+    "confidence": 0.90,
+    "strict": false
+  },
+  {
+    "name": "天坛相关",
+    "aliases": ["天坛", "祈年殿", "圜丘", "皇穹宇"],
+    "preferredNames": ["天坛"],
+    "fallbackIds": ["temple_of_heaven"],
+    "confidence": 0.94,
+    "strict": false
+  },
+  {
+    "name": "佛光寺相关",
+    "aliases": ["佛光寺", "佛光寺东大殿", "东大殿", "中国第一国宝"],
+    "preferredNames": ["佛光寺东大殿"],
+    "fallbackIds": ["foguang_temple"],
+    "confidence": 0.95,
+    "strict": true
+  },
+  {
+    "name": "南禅寺相关",
+    "aliases": ["南禅寺", "南禅寺大殿", "最早木构"],
+    "preferredNames": ["南禅寺大殿"],
+    "fallbackIds": ["nanchan_temple"],
+    "confidence": 0.95,
+    "strict": true
   }
 ]

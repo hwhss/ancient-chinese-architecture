@@ -43,7 +43,7 @@ function startServer() {
     console.log(`📍 健康检查: http://localhost:${config.port}/api/health`);
     console.log(`📍 问答接口: http://localhost:${config.port}/api/chat`);
     console.log(`📍 建筑列表: http://localhost:${config.port}/api/buildings`);
-    console.log(`📍 素材接口: http://localhost:${config.port}/api/material?materialId=gugong_01\n`);
+    console.log(`📍 素材接口: http://localhost:${config.port}/api/material?materialId=taihe_dian\n`);
   });
 
   server.on('error', (error) => {

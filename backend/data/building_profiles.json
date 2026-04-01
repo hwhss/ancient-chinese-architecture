@@ -1,6 +1,6 @@
 [
   {
-    "id": "gugong_01",
+    "id": "taihe_dian",
     "era": "明永乐十八年（1420）",
     "style": "明清皇家宫殿木构",
     "overviewSummary": "故宫核心礼制建筑，象征皇权与国家典仪。",
@@ -71,7 +71,7 @@
     }
   },
   {
-    "id": "gugong_02",
+    "id": "qiankun_gong",
     "era": "明永乐十八年（1420）",
     "style": "明清宫廷建筑",
     "overviewSummary": "清代中后期皇帝处理政务的重要空间之一。",
@@ -87,7 +87,7 @@
     }
   },
   {
-    "id": "shenyang_01",
+    "id": "dazheng_dian",
     "era": "后金-清初",
     "style": "满汉融合宫殿建筑",
     "overviewSummary": "清代入关前的政治核心建筑之一，具有鲜明民族特色。",
@@ -97,7 +97,7 @@
     "culturalValue": "是研究清初政治制度与建筑文化的重要实物。"
   },
   {
-    "id": "zhaozhou_01",
+    "id": "zhaozhou_bridge",
     "era": "隋代",
     "style": "敞肩石拱桥",
     "overviewSummary": "中国古代桥梁工程的标志性作品，结构思想领先。",
@@ -107,7 +107,7 @@
     "culturalValue": "体现中国古代工程实践与结构创新能力。"
   },
   {
-    "id": "lugou_01",
+    "id": "lugou_bridge",
     "era": "金代",
     "style": "联拱石桥",
     "overviewSummary": "兼具交通功能与历史记忆的代表性古桥。",
@@ -117,7 +117,7 @@
     "culturalValue": "是城市历史、工程技术与纪念意义叠加的地标。"
   },
   {
-    "id": "guangji_01",
+    "id": "guangji_bridge",
     "era": "宋至明清",
     "style": "梁桥-浮桥-拱桥组合",
     "overviewSummary": "结构类型复合、功能灵活的古代桥梁典范。",
@@ -127,7 +127,7 @@
     "culturalValue": "反映了古代工程对水文环境的长期适应。"
   },
   {
-    "id": "zhuozheng_01",
+    "id": "zhuozheng_garden",
     "era": "明代",
     "style": "江南私家园林",
     "overviewSummary": "以水景为核心，空间层次与借景手法成熟。",
@@ -137,7 +137,7 @@
     "culturalValue": "是中国古典园林艺术的重要范本。"
   },
   {
-    "id": "yiheyuan_01",
+    "id": "yihe_yuan",
     "era": "清代",
     "style": "皇家园林",
     "overviewSummary": "山水格局宏大，兼具政治与休憩功能。",
@@ -147,7 +147,7 @@
     "culturalValue": "体现清代皇家园林的综合营造能力。"
   },
   {
-    "id": "xian_01",
+    "id": "xian_wall",
     "era": "明代",
     "style": "城垣防御体系",
     "overviewSummary": "保存完整的古代城市防御系统样本。",
@@ -157,7 +157,7 @@
     "culturalValue": "是研究古代城市军事工程的关键实物。"
   },
   {
-    "id": "nanjing_01",
+    "id": "nanjing_wall",
     "era": "明代",
     "style": "巨型城垣工程",
     "overviewSummary": "规模宏大、建造周期长，反映国家级工程组织能力。",
@@ -167,7 +167,7 @@
     "culturalValue": "是古代都城工程体系的重要见证。"
   },
   {
-    "id": "tulou_01",
+    "id": "fujian_tulou",
     "era": "明清至近代",
     "style": "客家夯土民居",
     "overviewSummary": "兼具居住、防御与宗族组织功能的复合型建筑。",
@@ -177,7 +177,7 @@
     "culturalValue": "体现民间建筑智慧与社区协作机制。"
   },
   {
-    "id": "qiaojia_01",
+    "id": "qiaojia_dayuan",
     "era": "清代",
     "style": "晋商大院",
     "overviewSummary": "商帮文化与北方民居工艺结合的典型。",
@@ -187,7 +187,7 @@
     "culturalValue": "是研究近世商帮文化的重要建筑样本。"
   },
   {
-    "id": "pingyao_01",
+    "id": "pingyao_city",
     "era": "明清",
     "style": "古城街巷与院落体系",
     "overviewSummary": "城池、街巷、商号与民居整体保存度高。",
@@ -197,7 +197,7 @@
     "culturalValue": "展示了传统城市形态与金融文化发展脉络。"
   },
   {
-    "id": "yueyang_01",
+    "id": "yueyang_tower",
     "era": "宋以来多次重修",
     "style": "传统楼阁建筑",
     "overviewSummary": "以文学记忆与楼阁景观共同构成文化地标。",
@@ -207,7 +207,7 @@
     "culturalValue": "是文学与建筑互相塑造的典型案例。"
   },
   {
-    "id": "kongmiao_01",
+    "id": "qufu_kongmiao",
     "era": "金元明清多次扩建",
     "style": "祭祀礼制建筑群",
     "overviewSummary": "以中轴礼制空间组织儒家祭祀活动。",
@@ -217,7 +217,7 @@
     "culturalValue": "是儒家文化物质化表达的重要代表。"
   },
   {
-    "id": "dujiangyan_01",
+    "id": "dujiangyan",
     "era": "战国",
     "style": "无坝引水系统",
     "overviewSummary": "以分水、泄洪、引流协同实现长期稳定灌溉。",
@@ -254,7 +254,7 @@
     }
   },
   {
-    "id": "kanerjing_01",
+    "id": "kanerjing",
     "era": "古代至近现代",
     "style": "地下引水系统",
     "overviewSummary": "通过地下渠道与竖井实现干旱区稳定供水。",

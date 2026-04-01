@@ -1,48 +1,48 @@
 [
   {
-    "materialId": "gugong_01",
+    "materialId": "taihe_dian",
     "url": "https://picsum.photos/800/600?random=1",
     "type": "image",
     "source": "故宫博物院官网"
   },
   {
-    "materialId": "gugong_02",
+    "materialId": "qiankun_gong",
     "url": "https://picsum.photos/800/600?random=2",
     "type": "image",
     "source": "故宫博物院官网"
   },
   {
-    "materialId": "gugong_03",
+    "materialId": "zhonghe_dian",
     "url": "https://picsum.photos/800/600?random=3",
     "type": "image",
     "source": "故宫博物院官网"
   },
   {
-    "materialId": "gugong_04",
+    "materialId": "baohe_dian",
     "url": "https://picsum.photos/800/600?random=4",
     "type": "image",
     "source": "故宫博物院官网"
   },
   {
-    "materialId": "gugong_05",
+    "materialId": "yangxin_dian",
     "url": "https://picsum.photos/800/600?random=5",
     "type": "image",
     "source": "故宫博物院官网"
   },
   {
-    "materialId": "gugong_06",
+    "materialId": "yuhua_yuan",
     "url": "https://picsum.photos/800/600?random=6",
     "type": "image",
     "source": "故宫博物院官网"
   },
   {
-    "materialId": "gugong_07",
+    "materialId": "wumen",
     "url": "https://picsum.photos/800/600?random=7",
     "type": "image",
     "source": "故宫博物院官网"
   },
   {
-    "materialId": "gugong_08",
+    "materialId": "tiananmen",
     "url": "https://picsum.photos/800/600?random=8",
     "type": "image",
     "source": "故宫博物院官网"

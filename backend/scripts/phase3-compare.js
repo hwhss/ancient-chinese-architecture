@@ -56,10 +56,10 @@ async function waitForHealth(baseUrl, timeoutMs = 20000) {
 async function getSummary(baseUrl) {
   const health = (await (await fetch(`${baseUrl}/api/health`)).json()).data;
   const buildings = (await (await fetch(`${baseUrl}/api/buildings`)).json()).data;
-  const detail = (await (await fetch(`${baseUrl}/api/buildings/gugong_01`)).json()).data;
-  const model = (await (await fetch(`${baseUrl}/api/buildings/gugong_01/model3d`)).json()).data;
-  const manifest = (await (await fetch(`${baseUrl}/api/buildings/gugong_01/model3d/manifest`)).json()).data;
-  const material = (await (await fetch(`${baseUrl}/api/material?materialId=gugong_01`)).json()).data;
+  const detail = (await (await fetch(`${baseUrl}/api/buildings/taihe_dian`)).json()).data;
+  const model = (await (await fetch(`${baseUrl}/api/buildings/taihe_dian/model3d`)).json()).data;
+  const manifest = (await (await fetch(`${baseUrl}/api/buildings/taihe_dian/model3d/manifest`)).json()).data;
+  const material = (await (await fetch(`${baseUrl}/api/material?materialId=taihe_dian`)).json()).data;
   const knowledge = (await (await fetch(`${baseUrl}/api/knowledge`)).json()).data;
 
   return {

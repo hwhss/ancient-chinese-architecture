@@ -351,43 +351,78 @@ const CACHE_KEY = "CHAT_HISTORY";
 const MAX_HISTORY_LENGTH = 15;
 
 // 后端返回materialId后优先使用，仅作为降级兜底保留关键词映射
+// 注意：这些ID必须与后端 data-jsondb/buildings/*.json 中的 id 字段完全一致
 const KEYWORD_MAPPING = {
-  // 皇宫
-  太和殿: "gugong_01",
-  乾清宫: "gugong_02",
-  中和殿: "gugong_03",
-  保和殿: "gugong_04",
-  养心殿: "gugong_05",
-  御花园: "gugong_06",
-  午门: "gugong_07",
-  天安门: "gugong_08",
-  故宫: "gugong_01",
-  紫禁城: "gugong_01",
-  沈阳故宫: "shenyang_01",
-  // 桥梁
-  赵州桥: "zhaozhou_01",
-  卢沟桥: "lugou_01",
-  广济桥: "guangji_01",
-  // 园林
-  拙政园: "zhuozheng_01",
-  颐和园: "yiheyuan_01",
-  苏州园林: "zhuozheng_01",
-  // 城防
-  西安城墙: "xian_01",
-  南京城墙: "nanjing_01",
-  // 民居
-  福建土楼: "tulou_01",
-  土楼: "tulou_01",
-  乔家大院: "qiaojia_01",
-  平遥古城: "pingyao_01",
-  丽江古城: "lijiang_01",
-  // 楼阁
-  岳阳楼: "yueyang_01",
-  孔庙: "kongmiao_01",
-  曲阜孔庙: "kongmiao_01",
-  // 水利
-  都江堰: "dujiangyan_01",
-  坎儿井: "kanerjing_01",
+  // 皇宫 (palace.json)
+  太和殿: "taihe_dian",
+  乾清宫: "qiankun_gong",
+  中和殿: "zhonghe_dian",
+  保和殿: "baohe_dian",
+  养心殿: "yangxin_dian",
+  御花园: "yuhua_yuan",
+  午门: "wumen",
+  天安门: "tiananmen",
+  故宫: "taihe_dian",
+  紫禁城: "taihe_dian",
+  沈阳故宫: "dazheng_dian",
+  大政殿: "dazheng_dian",
+  沈阳故宫大政殿: "dazheng_dian",
+  布达拉宫: "potala_palace",
+  佛光寺: "foguang_temple",
+  佛光寺东大殿: "foguang_temple",
+  南禅寺: "nanchan_temple",
+  南禅寺大殿: "nanchan_temple",
+  天坛: "temple_of_heaven",
+  // 桥梁 (bridge.json)
+  赵州桥: "zhaozhou_bridge",
+  卢沟桥: "lugou_bridge",
+  广济桥: "guangji_bridge",
+  洛阳桥: "luoyang_bridge",
+  安平桥: "anping_bridge",
+  // 园林 (garden.json)
+  拙政园: "zhuozheng_garden",
+  颐和园: "yihe_yuan",
+  留园: "liu_yuan",
+  承德避暑山庄: "bishu_shanzhuang",
+  避暑山庄: "bishu_shanzhuang",
+  苏州园林: "zhuozheng_garden",
+  狮子林: "shizi_lin",
+  沧浪亭: "canglang_ting",
+  网师园: "wangshi_yuan",
+  环秀山庄: "huanxiu_shanzhuang",
+  // 城防 (defense.json)
+  西安城墙: "xian_wall",
+  南京城墙: "nanjing_wall",
+  平遥古城: "pingyao_city",
+  丽江古城: "lijiang_city",
+  凤凰古城: "fenghuang_city",
+  // 民居 (residence.json)
+  福建土楼: "fujian_tulou",
+  土楼: "fujian_tulou",
+  乔家大院: "qiaojia_dayuan",
+  王家大院: "wangjia_dayuan",
+  四合院: "siheyuan",
+  北京四合院: "siheyuan",
+  徽派建筑: "huizhou_house",
+  宏村: "hongcun",
+  西递: "xidi",
+  窑洞: "yaodong",
+  吊脚楼: "diaojiaolou",
+  // 楼阁 (tower.json)
+  岳阳楼: "yueyang_tower",
+  黄鹤楼: "huanghe_tower",
+  滕王阁: "tengwang_ge",
+  孔庙: "qufu_kongmiao",
+  曲阜孔庙: "qufu_kongmiao",
+  应县木塔: "yingxian_muta",
+  佛宫寺释迦塔: "yingxian_muta",
+  嵩岳寺塔: "songyue_tower",
+  // 水利 (water.json)
+  都江堰: "dujiangyan",
+  坎儿井: "kanerjing",
+  京杭大运河: "grand_canal",
+  大运河: "grand_canal",
+  灵渠: "lingqu",
 };
 
 // 加载提示语
