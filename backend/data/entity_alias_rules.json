@@ -1,0 +1,18 @@
+[
+  {
+    "name": "故宫泛称",
+    "aliases": ["故宫", "紫禁城", "北京故宫", "故宫博物院"],
+    "preferredNames": ["太和殿"],
+    "fallbackIds": ["gugong_01", "taihe_dian"],
+    "confidence": 0.98,
+    "strict": true
+  },
+  {
+    "name": "苏州园林泛称",
+    "aliases": ["苏州园林"],
+    "preferredNames": ["拙政园"],
+    "fallbackIds": ["zhuozheng_01", "zhuozheng_garden"],
+    "confidence": 0.92,
+    "strict": false
+  }
+]

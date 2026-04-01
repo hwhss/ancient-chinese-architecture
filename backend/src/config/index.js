@@ -41,8 +41,11 @@ const config = {
   enableVectorRetrieval: toBoolean(process.env.ENABLE_VECTOR_RETRIEVAL, false),
   chatVectorSimilarityThreshold: toNumber(process.env.CHAT_VECTOR_SIMILARITY_THRESHOLD, 0.2),
   chatVectorMinDomainSimilarity: toNumber(process.env.CHAT_VECTOR_MIN_DOMAIN_SIMILARITY, 0.45),
+  chatVectorOnlyAcceptThreshold: toNumber(process.env.CHAT_VECTOR_ONLY_ACCEPT_THRESHOLD, 0.78),
   chatVectorTopK: toNumber(process.env.CHAT_VECTOR_TOP_K, 5),
   chatHybridScoreThreshold: toNumber(process.env.CHAT_HYBRID_SCORE_THRESHOLD, 0.2),
+  chatDecisionMinScore: toNumber(process.env.CHAT_DECISION_MIN_SCORE, 0.45),
+  chatDecisionMinGap: toNumber(process.env.CHAT_DECISION_MIN_GAP, 0.08),
   chatHybridKeywordWeight: toNumber(process.env.CHAT_HYBRID_KEYWORD_WEIGHT, 0.45),
   chatHybridVectorWeight: toNumber(process.env.CHAT_HYBRID_VECTOR_WEIGHT, 0.55),
   embeddingProvider: String(process.env.EMBEDDING_PROVIDER || 'dashscope').trim().toLowerCase(),
@@ -62,6 +65,7 @@ const config = {
   enableQuestionNormalize: toBoolean(process.env.ENABLE_QUESTION_NORMALIZE, true),
   enableChatRewrite: toBoolean(process.env.ENABLE_CHAT_REWRITE, true),
   chatEntityMinConfidence: toNumber(process.env.CHAT_ENTITY_MIN_CONFIDENCE, 0.35),
+  chatEntityMinGap: toNumber(process.env.CHAT_ENTITY_MIN_GAP, 0.08),
   chatDebugEnabled: toBoolean(process.env.CHAT_DEBUG_ENABLED, process.env.NODE_ENV !== 'production')
 };
 

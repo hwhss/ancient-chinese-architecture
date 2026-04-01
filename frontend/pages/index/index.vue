@@ -231,6 +231,22 @@
             >
               查看实景资料 →
             </button>
+            <view
+              v-else-if="!msg.isTyping && msg.entities && msg.entities.length"
+              class="candidate-list"
+            >
+              <text class="candidate-title">可能相关的古建：</text>
+              <view class="candidate-tags">
+                <text
+                  v-for="entity in msg.entities"
+                  :key="entity.id"
+                  class="candidate-tag"
+                  @click="goToDetail(entity.id)"
+                >
+                  {{ entity.name }}
+                </text>
+              </view>
+            </view>
           </view>
           
           <!-- 消息操作栏 -->
@@ -848,6 +864,8 @@ export default {
           content: data.answer,
           displayContent: "",
           materialId,
+          entities: Array.isArray(data.entities) ? data.entities : [],
+          entityDecision: data.entityDecision || null,
           isTyping: true
         };
         this.messages.push(aiMsg);
@@ -872,6 +890,8 @@ export default {
           content: mockAnswer,
           displayContent: "",
           materialId,
+          entities: [],
+          entityDecision: null,
           isTyping: true
         };
         this.messages.push(aiMsg);
@@ -2274,6 +2294,33 @@ export default {
 .view-btn:active {
   transform: translateY(0) scale(0.96);
   box-shadow: 0 1rpx 4rpx rgba(200, 37, 6, 0.15);
+}
+
+.candidate-list {
+  margin-top: 20rpx;
+}
+
+.candidate-title {
+  display: block;
+  font-size: 24rpx;
+  color: #8b7355;
+  margin-bottom: 12rpx;
+}
+
+.candidate-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.candidate-tag {
+  display: inline-block;
+  padding: 10rpx 18rpx;
+  border-radius: 999rpx;
+  border: 1rpx solid #c82506;
+  color: #c82506;
+  font-size: 24rpx;
+  background: #fff8f4;
 }
 
 .input-area {

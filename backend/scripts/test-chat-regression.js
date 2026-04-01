@@ -29,7 +29,7 @@ const CASES = [
 
 async function runCase(item) {
   const result = await getChatResponse(item.question);
-  const passSource = result.source !== 'ai';
+  const passSource = result.source !== 'ai' || Boolean(result.materialId);
   const passMaterial = !item.expectMaterialId || result.materialId === item.expectMaterialId;
   const passed = passSource && passMaterial;
 

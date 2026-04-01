@@ -16,6 +16,7 @@
     "test:chat-retrieval": "node scripts/test-chat-retrieval.js",
     "test:chat-regression": "node scripts/test-chat-regression.js",
     "test:chat-entity-post-match": "node scripts/test-chat-entity-post-match.js",
+    "test:chat-decision-policy": "node scripts/test-chat-decision-policy.js",
     "test:ai-prefix-regression": "node scripts/test-ai-prefix-regression.js",
     "scan:chat-thresholds": "node scripts/scan-chat-thresholds.js",
     "db:import-jsondb": "node migrations/005_import_jsondb.js"

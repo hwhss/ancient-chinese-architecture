@@ -24,47 +24,55 @@ async function getChatResponse(question) {
     rewriteApplied: false
   };
 
-  let knowledgeMatched = await findBestKnowledgeByHybrid(retrievalQuestion);
-  if (!knowledgeMatched && retrievalQuestion !== rawQuestion) {
+  let knowledgeDecision = await findBestKnowledgeByHybrid(retrievalQuestion);
+  if ((!knowledgeDecision || !knowledgeDecision.accepted) && retrievalQuestion !== rawQuestion) {
     debug.fallbackToRawQuestion = true;
-    knowledgeMatched = await findBestKnowledgeByHybrid(rawQuestion);
+    knowledgeDecision = await findBestKnowledgeByHybrid(rawQuestion);
   } else {
     debug.fallbackToRawQuestion = false;
   }
 
-  if (knowledgeMatched) {
-    debug.matchedBy = knowledgeMatched.source;
-    if (knowledgeMatched.debug) {
+  if (knowledgeDecision && knowledgeDecision.accepted) {
+    debug.matchedBy = knowledgeDecision.source;
+    debug.knowledgeDecision = {
+      accepted: true,
+      reason: knowledgeDecision.reason || 'accepted'
+    };
+    if (knowledgeDecision.debug) {
       debug.matchScore = {
-        keywordScore: knowledgeMatched.debug.keywordScore,
-        vectorSimilarity: knowledgeMatched.debug.vectorSimilarity,
-        hybridScore: knowledgeMatched.debug.hybridScore
+        keywordScore: knowledgeDecision.debug.keywordScore,
+        vectorSimilarity: knowledgeDecision.debug.vectorSimilarity,
+        hybridScore: knowledgeDecision.debug.hybridScore,
+        decisionScore: knowledgeDecision.debug.decisionScore
       };
+      debug.retrievalTopCandidates = knowledgeDecision.debug.topCandidates || [];
     }
 
     const answer = config.enableChatRewrite
-      ? await rewriteKnowledgeAnswer(rawQuestion, knowledgeMatched.answer)
-      : knowledgeMatched.answer;
+      ? await rewriteKnowledgeAnswer(rawQuestion, knowledgeDecision.answer)
+      : knowledgeDecision.answer;
 
     const entityMatch = await resolveBuildingEntities(rawQuestion, answer, {
-      preferredId: knowledgeMatched.materialId || null
+      preferredId: knowledgeDecision.materialId || null
     });
-    const materialId = knowledgeMatched.materialId || (entityMatch.primary ? entityMatch.primary.id : null);
+    const materialId = knowledgeDecision.materialId || (entityMatch.primary ? entityMatch.primary.id : null);
 
     debug.rewriteApplied = Boolean(config.enableChatRewrite);
     if (config.chatDebugEnabled) {
       debug.entityPostMatch = {
         primary: entityMatch.primary,
-        entities: entityMatch.entities
+        entities: entityMatch.entities,
+        decision: entityMatch.decision
       };
     }
 
     return {
       answer,
-      source: knowledgeMatched.source,
+      source: knowledgeDecision.source,
       materialId,
       matchedEntity: entityMatch.primary,
       entities: entityMatch.entities,
+      entityDecision: entityMatch.decision,
       debug: config.chatDebugEnabled ? debug : undefined
     };
   }
@@ -72,10 +80,18 @@ async function getChatResponse(question) {
   const answer = await getAIAnswer(rawQuestion);
   const entityMatch = await resolveBuildingEntities(rawQuestion, answer);
   debug.matchedBy = 'ai_fallback';
+  debug.knowledgeDecision = {
+    accepted: false,
+    reason: (knowledgeDecision && knowledgeDecision.reason) || 'not_accepted'
+  };
+  if (knowledgeDecision && knowledgeDecision.debug && knowledgeDecision.debug.topCandidates) {
+    debug.retrievalTopCandidates = knowledgeDecision.debug.topCandidates;
+  }
   if (config.chatDebugEnabled) {
     debug.entityPostMatch = {
       primary: entityMatch.primary,
-      entities: entityMatch.entities
+      entities: entityMatch.entities,
+      decision: entityMatch.decision
     };
   }
 
@@ -85,6 +101,7 @@ async function getChatResponse(question) {
     materialId: entityMatch.primary ? entityMatch.primary.id : null,
     matchedEntity: entityMatch.primary,
     entities: entityMatch.entities,
+    entityDecision: entityMatch.decision,
     debug: config.chatDebugEnabled ? debug : undefined
   };
 }
