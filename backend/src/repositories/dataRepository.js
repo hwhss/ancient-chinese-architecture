@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
 const { query } = require('../config/database');
 
@@ -13,7 +13,44 @@ const dataJsonDbDir = (() => {
   return path.isAbsolute(raw) ? raw : path.join(__dirname, '..', '..', raw);
 })();
 
-function readJsonFile(baseDir, filename, defaultValue) {
+// 缓存存储
+const cache = new Map();
+const CACHE_TTL = 3600000; // 1 hour
+
+async function readJsonFile(baseDir, filename, defaultValue) {
+  const cacheKey = `${baseDir}:${filename}`;
+  const now = Date.now();
+  
+  // 检查缓存
+  const cached = cache.get(cacheKey);
+  if (cached && (now - cached.timestamp) < CACHE_TTL) {
+    return cached.data;
+  }
+  
+  const filePath = path.join(baseDir, filename);
+  
+  try {
+    await fs.access(filePath);
+    const raw = await fs.readFile(filePath, 'utf8');
+    const data = JSON.parse(raw);
+    
+    // 更新缓存
+    cache.set(cacheKey, {
+      data,
+      timestamp: now
+    });
+    
+    return data;
+  } catch (error) {
+    if (error.code !== 'ENOENT') {
+      console.error(`Failed to parse ${filename}:`, error.message);
+    }
+    return defaultValue;
+  }
+}
+
+// 同步版本，用于初始化
+function readJsonFileSync(baseDir, filename, defaultValue) {
   const filePath = path.join(baseDir, filename);
   if (!fs.existsSync(filePath)) {
     return defaultValue;
