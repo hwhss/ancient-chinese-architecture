@@ -15,6 +15,17 @@ function hasUsableApiKey() {
   return Boolean(String(config.llmApiKey || '').trim());
 }
 
+function stripLLMLeadPrefix(text) {
+  const cleaned = String(text || '').trim();
+  if (!cleaned) {
+    return '';
+  }
+
+  return cleaned
+    .replace(/^(回答[:：]?\s*|答案[:：]?\s*|问题纠正[:：]?\s*|纠正后问题[:：]?\s*)/i, '')
+    .trim();
+}
+
 async function requestChatCompletion({
   userContent,
   systemPrompt = SYSTEM_PROMPT,
@@ -162,7 +173,7 @@ async function normalizeQuestion(question) {
 要求：
 1. 修正明显错别字和常见口误。
 2. 保留原问题意图。
-3. 只返回一句纠正后的问题文本，不要任何额外说明。`;
+3. 只返回一句纠正后的问题文本本身，不要任何前缀、标题、冒号引导词、引号或额外说明。`;
 
   try {
     const normalized = await requestChatCompletion({
@@ -172,7 +183,8 @@ async function normalizeQuestion(question) {
       maxTokens: 120
     });
 
-    return String(normalized || rawQuestion).trim() || rawQuestion;
+    const stripped = stripLLMLeadPrefix(normalized);
+    return stripped || rawQuestion;
   } catch (error) {
     console.warn('⚠️ 问题纠正失败，回退原问题:', error.message);
     return rawQuestion;
@@ -193,7 +205,7 @@ async function rewriteKnowledgeAnswer(question, knowledgeAnswer) {
 1. 忠于原答案事实，不新增未经给出的事实。
 2. 控制在120-220字。
 3. 语气自然，适合前端直接展示。
-4. 只返回最终答案，不要解释过程。`;
+4. 只返回最终答案文本，不要任何前缀、标题、冒号引导词或解释。`;
 
   try {
     const content = `用户问题：${q}\n\n知识库原答案：${a}`;
@@ -204,7 +216,8 @@ async function rewriteKnowledgeAnswer(question, knowledgeAnswer) {
       maxTokens: 320
     });
 
-    return String(rewritten || a).trim() || a;
+    const stripped = stripLLMLeadPrefix(rewritten);
+    return stripped || a;
   } catch (error) {
     console.warn('⚠️ 答案润色失败，回退原答案:', error.message);
     return a;
