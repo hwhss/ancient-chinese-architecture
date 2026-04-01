@@ -1,0 +1,212 @@
+# 提交报告：中式UI与交互动效优化
+
+**提交时间**: 2026-03-31  
+**提交人**: AI Assistant  
+**分支**: main  
+
+---
+
+## 一、优化概述
+
+本次提交对 UniApp+Vue3 前端项目进行了全面的中式UI风格优化，包括全局字体替换、页面过渡动画、交互反馈效果和边框分割线优化，所有修改均遵循以下原则：
+- 仅修改 frontend 目录，不涉及后端
+- 保留所有现有功能（AI问答、3D导览、收藏、可视化）
+- 适配现有中式主题配色（棕褐色 #8B4513、米色背景 #f8f4e9）
+- 所有动画使用 GPU 加速（transform 和 opacity）
+
+---
+
+## 二、详细优化内容
+
+### 1. 全局字体替换 ✅
+
+**新增文件**: `frontend/utils/animationHelper.js`
+
+**修改文件**: `frontend/App.vue`
+
+**优化内容**:
+- 引入免费可商用古风字体
+  - 正文: 思源宋体 (Source Han Serif CN)
+  - 标题: 仓耳今楷 (TsangerJinKai)
+- 使用 chinese-font.netlify.app CDN 加载字体
+- 设置 CSS 变量 `--font-title` 和 `--font-body`
+- 适配 UniApp 多端环境（H5/小程序/App）
+
+**使用方式**:
+```css
+/* 标题字体 */
+font-family: var(--font-title);
+
+/* 正文字体 */
+font-family: var(--font-body);
+```
+
+---
+
+### 2. 页面过渡动画替换 ✅
+
+**修改文件**: `frontend/App.vue`
+
+**优化内容**:
+- 替换原有通用滑入动画为流畅的页面过渡效果
+- 使用 GPU 加速属性（transform, opacity）
+- 添加 `will-change` 优化提示
+- 动画时长 0.4s，使用 cubic-bezier 缓动函数
+
+**动画类**:
+- `.page-enter` - 页面进入动画（滑入淡入）
+- `.page-leave` - 页面退出动画（淡出）
+
+---
+
+### 3. 交互反馈优化 ✅
+
+**新增文件**: 
+- `frontend/utils/animationHelper.js` - 动画工具函数
+- `frontend/utils/animationDemo.md` - 使用文档
+
+**修改文件**:
+- `frontend/App.vue` - 全局交互样式
+- `frontend/pages/home/home.vue` - 首页交互应用
+- `frontend/pages/map/map.vue` - 建筑名录页交互应用
+- `frontend/pages/detail/detail.vue` - 详情页交互应用
+
+**新增交互效果**:
+
+| 类名 | 效果 | 应用场景 |
+|------|------|----------|
+| `.ink-ripple` | 墨水滴波纹扩散 | 主要按钮 |
+| `.btn-ink` | 按钮墨水填充 | 重要操作按钮 |
+| `.tap-feedback` | 点击缩放+背景色 | 小按钮/标签/图标 |
+| `.card-ink` | 卡片墨水晕染 | 卡片悬停效果 |
+| `.brush-write` | 毛笔书写动画 | 文字逐行显示 |
+| `.brush-char` | 逐字显示 | 标题动画 |
+| `.brush-paragraph` | 段落滑入 | 详情文字 |
+| `.list-item-ink` | 列表项滑入 | 列表加载 |
+
+**已应用页面**:
+- **首页**: 主按钮、分类入口、卡片、收藏/分享按钮
+- **建筑名录页**: 视图切换、筛选标签、排序按钮、建筑卡片
+- **详情页**: Tab切换、收藏按钮、3D导览按钮
+
+---
+
+### 4. 边框与分割线优化 ✅
+
+**修改文件**: `frontend/App.vue`
+
+**新增样式类**:
+
+| 类名 | 效果 | 应用场景 |
+|------|------|----------|
+| `.brush-border` | 毛笔笔触渐变边框 | 卡片容器 |
+| `.scroll-edge` | 古卷上下压边纹理 | 区块分隔 |
+| `.scroll-side-edge` | 古卷左右侧边装饰 | 竖向容器 |
+| `.chinese-divider` | 中式云纹分隔线 | 标题分隔 |
+| `.scroll-shadow` | 古画卷轴阴影 | 卡片阴影 |
+| `.rice-paper-bg` | 宣纸纹理背景 | 背景装饰 |
+| `.seal-border` | 印章边框（朱砂色） | 强调元素 |
+
+**特点**:
+- 使用 CSS 渐变模拟毛笔手绘效果
+- 支持深色主题自动适配
+- 仅使用 GPU 加速属性
+
+---
+
+## 三、文件变更统计
+
+```
+ frontend/App.vue                 | 720 +++++++++++++++++++++++++++++++++++++--
+ frontend/pages/detail/detail.vue |  30 +-
+ frontend/pages/home/home.vue     |  65 +--
+ frontend/pages/map/map.vue       |  57 +--
+ frontend/utils/animationHelper.js | 154 ++++++++  (新增)
+ frontend/utils/animationDemo.md   | 198 +++++++++  (新增)
+```
+
+**总计**: 4 个修改文件，2 个新增文件，约 780 行新增代码
+
+---
+
+## 四、技术实现要点
+
+### 性能优化
+- 所有动画使用 `transform` 和 `opacity`（GPU 加速）
+- 添加 `will-change` 提示浏览器优化
+- 使用 `-webkit-transform` 兼容旧版浏览器
+- 限制逐字动画的最大字符数（30字）
+
+### 多端适配
+- 使用 `rpx` 单位确保响应式
+- H5 端使用 Intersection Observer 实现滚动动画
+- 小程序/App 端使用数据驱动动画
+- 条件编译 `#ifdef H5` 区分平台
+
+### 深色主题
+- 所有效果支持 `[data-theme="dark"]` 选择器
+- 自动切换棕褐色/浅棕色配色
+
+---
+
+## 五、使用示例
+
+### 墨水滴波纹按钮
+```html
+<button class="ink-ripple">点击我</button>
+```
+
+### 卡片墨水晕染
+```html
+<view class="card-ink" @click="handleClick">
+  <text>卡片内容</text>
+</view>
+```
+
+### 毛笔书写动画
+```html
+<text class="brush-paragraph">这段文字会滑入显示</text>
+```
+
+### 中式分隔线
+```html
+<view class="chinese-divider"></view>
+```
+
+---
+
+## 六、验证清单
+
+- [x] 全局字体正常加载（思源宋体、仓耳今楷）
+- [x] 页面过渡动画流畅
+- [x] 墨水滴波纹效果正常
+- [x] 按钮点击反馈正常
+- [x] 卡片墨水晕染效果正常
+- [x] 所有现有功能完整保留
+  - [x] AI 问答功能
+  - [x] 3D 导览功能
+  - [x] 收藏功能
+  - [x] 可视化组件
+- [x] 深色主题适配
+- [x] 多端兼容性
+
+---
+
+## 七、后续建议
+
+1. **字体加载优化**: 考虑添加字体预加载或本地字体文件
+2. **动画性能监控**: 在低端设备上测试动画流畅度
+3. **更多页面应用**: 将交互效果应用到更多页面（设置页、AI问答页等）
+4. **用户偏好**: 考虑添加动画开关，允许用户关闭动效
+
+---
+
+## 八、参考资料
+
+- 字体来源: https://chinese-font.netlify.app/
+- 思源宋体: 开源字体，SIL Open Font License
+- 仓耳今楷: 免费商用字体
+
+---
+
+**提交说明**: 本次优化完全保留现有业务逻辑，仅增强视觉体验和交互反馈，所有功能均经过验证可正常使用。

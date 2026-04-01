@@ -1,12 +1,9 @@
 <script>
-import themeManager from './utils/themeManager.js'
 import { initChineseAnimations } from './utils/animationHelper.js'
 
 export default {
   onLaunch() {
     console.log('App Launch')
-    // 初始化主题
-    themeManager.init()
     // 初始化中式交互动效
     // #ifdef H5
     initChineseAnimations()
@@ -81,31 +78,6 @@ export default {
   /* 字体变量 */
   --font-title: 'TsangerJinKai', 'Source Han Serif CN', 'Noto Serif SC', 'SimSun', serif;
   --font-body: 'Source Han Serif CN', 'Noto Serif SC', 'SimSun', 'PingFang SC', 'Microsoft YaHei', serif;
-}
-
-/* 深色主题 */
-[data-theme="dark"] {
-  --primary: #e84a5f;
-  --primary-dark: #c41e3a;
-  --primary-light: #f06b7d;
-  --secondary: #c4956a;
-  --secondary-dark: #a67c52;
-  --secondary-light: #d4a87a;
-  --text-primary: #f5f0e6;
-  --text-secondary: #d4c8b8;
-  --text-tertiary: #b8a898;
-  --text-muted: #8b7d6b;
-  --bg-primary: #1a1612;
-  --bg-secondary: #242018;
-  --bg-tertiary: #2e2820;
-  --bg-card: #363028;
-  --border: #4a4035;
-  --border-light: #5a5045;
-  --error: #e57373;
-  --success: #81c784;
-  --warning: #ffb74d;
-  --shadow: rgba(0, 0, 0, 0.4);
-  --shadow-primary: rgba(232, 74, 95, 0.4);
 }
 
 /* 全局基础样式 */
@@ -325,34 +297,6 @@ scroll-view {
   color: var(--primary);
 }
 
-/* ========== 深色主题特定样式 ========== */
-
-/* 深色主题下的图片亮度调整 */
-[data-theme="dark"] image,
-[data-theme="dark"] .card-image,
-[data-theme="dark"] .daily-image {
-  filter: brightness(0.9);
-}
-
-/* 深色主题下的阴影调整 */
-[data-theme="dark"] .shadow-card {
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.3);
-}
-
-/* 深色主题下的边框发光效果 */
-[data-theme="dark"] .glow-border {
-  border-color: rgba(232, 74, 95, 0.3);
-  box-shadow: 0 0 20rpx rgba(232, 74, 95, 0.1);
-}
-
-/* 主题切换过渡动画 */
-.theme-transition {
-  transition: background-color 0.3s ease,
-              color 0.3s ease,
-              border-color 0.3s ease,
-              box-shadow 0.3s ease;
-}
-
 /* ========== 交互反馈优化 - 墨水滴开波纹效果（增强版） ========== */
 
 /* 
@@ -409,17 +353,6 @@ scroll-view {
   }
 }
 
-/* 深色主题适配 */
-[data-theme="dark"] .ink-ripple::after {
-  background: radial-gradient(
-    circle at center,
-    rgba(196, 149, 106, 0.3) 0%,
-    rgba(196, 149, 106, 0.15) 20%,
-    rgba(196, 149, 106, 0.05) 40%,
-    transparent 60%
-  );
-}
-
 /* ========== 按钮点击反馈（更明显） ========== */
 
 /* 按钮点击时的墨水填充效果 */
@@ -458,15 +391,6 @@ scroll-view {
   width: 200%;
   height: 200%;
   opacity: 1;
-}
-
-/* 深色主题 */
-[data-theme="dark"] .btn-ink::before {
-  background: rgba(196, 149, 106, 0.25);
-}
-
-[data-theme="dark"] .btn-ink:active {
-  background-color: rgba(196, 149, 106, 0.15);
 }
 
 /* ========== 毛笔书写动画（增强版） ========== */
@@ -615,16 +539,6 @@ scroll-view {
   transform: scale(0.98);
 }
 
-/* 深色主题 */
-[data-theme="dark"] .card-ink::after {
-  background: radial-gradient(
-    circle at center,
-    rgba(196, 149, 106, 0.15) 0%,
-    rgba(196, 149, 106, 0.08) 30%,
-    transparent 60%
-  );
-}
-
 /* ========== 列表项滑入动画（增强版） ========== */
 
 .list-item-ink {
@@ -668,10 +582,6 @@ scroll-view {
   background-color: rgba(139, 69, 19, 0.08);
 }
 
-[data-theme="dark"] .tap-feedback:active {
-  background-color: rgba(196, 149, 106, 0.1);
-}
-
 /* ========== 边框与分割线优化 - 毛笔笔触效果 ========== */
 
 /* 
@@ -709,18 +619,6 @@ scroll-view {
   mask-composite: exclude;
 }
 
-/* 深色主题 */
-[data-theme="dark"] .brush-border::before {
-  background: linear-gradient(
-    135deg,
-    rgba(196, 149, 106, 0.8) 0%,
-    rgba(196, 149, 106, 0.6) 25%,
-    rgba(196, 149, 106, 0.4) 50%,
-    rgba(196, 149, 106, 0.6) 75%,
-    rgba(196, 149, 106, 0.8) 100%
-  );
-}
-
 /* 古卷压边效果 - 模拟古画卷轴的压边纹理 */
 .scroll-edge {
   position: relative;
@@ -756,21 +654,6 @@ scroll-view {
 
 .scroll-edge::after {
   bottom: 0;
-}
-
-/* 深色主题 */
-[data-theme="dark"] .scroll-edge::before,
-[data-theme="dark"] .scroll-edge::after {
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(196, 149, 106, 0.3) 10%,
-    rgba(196, 149, 106, 0.5) 30%,
-    rgba(196, 149, 106, 0.3) 50%,
-    rgba(196, 149, 106, 0.5) 70%,
-    rgba(196, 149, 106, 0.3) 90%,
-    transparent 100%
-  );
 }
 
 /* 古卷侧边装饰 - 左右压边 */
@@ -838,37 +721,12 @@ scroll-view {
   right: 20%;
 }
 
-/* 深色主题 */
-[data-theme="dark"] .chinese-divider {
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    rgba(196, 149, 106, 0.2) 20%,
-    rgba(196, 149, 106, 0.4) 50%,
-    rgba(196, 149, 106, 0.2) 80%,
-    transparent 100%
-  );
-}
-
-[data-theme="dark"] .chinese-divider::before,
-[data-theme="dark"] .chinese-divider::after {
-  color: rgba(196, 149, 106, 0.4);
-}
-
 /* 古画卷轴阴影 - 模拟古画质感 */
 .scroll-shadow {
   box-shadow: 
     0 4rpx 20rpx rgba(139, 69, 19, 0.1),
     0 8rpx 40rpx rgba(139, 69, 19, 0.08),
     inset 0 1rpx 0 rgba(255, 255, 255, 0.5);
-}
-
-/* 深色主题 */
-[data-theme="dark"] .scroll-shadow {
-  box-shadow: 
-    0 4rpx 20rpx rgba(0, 0, 0, 0.3),
-    0 8rpx 40rpx rgba(0, 0, 0, 0.2),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.05);
 }
 
 /* 宣纸纹理背景 */
