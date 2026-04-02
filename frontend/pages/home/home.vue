@@ -30,7 +30,7 @@
       v-show="!loading"
       scroll-y
       class="scroll-view"
-      @scroll="onScroll"
+      @scroll="handleScroll"
       scroll-with-animation
       :scroll-top="scrollTop"
     >
@@ -380,11 +380,23 @@
 <script>
 import SkeletonScreen from "../../components/SkeletonScreen.vue";
 import ShareCard from "../../components/ShareCard.vue";
+import HeroSection from "../../components/home/HeroSection.vue";
+import BuildingCard from "../../components/home/BuildingCard.vue";
+import FeatureCard from "../../components/home/FeatureCard.vue";
+import SectionHeader from "../../components/ui/SectionHeader.vue";
+import { throttle } from "../../utils/lazyLoad.js";
+import { recordPageLoad } from "../../utils/performance.js";
+import { goToMap, goToChat, goToFavorites, goToSettings, goToDetail } from "../../utils/navigation.js";
 
 export default {
+  name: 'HomePage',
   components: {
     SkeletonScreen,
-    ShareCard
+    ShareCard,
+    HeroSection,
+    BuildingCard,
+    FeatureCard,
+    SectionHeader
   },
   data() {
     return {
@@ -447,15 +459,25 @@ export default {
   },
   
   mounted() {
+    // 记录页面加载开始时间
+    this._pageLoadStart = Date.now();
+
     // 获取每日推荐
     this.getDailyBuilding();
 
-    // 模拟加载延迟，展示骨架屏效果
-    setTimeout(() => {
-      this.loading = false;
-      this.startHeroAnimation();
-      this.shuffleKnowledgeItems();
-    }, 800);
+    // 立即显示内容，移除延迟
+    this.loading = false;
+    this.startHeroAnimation();
+    this.shuffleKnowledgeItems();
+
+    // 记录页面加载完成时间
+    if (this._pageLoadStart) {
+      const loadTime = Date.now() - this._pageLoadStart;
+      recordPageLoad('home', loadTime);
+    }
+
+    // 初始化节流滚动处理
+    this.throttledOnScroll = throttle(this.onScroll.bind(this), 100);
   },
 
   onShow() {
@@ -605,30 +627,28 @@ export default {
 
     // 跳转到收藏页面
     goToFavorites() {
-      uni.navigateTo({
-        url: '/pages/favorites/favorites'
-      });
+      goToFavorites();
     },
 
     // 跳转到设置页面
     goToSettings() {
-      uni.navigateTo({
-        url: '/pages/settings/settings'
-      });
+      goToSettings();
     },
 
     startHeroAnimation() {
-      setTimeout(() => this.sections.hero.title = true, 200);
-      setTimeout(() => this.sections.hero.seal = true, 400);
-      setTimeout(() => this.sections.hero.subtitle = true, 700);
-      setTimeout(() => this.sections.hero.description = true, 1000);
-      setTimeout(() => this.sections.hero.divider = true, 1300);
-      setTimeout(() => this.sections.hero.btn1 = true, 1600);
-      setTimeout(() => this.sections.hero.btn2 = true, 1900);
-      setTimeout(() => this.sections.hero.statCards = true, 2100);
-      setTimeout(() => this.sections.hero.categoryShortcuts = true, 2300);
-      setTimeout(() => this.sections.daily = true, 2500);
-      setTimeout(() => this.sections.preview = true, 2700);
+      // 优化动画序列，更快更流畅
+      const baseDelay = 80; // 基础延迟缩短
+      setTimeout(() => this.sections.hero.title = true, baseDelay * 1);
+      setTimeout(() => this.sections.hero.seal = true, baseDelay * 2);
+      setTimeout(() => this.sections.hero.subtitle = true, baseDelay * 3);
+      setTimeout(() => this.sections.hero.description = true, baseDelay * 4);
+      setTimeout(() => this.sections.hero.divider = true, baseDelay * 5);
+      setTimeout(() => this.sections.hero.btn1 = true, baseDelay * 6);
+      setTimeout(() => this.sections.hero.btn2 = true, baseDelay * 7);
+      setTimeout(() => this.sections.hero.statCards = true, baseDelay * 8);
+      setTimeout(() => this.sections.hero.categoryShortcuts = true, baseDelay * 9);
+      setTimeout(() => this.sections.daily = true, baseDelay * 10);
+      setTimeout(() => this.sections.preview = true, baseDelay * 11);
     },
 
     onKnowledgeScroll(e) {
@@ -638,21 +658,15 @@ export default {
     },
     
     goToDetail(building) {
-      uni.navigateTo({
-        url: `/pages/detail/detail?materialId=${building.id}&name=${encodeURIComponent(building.name)}`,
-      });
+      goToDetail(building.id, building.name);
     },
     
     goToMap() {
-      uni.navigateTo({
-        url: "/pages/map/map"
-      });
+      goToMap();
     },
-    
+
     goToChat() {
-      uni.navigateTo({
-        url: "/pages/index/index"
-      });
+      goToChat();
     },
     
     onScroll(e) {
@@ -676,6 +690,15 @@ export default {
       this.sections.knowledge = scrollTop > windowHeight * 1.4;
       this.sections.footer = scrollTop > windowHeight * 1.8;
     },
+
+    // 使用节流优化的滚动事件处理
+    handleScroll(e) {
+      if (this.throttledOnScroll) {
+        this.throttledOnScroll(e);
+      } else {
+        this.onScroll(e);
+      }
+    },
     
     scrollToTop() {
       this.scrollTop = 1;
@@ -697,9 +720,7 @@ export default {
     },
     
     goToCategory(category) {
-      uni.navigateTo({
-        url: `/pages/map/map?category=${category}`
-      });
+      goToMap(category);
     }
   },
 
@@ -1027,7 +1048,7 @@ export default {
   z-index: 1;
 }
 
-/* 顶层：动态祥云（调慢） */
+/* 顶层：动态祥云（优化性能） */
 .cloud-background {
   position: fixed;
   top: 0;
@@ -1037,10 +1058,11 @@ export default {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800'%3E%3Cpath fill='%238b4513' d='M400,100 Q300,50 200,100 Q100,150 200,200 Q300,250 400,200 Q500,150 600,200 Q700,250 600,100 Q500,50 400,100'/%3E%3C/svg%3E");
   background-size: 400rpx 400rpx;
   background-repeat: repeat;
-  opacity: 0.06;
-  animation: cloudMove 60s linear infinite;
+  opacity: 0.04;
+  animation: cloudMove 80s linear infinite;
   pointer-events: none;
   z-index: 2;
+  will-change: background-position;
 }
 
 @keyframes cloudMove {
@@ -1199,16 +1221,17 @@ export default {
 
 .main-title {
   display: block;
-  font-size: 98rpx;
+  font-size: 88rpx;
   font-weight: 900;
-  color: #8b4513;
-  letter-spacing: 20rpx;
+  color: #7a3c10;
+  letter-spacing: 16rpx;
   margin-bottom: 24rpx;
-  text-shadow: 0 4rpx 16rpx rgba(196, 30, 58, 0.3), 0 2rpx 8rpx rgba(139, 69, 19, 0.2);
+  text-shadow: 0 2rpx 8rpx rgba(196, 30, 58, 0.25), 0 1rpx 4rpx rgba(139, 69, 19, 0.15);
   opacity: 0;
-  transform: translateY(30px);
-  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(20px);
+  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   font-family: 'ZCOOL XiaoWei', serif;
+  will-change: transform, opacity;
 }
 
 .main-title.visible {
@@ -1246,14 +1269,15 @@ export default {
 
 .subtitle {
   display: block;
-  font-size: 42rpx;
-  color: #6b5643;
-  margin-bottom: 32rpx;
-  letter-spacing: 6rpx;
+  font-size: 40rpx;
+  color: #5a4a3a;
+  margin-bottom: 28rpx;
+  letter-spacing: 5rpx;
   opacity: 0;
-  transform: translateY(30px);
-  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(20px);
+  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   font-family: 'ZCOOL XiaoWei', serif;
+  will-change: transform, opacity;
 }
 
 .subtitle.visible {
@@ -1263,12 +1287,13 @@ export default {
 
 .description {
   display: block;
-  font-size: 30.8rpx;
-  color: #8b7355;
-  line-height: 1.9;
+  font-size: 30rpx;
+  color: #6b5a4a;
+  line-height: 1.8;
   opacity: 0;
-  transform: translateY(30px);
-  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(20px);
+  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform, opacity;
 }
 
 .description.visible {
@@ -1301,20 +1326,21 @@ export default {
 }
 
 .hero-btn {
-  height: 108rpx;
-  border-radius: 54rpx;
-  font-size: 32rpx;
+  height: 100rpx;
+  border-radius: 50rpx;
+  font-size: 30rpx;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12rpx;
   transform: translateZ(0) translateY(0);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   cursor: pointer;
   opacity: 0;
   position: relative;
   overflow: hidden;
+  will-change: transform, box-shadow;
 }
 
 .hero-btn.visible {
@@ -1410,10 +1436,11 @@ export default {
 .section-features,
 .section-knowledge,
 .footer {
-  padding: 80rpx 40rpx;
+  padding: 60rpx 40rpx;
   opacity: 0;
-  transform: translateY(40px);
-  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(30px);
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform, opacity;
 }
 
 .section-daily.visible,

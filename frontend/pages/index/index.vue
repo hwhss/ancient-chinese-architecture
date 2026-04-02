@@ -136,13 +136,9 @@
     </view>
 
     <!-- 消息区域 -->
-    <scroll-view
+    <view
       class="message-area"
       :class="{ 'with-search-results': showSearch && searchResults.length > 0 }"
-      scroll-y
-      :scroll-into-view="scrollId"
-      :scroll-with-animation="true"
-      @scroll="onScroll"
     >
       <!-- 全新欢迎页设计 -->
       <view v-if="messages.length === 0" class="welcome-container">
@@ -193,80 +189,17 @@
         </view>
       </view>
 
-      <!-- 消息列表 -->
-      <view
-        v-for="(msg, index) in messages"
-        :key="msg.id"
-        :id="'msg-' + index"
-        class="message-wrapper"
-        :class="msg.role"
-      >
-        <!-- AI 头像 -->
-        <view v-if="msg.role === 'ai'" class="avatar ai-avatar">
-          <text class="avatar-icon">🏯</text>
-        </view>
-        
-        <view class="message-content">
-          <!-- 消息头部：名称和时间 -->
-          <view class="message-header">
-            <text class="message-sender">{{ msg.role === 'ai' ? '古建筑助手' : '我' }}</text>
-            <text class="message-time">{{ formatTime(msg.id) }}</text>
-          </view>
-          
-          <!-- 消息主体 -->
-          <view class="message" :class="msg.role">
-            <!-- AI消息使用Markdown渲染 -->
-            <view v-if="msg.role === 'ai' && !msg.isTyping" class="message-rich-text">
-              <rich-text :nodes="renderMarkdown(msg.displayContent || msg.content)"></rich-text>
-            </view>
-            <!-- 打字中或用户消息使用普通文本 -->
-            <text v-else class="message-text">
-              {{ msg.displayContent || msg.content }}
-              <text v-if="msg.isTyping" class="cursor">|</text>
-            </text>
-            <button
-              v-if="msg.materialId && !msg.isTyping"
-              class="view-btn"
-              @click="goToDetail(msg.materialId)"
-            >
-              查看实景资料 →
-            </button>
-            <view
-              v-else-if="!msg.isTyping && msg.entities && msg.entities.length"
-              class="candidate-list"
-            >
-              <text class="candidate-title">可能相关的古建：</text>
-              <view class="candidate-tags">
-                <text
-                  v-for="entity in msg.entities"
-                  :key="entity.id"
-                  class="candidate-tag"
-                  @click="goToDetail(entity.id)"
-                >
-                  {{ entity.name }}
-                </text>
-              </view>
-            </view>
-          </view>
-          
-          <!-- 消息操作栏 -->
-          <view v-if="!msg.isTyping" class="message-actions">
-            <view class="action-btn" @click="copyMessage(msg.content)" title="复制">
-              <text class="action-icon">📋</text>
-              <text class="action-text">复制</text>
-            </view>
-            <view v-if="msg.role === 'ai'" class="action-btn" @click="regenerateResponse(index)" title="重新生成">
-              <text class="action-icon">🔄</text>
-              <text class="action-text">重新生成</text>
-            </view>
-          </view>
-        </view>
-        
-        <!-- 用户头像 -->
-        <view v-if="msg.role === 'user'" class="avatar user-avatar">
-          <text class="avatar-icon">👤</text>
-        </view>
-      </view>
+      <!-- 使用虚拟列表渲染消息 - 优化大量消息性能 -->
+      <virtual-message-list
+        v-else
+        ref="messageList"
+        :messages="messages"
+        :container-height="messageAreaHeight"
+        :item-height="120"
+        :buffer-size="3"
+        @go-to-detail="goToDetail"
+        @regenerate="regenerateResponse"
+      />
 
       <!-- 加载状态 - 优化版 -->
       <view v-if="loading && !hasPendingAiMessage" class="message-wrapper ai loading-wrapper">
@@ -293,9 +226,7 @@
         <text class="error-text">{{ lastError }}</text>
         <button class="retry-btn" @click="retryLastQuestion">重新发送</button>
       </view>
-
-      <view class="scroll-bottom"></view>
-    </scroll-view>
+    </view>
 
     <!-- 示例问题区域（永久显示） -->
     <view class="example-questions-area">
@@ -344,6 +275,7 @@
 <script>
 import { chat } from "../../services/api";
 import { parseMarkdown, renderToHtml, containsMarkdown } from "../../utils/markdown.js";
+import VirtualMessageList from "../../components/VirtualMessageList.vue";
 
 // 缓存键
 const CACHE_KEY = "CHAT_HISTORY";
@@ -463,6 +395,10 @@ const MOCK_ANSWERS = {
 };
 
 export default {
+  components: {
+    VirtualMessageList
+  },
+  
   data() {
     return {
       messages: [],
@@ -492,7 +428,12 @@ export default {
       searchQuery: "",
       searchResults: [],
       isSearching: false,
-      highlightedMessageId: null
+      highlightedMessageId: null,
+      // 响应式设计
+      messageAreaHeight: 600,
+      windowHeight: 0,
+      windowWidth: 0,
+      isMobile: false
     };
   },
 
@@ -512,6 +453,15 @@ export default {
     if (!this.currentSessionId) {
       this.createNewSession();
     }
+    // 初始化响应式设计
+    this.initResponsiveDesign();
+    // 监听窗口大小变化
+    uni.onWindowResize(this.handleWindowResize);
+  },
+
+  onUnload() {
+    // 取消监听窗口大小变化
+    uni.offWindowResize(this.handleWindowResize);
   },
 
   onHide() {
@@ -1032,16 +982,21 @@ export default {
       return `这是一个很有价值的问题。${question}涉及丰富的历史文化内涵。建议您参考相关历史资料获取更详细的信息。`;
     },
 
-    // 滚动到底部 - 优化版
+    // 滚动到底部 - 优化版（支持虚拟列表）
     scrollToBottom() {
       this.$nextTick(() => {
         if (this.messages.length > 0) {
-          // 使用 scroll-into-view 滚动到最后一条消息
-          const lastIndex = this.messages.length - 1;
-          this.scrollId = '';
-          setTimeout(() => {
-            this.scrollId = 'msg-' + lastIndex;
-          }, 50);
+          // 如果有虚拟列表，使用虚拟列表的滚动方法
+          if (this.$refs.messageList) {
+            this.$refs.messageList.scrollToBottom();
+          } else {
+            // 使用 scroll-into-view 滚动到最后一条消息
+            const lastIndex = this.messages.length - 1;
+            this.scrollId = '';
+            setTimeout(() => {
+              this.scrollId = 'msg-' + lastIndex;
+            }, 50);
+          }
         }
       });
     },
@@ -1120,11 +1075,63 @@ export default {
 
     onScroll(e) {
       this.scrollTop = e.detail.scrollTop;
+      // 同步到虚拟列表
+      if (this.$refs.messageList) {
+        this.$refs.messageList.onScroll(e.detail.scrollTop);
+      }
     },
 
-    // 键盘聚焦
-    onInputFocus() {
-      // 键盘弹起时，延迟调整滚动
+    // 初始化响应式设计
+    initResponsiveDesign() {
+      const systemInfo = uni.getSystemInfoSync();
+      this.windowHeight = systemInfo.windowHeight;
+      this.windowWidth = systemInfo.windowWidth;
+      this.isMobile = systemInfo.windowWidth < 768;
+      
+      // 计算消息区域高度
+      this.calculateMessageAreaHeight();
+    },
+
+    // 处理窗口大小变化
+    handleWindowResize(res) {
+      this.windowHeight = res.size.windowHeight;
+      this.windowWidth = res.size.windowWidth;
+      this.isMobile = res.size.windowWidth < 768;
+      
+      // 重新计算消息区域高度
+      this.calculateMessageAreaHeight();
+    },
+
+    // 计算消息区域高度
+    calculateMessageAreaHeight() {
+      // 减去头部、输入区域和示例问题区域的高度
+      const headerHeight = 100; // rpx
+      const inputAreaHeight = this.keyboardHeight > 0 ? this.keyboardHeight + 60 : 180;
+      const exampleAreaHeight = 120;
+      const padding = 40;
+      
+      // 将rpx转换为px（假设屏幕宽度750rpx）
+      const rpxToPx = this.windowWidth / 750;
+      const totalRpxHeight = headerHeight + inputAreaHeight + exampleAreaHeight + padding;
+      const totalPxHeight = totalRpxHeight * rpxToPx;
+      
+      this.messageAreaHeight = Math.max(300, this.windowHeight - totalPxHeight);
+    },
+
+    // 键盘聚焦 - 优化键盘弹出体验
+    onInputFocus(e) {
+      // 获取键盘高度
+      if (e.detail && e.detail.height) {
+        this.keyboardHeight = e.detail.height;
+      } else {
+        // 默认键盘高度
+        this.keyboardHeight = 300;
+      }
+      
+      // 重新计算消息区域高度
+      this.calculateMessageAreaHeight();
+      
+      // 键盘弹起时，延迟滚动到底部
       setTimeout(() => {
         this.scrollToBottom();
       }, 300);
@@ -1132,12 +1139,20 @@ export default {
 
     onInputBlur() {
       this.keyboardHeight = 0;
+      // 恢复消息区域高度
+      this.calculateMessageAreaHeight();
     },
 
     // 处理行数变化
     onLineChange(e) {
-      // 可以在这里处理行数变化的逻辑
-      console.log('行数变化:', e.detail.lineCount);
+      // 根据行数调整输入框高度
+      const lineCount = e.detail.lineCount;
+      if (lineCount > 1) {
+        // 多行时重新计算布局
+        this.$nextTick(() => {
+          this.calculateMessageAreaHeight();
+        });
+      }
     },
 
     goToDetail(materialId) {
@@ -1667,9 +1682,88 @@ export default {
   overflow: hidden;
   position: relative;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
 }
 
-/* ========== 全新欢迎页样式 ========== */
+/* ========== 响应式设计 ========== */
+/* 平板设备 */
+@media (min-width: 768px) {
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  
+  .title {
+    font-size: 42rpx;
+  }
+  
+  .message-content {
+    max-width: 60%;
+  }
+  
+  .sidebar {
+    width: 400rpx;
+  }
+}
+
+/* 桌面设备 */
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1100px;
+  }
+  
+  .message-content {
+    max-width: 50%;
+  }
+  
+  .input-area {
+    padding: 30rpx 60rpx;
+  }
+  
+  .example-questions-area {
+    padding: 30rpx 60rpx;
+  }
+}
+
+/* 小屏手机优化 */
+@media (max-width: 375px) {
+  .title {
+    font-size: 30rpx;
+    letter-spacing: 4rpx;
+  }
+  
+  .avatar {
+    width: 64rpx;
+    height: 64rpx;
+  }
+  
+  .avatar-icon {
+    font-size: 32rpx;
+  }
+  
+  .message {
+    font-size: 28rpx;
+    padding: 20rpx;
+  }
+  
+  .message-content {
+    max-width: 75%;
+  }
+}
+
+/* 键盘弹出时的布局调整 */
+.input-area.keyboard-active {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: #fffef9;
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.1);
+}
+
+/* ========== 全新欢迎页样式 ==========
 .welcome-container {
   position: relative;
   padding: 40rpx 30rpx 60rpx;

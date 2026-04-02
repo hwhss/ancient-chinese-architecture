@@ -100,13 +100,13 @@
       <!-- 视图切换动画容器 -->
       <view class="view-transition-container">
         <!-- 建筑列表视图 -->
-        <scroll-view 
-          v-show="currentView === 'list'" 
-          scroll-y 
-          class="scroll-view view-content" 
+        <scroll-view
+          v-show="currentView === 'list'"
+          scroll-y
+          class="scroll-view view-content"
           :class="{ 'view-active': currentView === 'list', 'view-inactive': currentView !== 'list' }"
-          @scroll="onScroll" 
-          scroll-with-animation 
+          @scroll="handleScroll"
+          scroll-with-animation
           :scroll-top="scrollTop"
         >
           <view class="building-grid">
@@ -255,9 +255,16 @@
 </template>
 
 <script>
-import { getBuildings } from "../../services/api";
+import { getBuildings } from "../../services/apiWithCache.js";
 import SkeletonScreen from "../../components/SkeletonScreen.vue";
 import VisualChart from "../../components/VisualChart.vue";
+import { throttle } from "../../utils/lazyLoad.js";
+import { 
+  createOptimizedMapConfig, 
+  MapEventThrottler,
+  getPerformanceBasedConfig,
+  debounce
+} from "../../utils/mapPerformance.js";
 
 // 分类配置 - 静态常量
 const categories = [
@@ -303,7 +310,10 @@ export default {
       chartTabs: [
         { key: 'category', name: '类型分布', icon: '🏛️' },
         { key: 'geo', name: '地理分布', icon: '📍' }
-      ]
+      ],
+      mapEventThrottler: null,
+      perfConfig: null,
+      isRenderingMarkers: false
     };
   },
 
@@ -311,6 +321,8 @@ export default {
     if (options.category) {
       this.currentCategory = options.category;
     }
+    // 初始化节流函数
+    this.throttledOnScroll = throttle(this.onScroll.bind(this), 100);
     this.loadBuildings();
   },
   
@@ -550,48 +562,95 @@ export default {
     // 创建 Leaflet 地图
     createLeafletMap() {
       if (!window.L) return;
-      
+
       const container = document.getElementById('tencentMap');
       if (!container) return;
-      
-      // 修复：确保容器有明确的大小
+
+      // 获取性能优化配置
+      this.perfConfig = getPerformanceBasedConfig();
+
+      // 确保容器有明确的大小
       container.style.width = '100%';
       container.style.height = '100%';
-      
+
       // 清空容器
       container.innerHTML = '';
-      
-      this.mapInstance = window.L.map('tencentMap', {
+
+      // 使用优化的地图配置
+      const mapConfig = {
         center: [this.mapCenter.lat, this.mapCenter.lng],
         zoom: this.mapZoom,
         minZoom: 3,
-        maxZoom: 18
-      });
-      
+        maxZoom: 18,
+        ...createOptimizedMapConfig()
+      };
+
+      this.mapInstance = window.L.map('tencentMap', mapConfig);
+
       // 添加 OpenStreetMap 图层
       window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors',
-        maxZoom: 18
+        maxZoom: 18,
+        // 优化瓦片加载
+        updateWhenIdle: true,
+        updateWhenZooming: false,
+        keepBuffer: 2
       }).addTo(this.mapInstance);
-      
-      // 修复：延迟更新标记以确保地图完全初始化
-      setTimeout(() => {
+
+      // 延迟更新标记以确保地图完全初始化
+      requestAnimationFrame(() => {
         this.mapInstance.invalidateSize();
         this.updateMapMarkers();
-      }, 200);
-
-      // 监听地图缩放事件，使用防抖优化性能
-      let zoomTimeout = null;
-      this.mapInstance.on('zoomend', () => {
-        // 清除之前的定时器
-        if (zoomTimeout) {
-          clearTimeout(zoomTimeout);
-        }
-        // 延迟300ms后重新渲染，避免频繁更新
-        zoomTimeout = setTimeout(() => {
-          this.renderMarkers();
-        }, 300);
       });
+
+      // 使用优化的事件节流器
+      this.mapEventThrottler = new MapEventThrottler(this.mapInstance, {
+        zoomDelay: 50,
+        moveDelay: 30
+      });
+
+      this.mapEventThrottler
+        .on('zoom', (zoom) => {
+          // 缩放过程中实时更新标记位置
+          this.updateMarkerPositions();
+        })
+        .on('zoomEnd', (zoom) => {
+          // 缩放结束后重新渲染标记
+          this.renderMarkers();
+        })
+        .on('move', (bounds) => {
+          // 移动过程中更新可见标记
+          this.updateVisibleMarkers(bounds);
+        })
+        .start();
+
+      // 使用 RAF 优化缩放动画
+      let rafId = null;
+      this.mapInstance.on('zoom', () => {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+          this.updateMarkerPositions();
+          rafId = null;
+        });
+      });
+    },
+
+    // 更新标记位置（不重新创建，仅更新位置）
+    updateMarkerPositions() {
+      if (!this.mapInstance || !window.L) return;
+
+      // 标记位置由 Leaflet 自动管理
+      // 这里可以添加额外的位置更新逻辑，如根据缩放级别调整样式
+      const currentZoom = this.mapInstance.getZoom();
+
+      // 可以在这里根据缩放级别调整标记样式
+      // 当前保持原始视觉效果不变
+    },
+
+    // 更新可见标记
+    updateVisibleMarkers(bounds) {
+      // 可以在这里实现视口外标记的隐藏逻辑
+      // 当前 Leaflet 会自动处理，这里预留扩展点
     },
     
     // 获取建筑坐标
@@ -679,52 +738,94 @@ export default {
     },
 
     // 渲染标记到地图
-    renderMarkers() {
-      if (!this.mapInstance || !window.L) return;
+    async renderMarkers() {
+      if (!this.mapInstance || !window.L || this.isRenderingMarkers) return;
 
-      // 修复：如果没有标记数据，直接返回
-      if (this.mapMarkers.length === 0) {
+      // 防止重复渲染
+      this.isRenderingMarkers = true;
+
+      try {
+        // 如果没有标记数据，直接返回
+        if (this.mapMarkers.length === 0) {
+          this.clearMarkers();
+          return;
+        }
+
+        // 获取当前缩放级别
+        const currentZoom = this.mapInstance.getZoom();
+
+        // 直接为每个标记创建实例，不进行聚类
+        const markerSignature = this.mapMarkers.map(m => `s:${m.title}`).join('|');
+
+        // 如果标记没有变化，跳过渲染
+        if (this.lastClusterSignature === markerSignature) {
+          this.isRenderingMarkers = false;
+          return;
+        }
+        this.lastClusterSignature = markerSignature;
+
         // 清除旧标记
-        this.mapInstance.eachLayer(layer => {
-          if (layer instanceof window.L.Marker || layer instanceof window.L.Popup) {
-            this.mapInstance.removeLayer(layer);
+        this.clearMarkers();
+
+        // 使用批量渲染优化性能
+        const batchSize = this.perfConfig?.batchSize || 50;
+        const batches = [];
+
+        for (let i = 0; i < this.mapMarkers.length; i += batchSize) {
+          batches.push(this.mapMarkers.slice(i, i + batchSize));
+        }
+
+        // 创建标记组
+        const markerGroup = window.L.layerGroup();
+
+        // 分批渲染
+        for (let i = 0; i < batches.length; i++) {
+          const batch = batches[i];
+
+          await new Promise(resolve => {
+            requestAnimationFrame(() => {
+              batch.forEach((markerData, index) => {
+                const marker = this.createSingleMarker(markerData, i * batchSize + index);
+                if (marker) {
+                  markerGroup.addLayer(marker);
+                  this.markersInstance.push(marker);
+                }
+              });
+              resolve();
+            });
+          });
+
+          // 让出主线程，避免阻塞UI
+          if (i < batches.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 0));
           }
-        });
-        this.markersInstance = [];
-        return;
+        }
+
+        // 一次性添加到地图
+        markerGroup.addTo(this.mapInstance);
+
+        // 根据缩放级别调整标记样式
+        this.updateMarkerPositions();
+
+      } finally {
+        this.isRenderingMarkers = false;
       }
+    },
 
-      // 获取当前缩放级别
-      const currentZoom = this.mapInstance.getZoom();
+    // 清除所有标记
+    clearMarkers() {
+      if (!this.mapInstance) return;
 
-      // 直接为每个标记创建实例，不进行聚类
-      const markerSignature = this.mapMarkers.map(m => `s:${m.title}`).join('|');
-
-      // 如果标记没有变化，跳过渲染
-      if (this.lastClusterSignature === markerSignature) {
-        return;
-      }
-      this.lastClusterSignature = markerSignature;
-
-      // 清除旧标记
+      // 只清除标记层，保留瓦片层
       this.mapInstance.eachLayer(layer => {
-        if (layer instanceof window.L.Marker || layer instanceof window.L.Popup) {
+        if (layer instanceof window.L.Marker ||
+            layer instanceof window.L.Popup ||
+            layer instanceof window.L.LayerGroup) {
           this.mapInstance.removeLayer(layer);
         }
       });
+
       this.markersInstance = [];
-
-      // 批量添加标记
-      const markerGroup = window.L.layerGroup();
-
-      // 为每个古建筑创建标记
-      this.mapMarkers.forEach((markerData, index) => {
-        const marker = this.createSingleMarker(markerData, index);
-        if (marker) markerGroup.addLayer(marker);
-      });
-
-      // 一次性添加到地图
-      markerGroup.addTo(this.mapInstance);
     },
 
     // 创建单个标记（返回marker实例，不直接添加到地图）
@@ -732,15 +833,15 @@ export default {
       // 获取建筑图片
       const buildingImage = markerData.buildingData.image || '';
 
-      // 创建自定义图标 - 醒目的红色标记（带标签）
+      // 创建自定义图标 - 醒目的红色标记（带标签）- 恢复原始视觉效果
       const customIcon = window.L.divIcon({
         className: 'building-marker',
         html: `
-          <div style="position: relative; width: 40px; height: 50px; display: flex; flex-direction: column; align-items: center;">
-            <div style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 40px; height: 40px; border-radius: 50%; background: rgba(196, 30, 58, 0.3); animation: pulse 1.5s ease-out infinite;"></div>
-            <div style="position: relative; width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%); border: 3px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.4);"></div>
-            <div style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 12px solid #c41e3a;"></div>
-            <div style="position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.95); padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #333; white-space: nowrap; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">${markerData.title.length > 4 ? markerData.title.substring(0, 4) + '...' : markerData.title}</div>
+          <div class="marker-container" style="position: relative; width: 40px; height: 50px; display: flex; flex-direction: column; align-items: center;">
+            <div class="marker-pulse-ring" style="position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 40px; height: 40px; border-radius: 50%; background: rgba(196, 30, 58, 0.3); animation: pulse 1.5s ease-out infinite;"></div>
+            <div class="marker-dot" style="position: relative; width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%); border: 3px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.4);"></div>
+            <div class="marker-arrow" style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 12px solid #c41e3a;"></div>
+            <div class="marker-label" style="position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.95); padding: 2px 8px; border-radius: 4px; font-size: 12px; color: #333; white-space: nowrap; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">${markerData.title.length > 4 ? markerData.title.substring(0, 4) + '...' : markerData.title}</div>
           </div>
           <style>
             @keyframes pulse {
@@ -807,12 +908,13 @@ export default {
       this.sortOrder = this.sortOrder === "name" ? "default" : "name";
     },
 
-    async loadBuildings() {
+    async loadBuildings(forceRefresh = false) {
       this.loading = true;
       this.error = "";
 
       try {
-        const list = await getBuildings();
+        // 使用带缓存的API，默认使用缓存
+        const list = await getBuildings({}, forceRefresh);
         console.log("[DEBUG] API返回数据数量:", list ? list.length : 0);
         if (list && list.length > 0) {
           console.log("[DEBUG] API返回的第一个建筑:", JSON.stringify(list[0], null, 2));
@@ -826,6 +928,9 @@ export default {
         this.loading = false;
       }
     },
+
+    // 节流优化的滚动处理
+    throttledOnScroll: null,
 
     goToDetail(building) {
       uni.navigateTo({
@@ -850,6 +955,15 @@ export default {
       this.showChart = scrollTop > windowHeight * 0.5;
 
       this.checkVisibleCards();
+    },
+
+    // 使用节流优化的滚动事件处理
+    handleScroll(e) {
+      if (this.throttledOnScroll) {
+        this.throttledOnScroll(e);
+      } else {
+        this.onScroll(e);
+      }
     },
 
     // 切换图表标签
@@ -1974,6 +2088,120 @@ export default {
 .building-marker {
   background: transparent !important;
   border: none !important;
+}
+
+/* 标记容器 - 恢复原始样式 */
+.marker-container {
+  position: relative;
+  width: 40px;
+  height: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  will-change: transform;
+}
+
+/* 脉冲动画环 */
+.marker-pulse-ring {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(196, 30, 58, 0.3);
+  animation: pulse 1.5s ease-out infinite;
+  will-change: transform, opacity;
+}
+
+@keyframes pulse {
+  0% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-50%) scale(1.6);
+    opacity: 0;
+  }
+}
+
+/* 标记点 */
+.marker-dot {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+  border: 3px solid #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  z-index: 2;
+}
+
+/* 标记箭头 */
+.marker-arrow {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 12px solid #c41e3a;
+  z-index: 1;
+}
+
+/* 标记标签 */
+.marker-label {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255,255,255,0.95);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #333;
+  white-space: nowrap;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  z-index: 3;
+}
+
+/* Leaflet 弹窗样式 */
+.leaflet-popup-content-wrapper {
+  border-radius: 16rpx !important;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.15) !important;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* 地图性能优化 - 硬件加速 */
+.leaflet-container {
+  will-change: transform;
+}
+
+.leaflet-tile {
+  will-change: transform;
+}
+
+.leaflet-marker-icon {
+  will-change: transform;
+}
+
+/* 标记悬停效果 */
+.building-marker:hover .marker-dot {
+  transform: scale(1.1);
+  transition: transform 0.2s ease;
+}
+
+.building-marker:hover .marker-label {
+  background: #fff;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
 }
 
 /* 地图弹窗卡片样式 */
