@@ -16,6 +16,9 @@
       "delay": 0
     },
     "modules": {},
+    "optimization": {
+      "subPackages": true
+    },
     "distribute": {
       "android": {
         "permissions": [
@@ -30,9 +33,17 @@
   "mp-weixin": {
     "appid": "",
     "setting": {
-      "urlCheck": false
+      "urlCheck": false,
+      "es6": true,
+      "enhance": true,
+      "postcss": true,
+      "minified": true,
+      "uglifyFileName": true
     },
-    "usingComponents": true
+    "usingComponents": true,
+    "optimization": {
+      "subPackages": true
+    }
   },
   "mp-alipay": {
     "usingComponents": true

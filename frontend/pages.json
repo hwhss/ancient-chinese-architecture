@@ -52,6 +52,38 @@
       }
     }
   ],
+  "tabBar": {
+    "color": "#8b7355",
+    "selectedColor": "#c41e3a",
+    "backgroundColor": "#f8f4e8",
+    "borderStyle": "#e8dcc8",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "首页",
+        "iconPath": "static/tabbar/home.png",
+        "selectedIconPath": "static/tabbar/home-active.png"
+      },
+      {
+        "pagePath": "pages/map/map",
+        "text": "名录",
+        "iconPath": "static/tabbar/map.png",
+        "selectedIconPath": "static/tabbar/map-active.png"
+      },
+      {
+        "pagePath": "pages/index/index",
+        "text": "AI导览",
+        "iconPath": "static/tabbar/chat.png",
+        "selectedIconPath": "static/tabbar/chat-active.png"
+      },
+      {
+        "pagePath": "pages/favorites/favorites",
+        "text": "收藏",
+        "iconPath": "static/tabbar/favorite.png",
+        "selectedIconPath": "static/tabbar/favorite-active.png"
+      }
+    ]
+  },
   "globalStyle": {
     "navigationBarTextStyle": "black",
     "navigationBarBackgroundColor": "#F8F8F8",

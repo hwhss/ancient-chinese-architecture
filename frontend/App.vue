@@ -8,12 +8,35 @@ export default {
     // #ifdef H5
     initChineseAnimations()
     // #endif
+
+    // 初始化页面转场动画
+    this.initPageTransitions()
   },
   onShow() {
     console.log('App Show')
+    // 触发页面显示事件
+    uni.$emit('pageShow')
   },
   onHide() {
     console.log('App Hide')
+  },
+
+  methods: {
+    // 初始化页面转场动画
+    initPageTransitions() {
+      // #ifdef H5
+      // 监听路由变化，添加转场动画
+      if (typeof window !== 'undefined') {
+        // 页面进入动画
+        document.addEventListener('DOMContentLoaded', () => {
+          document.body.classList.add('page-enter')
+          setTimeout(() => {
+            document.body.classList.remove('page-enter')
+          }, 400)
+        })
+      }
+      // #endif
+    }
   }
 }
 </script>

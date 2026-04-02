@@ -212,11 +212,12 @@
 </template>
 
 <script>
-import { getBuildingById, getMaterialById } from "../../services/api";
+import { getBuildingById, getMaterialById } from "../../services/apiWithCache.js";
 import ShareCard from "../../components/ShareCard.vue";
 import InfoGraphic from "../../components/InfoGraphic.vue";
 import LottieAnimation from "../../components/LottieAnimation.vue";
 import VisualChart from "../../components/VisualChart.vue";
+import { recordPageLoad, recordApiCall } from "../../utils/performance.js";
 
 // 素材ID到名称的映射 - 静态常量
 // 注意：这些ID必须与后端 data-jsondb/buildings/*.json 中的 id 字段完全一致
@@ -451,6 +452,9 @@ export default {
   },
 
   onLoad(options) {
+    // 记录页面加载开始时间
+    this._pageLoadStart = Date.now();
+
     this.materialId = options.materialId || "";
     this.materialName = options.name ? decodeURIComponent(options.name) : "";
 
@@ -481,21 +485,39 @@ export default {
       }
 
       this.loading = false;
+
+      // 记录页面加载完成时间
+      if (this._pageLoadStart) {
+        const loadTime = Date.now() - this._pageLoadStart;
+        recordPageLoad(`detail_${this.materialId}`, loadTime);
+      }
     },
 
     async loadBuilding() {
+      const startTime = Date.now();
       try {
+        // 使用带缓存的API，默认使用缓存
         this.building = await getBuildingById(this.materialId);
+        const duration = Date.now() - startTime;
+        recordApiCall('getBuildingById', duration, true);
       } catch (error) {
+        const duration = Date.now() - startTime;
+        recordApiCall('getBuildingById', duration, false);
         console.error("加载建筑详情失败:", error);
         this.error = error.message || "建筑详情加载失败";
       }
     },
 
     async loadMaterial() {
+      const startTime = Date.now();
       try {
+        // 使用带缓存的API
         this.material = await getMaterialById(this.materialId);
+        const duration = Date.now() - startTime;
+        recordApiCall('getMaterialById', duration, true);
       } catch (error) {
+        const duration = Date.now() - startTime;
+        recordApiCall('getMaterialById', duration, false);
         console.error("加载素材失败:", error);
         this.setPlaceholderData();
         this.materialNotice = "当前素材暂不可用，已展示示例图";
