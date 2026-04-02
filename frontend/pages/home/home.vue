@@ -237,7 +237,7 @@
             <view class="window-pattern"></view>
           </view>
         </view>
-        
+
         <view class="preview-cards-grid">
           <view 
             v-for="(building, index) in previewBuildings" 
@@ -257,7 +257,7 @@
           </view>
         </view>
       </view>
-      
+
       <!-- 项目亮点区 -->
       <view class="section-features" :class="{ 'visible': sections.features }">
         <view class="section-header">
@@ -628,6 +628,7 @@ export default {
       setTimeout(() => this.sections.hero.statCards = true, 2100);
       setTimeout(() => this.sections.hero.categoryShortcuts = true, 2300);
       setTimeout(() => this.sections.daily = true, 2500);
+      setTimeout(() => this.sections.preview = true, 2700);
     },
 
     onKnowledgeScroll(e) {
@@ -657,12 +658,12 @@ export default {
     onScroll(e) {
       const scrollTop = e.detail.scrollTop;
       const windowHeight = uni.getSystemInfoSync().windowHeight;
-      
+
       // 回到顶部按钮显示
       this.showBackToTop = scrollTop > windowHeight;
-      
+
       this.sections.preview = scrollTop > windowHeight * 0.3;
-      
+
       if (this.sections.preview) {
         this.previewBuildings.forEach((_, index) => {
           setTimeout(() => {
@@ -670,7 +671,7 @@ export default {
           }, index * 100);
         });
       }
-      
+
       this.sections.features = scrollTop > windowHeight * 0.8;
       this.sections.knowledge = scrollTop > windowHeight * 1.4;
       this.sections.footer = scrollTop > windowHeight * 1.8;
@@ -1404,6 +1405,7 @@ export default {
 
 /* 通用区块样式 */
 .section-daily,
+.section-chart,
 .section-preview,
 .section-features,
 .section-knowledge,

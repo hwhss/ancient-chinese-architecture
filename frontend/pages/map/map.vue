@@ -64,7 +64,7 @@
           </view>
         </view>
         
-        <!-- 筛选标签栏 - 分类和朝代合并 -->
+        <!-- 筛选标签栏 -->
         <view class="filter-tabs-container">
           <scroll-view class="filter-tabs" scroll-x>
             <!-- 分类筛选 -->
@@ -80,35 +80,18 @@
               {{ cat.name }}
             </view>
             </view>
-            
-            <!-- 分隔线 -->
-            <view class="filter-divider"></view>
-            
-            <!-- 朝代筛选 -->
-            <view class="filter-group">
-              <text class="filter-label">朝代</text>
-              <view
-              v-for="dynasty in dynasties"
-              :key="dynasty.key"
-              class="filter-tab tap-feedback"
-              :class="{ active: currentDynasty === dynasty.key }"
-              @click="selectDynasty(dynasty.key)"
-            >
-              {{ dynasty.name }}
-            </view>
-            </view>
           </scroll-view>
           
           <!-- 排序按钮 - 移到右侧 -->
           <view class="sort-btn tap-feedback" @click="toggleSort">
-            <text class="sort-icon">{{ sortOrder === 'name' ? '🔤' : '�' }}</text>
+            <text class="sort-icon">🔤</text>
           </view>
         </view>
         
         <!-- 已选筛选标签展示 -->
-        <view class="active-filters" v-if="currentCategory !== 'all' || currentDynasty !== 'all' || searchKeyword">
+        <view class="active-filters" v-if="currentCategory !== 'all' || searchKeyword">
           <text class="filter-result-text">筛选结果：{{ filteredBuildings.length }} 处古建</text>
-          <view class="clear-filters" @click="clearFilters" v-if="currentCategory !== 'all' || currentDynasty !== 'all'">
+          <view class="clear-filters" @click="clearFilters" v-if="currentCategory !== 'all'">
             <text>清除筛选</text>
           </view>
         </view>
@@ -151,6 +134,67 @@
                 <view class="card-tags">
                   <text v-for="tag in building.tags.slice(0, 2)" :key="tag" class="card-tag">{{ tag }}</text>
                 </view>
+              </view>
+            </view>
+          </view>
+
+          <!-- 数据可视化图表区域 - 放在列表底部 -->
+          <view class="charts-section" v-if="!loading && !error && filteredBuildings.length > 0">
+            <!-- 图表切换标签 -->
+            <view class="charts-tabs">
+              <view
+                v-for="tab in chartTabs"
+                :key="tab.key"
+                class="chart-tab tap-feedback"
+                :class="{ active: activeChartTab === tab.key }"
+                @click="switchChartTab(tab.key)"
+              >
+                <text class="chart-tab-icon">{{ tab.icon }}</text>
+                <text class="chart-tab-text">{{ tab.name }}</text>
+              </view>
+            </view>
+
+            <!-- 图表容器 -->
+            <view class="chart-display-area">
+              <!-- 分类分布饼图 -->
+              <view v-if="activeChartTab === 'category'" class="chart-wrapper">
+                <view class="chart-title-bar">
+                  <text class="chart-title-text">🏛️ 建筑类型分布</text>
+                </view>
+                <!-- #ifdef H5 -->
+                <VisualChart
+                  type="pie"
+                  :data="categoryChartData"
+                  :height="260"
+                  @click="onCategoryChartClick"
+                />
+                <!-- #endif -->
+                <!-- #ifndef H5 -->
+                <view class="chart-fallback-simple">
+                  <text class="fallback-text">请在 H5 环境下查看图表</text>
+                </view>
+                <!-- #endif -->
+              </view>
+
+              <!-- 地理位置散点图 -->
+              <view v-if="activeChartTab === 'geo'" class="chart-wrapper">
+                <view class="chart-title-bar">
+                  <text class="chart-title-text">📍 地理位置分布</text>
+                  <text class="chart-subtitle">共 {{ filteredBuildings.length }} 处古建筑</text>
+                </view>
+                <!-- #ifdef H5 -->
+                <VisualChart
+                  type="scatter"
+                  :data="geoChartData"
+                  :height="320"
+                  @click="onChartClick"
+                />
+                <!-- #endif -->
+                <!-- #ifndef H5 -->
+                <view class="chart-fallback-simple">
+                  <text class="fallback-text">请在 H5 环境下查看图表</text>
+                </view>
+                <!-- #endif -->
               </view>
             </view>
           </view>
@@ -213,6 +257,7 @@
 <script>
 import { getBuildings } from "../../services/api";
 import SkeletonScreen from "../../components/SkeletonScreen.vue";
+import VisualChart from "../../components/VisualChart.vue";
 
 // 分类配置 - 静态常量
 const categories = [
@@ -226,35 +271,15 @@ const categories = [
   { key: "water", name: "💧 水利" },
 ];
 
-// 朝代配置
-const dynasties = [
-  { key: "all", name: "全部" },
-  { key: "sui", name: "隋代" },
-  { key: "tang", name: "唐代" },
-  { key: "song", name: "宋代" },
-  { key: "ming", name: "明代" },
-  { key: "qing", name: "清代" },
-];
-
-// 朝代映射
-const dynastyMap = {
-  "隋代": "sui",
-  "唐代": "tang",
-  "宋代": "song",
-  "明代": "ming",
-  "清代": "qing"
-};
-
 export default {
   components: {
-    SkeletonScreen
+    SkeletonScreen,
+    VisualChart
   },
   data() {
     return {
       categories,
-      dynasties,
       currentCategory: "all",
-      currentDynasty: "all",
       searchKeyword: "",
       sortOrder: "name",
       currentView: "list",
@@ -272,7 +297,13 @@ export default {
       mapMarkers: [],
       mapInstance: null,
       markersInstance: [],
-      lastClusterSignature: null
+      lastClusterSignature: null,
+      showChart: false,
+      activeChartTab: 'category',
+      chartTabs: [
+        { key: 'category', name: '类型分布', icon: '🏛️' },
+        { key: 'geo', name: '地理分布', icon: '📍' }
+      ]
     };
   },
 
@@ -299,14 +330,6 @@ export default {
         result = result.filter((b) => b.category === this.currentCategory);
       }
       
-      // 朝代筛选
-      if (this.currentDynasty !== "all") {
-        result = result.filter((b) => {
-          const dynastyTag = b.tags.find(tag => dynastyMap[tag]);
-          return dynastyTag && dynastyMap[dynastyTag] === this.currentDynasty;
-        });
-      }
-      
       // 搜索筛选
       if (this.searchKeyword.trim()) {
         const keyword = this.searchKeyword.trim().toLowerCase();
@@ -319,18 +342,139 @@ export default {
       // 排序
       if (this.sortOrder === "name") {
         result.sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
-      } else {
-        // 按朝代排序
-        const dynastyOrder = ["隋代", "唐代", "宋代", "明代", "清代"];
-        result.sort((a, b) => {
-          const aDynasty = a.tags.find(tag => dynastyOrder.includes(tag)) || "";
-          const bDynasty = b.tags.find(tag => dynastyOrder.includes(tag)) || "";
-          return dynastyOrder.indexOf(aDynasty) - dynastyOrder.indexOf(bDynasty);
-        });
       }
       
       return result;
     },
+
+    // 地理位置散点图数据
+    geoChartData() {
+      const buildingCoordinates = this.getBuildingCoordinates();
+      const series = [];
+
+      // 按分类分组数据
+      const categoryColors = {
+        palace: '#c82506',
+        bridge: '#8B4513',
+        garden: '#5b8c5a',
+        defense: '#e8b860',
+        residence: '#b8956a',
+        tower: '#d6455a',
+        water: '#6b3410'
+      };
+
+      const categoryNames = {
+        palace: '宫殿',
+        bridge: '桥梁',
+        garden: '园林',
+        defense: '城防',
+        residence: '民居',
+        tower: '楼阁',
+        water: '水利'
+      };
+
+      // 为每个分类创建数据系列
+      const categoryGroups = {};
+      this.filteredBuildings.forEach(b => {
+        const cat = b.category || 'other';
+        if (!categoryGroups[cat]) {
+          categoryGroups[cat] = [];
+        }
+
+        let coords = buildingCoordinates[b.name];
+        if (!coords) {
+          const nameHash = b.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+          coords = {
+            lat: 35.0 + (nameHash % 10) * 0.5,
+            lng: 110.0 + (nameHash % 20) * 0.5
+          };
+        }
+
+        categoryGroups[cat].push({
+          name: b.name,
+          value: [coords.lng, coords.lat],
+          itemStyle: {
+            color: categoryColors[cat] || '#999'
+          }
+        });
+      });
+
+      // 转换为 series 格式
+      Object.entries(categoryGroups).forEach(([cat, data]) => {
+        series.push({
+          name: categoryNames[cat] || cat,
+          type: 'scatter',
+          data: data,
+          symbolSize: 20,
+          symbol: 'circle',
+          itemStyle: {
+            borderColor: '#fff',
+            borderWidth: 3,
+            shadowBlur: 8,
+            shadowColor: 'rgba(0,0,0,0.2)'
+          },
+          label: {
+            show: true,
+            position: 'top',
+            formatter: '{b}',
+            color: '#3c2a1d',
+            fontSize: 11,
+            backgroundColor: 'rgba(248, 244, 233, 0.95)',
+            padding: [4, 8],
+            borderRadius: 4,
+            borderWidth: 1,
+            borderColor: '#e8dcc8'
+          },
+          emphasis: {
+            focus: 'series',
+            scale: 1.6,
+            itemStyle: {
+              shadowBlur: 15,
+              shadowColor: 'rgba(200, 37, 6, 0.5)'
+            },
+            label: {
+              show: true,
+              fontSize: 14,
+              fontWeight: 'bold',
+              backgroundColor: 'rgba(200, 37, 6, 0.95)',
+              color: '#fff'
+            }
+          }
+        });
+      });
+
+      return { 
+        series,
+        legend: Object.keys(categoryGroups).map(cat => categoryNames[cat] || cat)
+      };
+    },
+
+    // 分类饼图数据
+    categoryChartData() {
+      const stats = {};
+      const categoryNames = {
+        palace: '宫殿',
+        bridge: '桥梁',
+        garden: '园林',
+        defense: '城防',
+        residence: '民居',
+        tower: '楼阁',
+        water: '水利'
+      };
+
+      this.filteredBuildings.forEach(b => {
+        const cat = b.category || 'other';
+        stats[cat] = (stats[cat] || 0) + 1;
+      });
+
+      return {
+        series: Object.entries(stats).map(([key, value]) => ({
+          name: categoryNames[key] || key,
+          value
+        }))
+      };
+    },
+
   },
 
   watch: {
@@ -533,65 +677,6 @@ export default {
         });
       }
     },
-    
-    // 计算两点之间的距离（简化版，单位：公里）
-    calculateDistance(lat1, lng1, lat2, lng2) {
-      const R = 6371; // 地球半径
-      const dLat = (lat2 - lat1) * Math.PI / 180;
-      const dLng = (lng2 - lng1) * Math.PI / 180;
-      const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                Math.sin(dLng/2) * Math.sin(dLng/2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-      return R * c;
-    },
-
-    // 对标记进行聚类
-    clusterMarkers(markers, zoom) {
-      // 根据缩放级别调整聚类距离阈值
-      const distanceThreshold = zoom >= 10 ? 0.5 : zoom >= 7 ? 2 : zoom >= 5 ? 5 : 10;
-
-      const clusters = [];
-      const processed = new Set();
-
-      markers.forEach((marker, index) => {
-        if (processed.has(index)) return;
-
-        const cluster = {
-          center: { lat: marker.lat, lng: marker.lng },
-          markers: [marker],
-          id: index
-        };
-        processed.add(index);
-
-        // 查找附近的标记
-        markers.forEach((other, otherIndex) => {
-          if (index === otherIndex || processed.has(otherIndex)) return;
-
-          const distance = this.calculateDistance(
-            marker.lat, marker.lng,
-            other.lat, other.lng
-          );
-
-          if (distance < distanceThreshold) {
-            cluster.markers.push(other);
-            processed.add(otherIndex);
-
-            // 重新计算聚类中心
-            const totalLat = cluster.markers.reduce((sum, m) => sum + m.lat, 0);
-            const totalLng = cluster.markers.reduce((sum, m) => sum + m.lng, 0);
-            cluster.center = {
-              lat: totalLat / cluster.markers.length,
-              lng: totalLng / cluster.markers.length
-            };
-          }
-        });
-
-        clusters.push(cluster);
-      });
-
-      return clusters;
-    },
 
     // 渲染标记到地图
     renderMarkers() {
@@ -612,23 +697,16 @@ export default {
       // 获取当前缩放级别
       const currentZoom = this.mapInstance.getZoom();
 
-      // 对标记进行聚类
-      const clusters = this.clusterMarkers(this.mapMarkers, currentZoom);
+      // 直接为每个标记创建实例，不进行聚类
+      const markerSignature = this.mapMarkers.map(m => `s:${m.title}`).join('|');
 
-      // 生成聚类签名，用于比较是否需要更新
-      const clusterSignature = clusters.map(c =>
-        c.markers.length === 1
-          ? `s:${c.markers[0].title}`
-          : `c:${c.center.lat.toFixed(4)},${c.center.lng.toFixed(4)}:${c.markers.length}`
-      ).join('|');
-
-      // 如果聚类结果没有变化，跳过渲染
-      if (this.lastClusterSignature === clusterSignature) {
+      // 如果标记没有变化，跳过渲染
+      if (this.lastClusterSignature === markerSignature) {
         return;
       }
-      this.lastClusterSignature = clusterSignature;
+      this.lastClusterSignature = markerSignature;
 
-      // 清除旧标记 - 只在需要更新时执行
+      // 清除旧标记
       this.mapInstance.eachLayer(layer => {
         if (layer instanceof window.L.Marker || layer instanceof window.L.Popup) {
           this.mapInstance.removeLayer(layer);
@@ -636,20 +714,13 @@ export default {
       });
       this.markersInstance = [];
 
-      // 批量添加标记，减少重绘次数
+      // 批量添加标记
       const markerGroup = window.L.layerGroup();
 
-      // 添加聚类标记
-      clusters.forEach((cluster, index) => {
-        if (cluster.markers.length === 1) {
-          // 单个标记，使用普通标记
-          const marker = this.createSingleMarker(cluster.markers[0], index);
-          if (marker) markerGroup.addLayer(marker);
-        } else {
-          // 多个标记，使用聚类标记
-          const marker = this.createClusterMarker(cluster, index);
-          if (marker) markerGroup.addLayer(marker);
-        }
+      // 为每个古建筑创建标记
+      this.mapMarkers.forEach((markerData, index) => {
+        const marker = this.createSingleMarker(markerData, index);
+        if (marker) markerGroup.addLayer(marker);
       });
 
       // 一次性添加到地图
@@ -723,122 +794,17 @@ export default {
       return marker;
     },
 
-    // 创建聚类标记（返回marker实例，不直接添加到地图）
-    createClusterMarker(cluster, index) {
-      const count = cluster.markers.length;
-
-      // 创建聚类图标
-      const clusterIcon = window.L.divIcon({
-        className: 'cluster-marker',
-        html: `
-          <div style="
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #e84a38 0%, #c82506 100%);
-            border: 4px solid #fff;
-            box-shadow: 0 4px 12px rgba(200, 37, 6, 0.4);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 18px;
-            font-weight: bold;
-            position: relative;
-          ">
-            ${count}
-            <div style="
-              position: absolute;
-              top: 50%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-              width: 60px;
-              height: 60px;
-              border-radius: 50%;
-              border: 2px solid rgba(200, 37, 6, 0.3);
-              animation: clusterPulse 2s ease-out infinite;
-            "></div>
-          </div>
-          <style>
-            @keyframes clusterPulse {
-              0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-              100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
-            }
-          </style>
-        `,
-        iconSize: [50, 50],
-        iconAnchor: [25, 25]
-      });
-
-      // 创建聚类标记
-      const marker = window.L.marker([cluster.center.lat, cluster.center.lng], {
-        icon: clusterIcon,
-        zIndexOffset: 1000
-      });
-
-      // 创建弹窗内容 - 显示聚类中的所有建筑
-      const buildingList = cluster.markers.map(m =>
-        `<div style="padding: 8px 0; border-bottom: 1px solid #eee; cursor: pointer;" onclick="window.zoomToBuilding('${m.title}')">
-          <strong>${m.title}</strong>
-        </div>`
-      ).join('');
-
-      const popupContent = `
-        <div style="min-width: 200px; max-height: 300px; overflow-y: auto;">
-          <h4 style="margin: 0 0 12px 0; color: #c82506; font-size: 16px;">📍 该区域有 ${count} 处古建</h4>
-          <div style="font-size: 14px;">${buildingList}</div>
-          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #eee; text-align: center; color: #999; font-size: 12px;">
-            点击建筑名称查看详情，或放大地图查看更多
-          </div>
-        </div>
-      `;
-
-      marker.bindPopup(popupContent, {
-        closeButton: true,
-        offset: [0, -10]
-      });
-
-      // 点击聚类标记打开弹窗
-      marker.on('click', () => {
-        marker.openPopup();
-      });
-
-      // 双击聚类标记放大地图
-      marker.on('dblclick', (e) => {
-        e.originalEvent.stopPropagation();
-        this.mapInstance.setView([cluster.center.lat, cluster.center.lng], this.mapInstance.getZoom() + 2);
-      });
-
-      // 将跳转函数挂载到 window 对象
-      window.zoomToBuilding = (title) => {
-        const targetMarker = cluster.markers.find(m => m.title === title);
-        if (targetMarker) {
-          this.mapInstance.setView([targetMarker.lat, targetMarker.lng], 12);
-          // 关闭弹窗
-          marker.closePopup();
-        }
-      };
-
-      this.markersInstance.push(marker);
-      return marker;
-    },
-
     selectCategory(key) {
       this.currentCategory = key;
     },
 
-    selectDynasty(key) {
-      this.currentDynasty = key;
-    },
-
     clearFilters() {
       this.currentCategory = "all";
-      this.currentDynasty = "all";
       this.searchKeyword = "";
     },
 
     toggleSort() {
-      this.sortOrder = this.sortOrder === "name" ? "dynasty" : "name";
+      this.sortOrder = this.sortOrder === "name" ? "default" : "name";
     },
 
     async loadBuildings() {
@@ -847,6 +813,10 @@ export default {
 
       try {
         const list = await getBuildings();
+        console.log("[DEBUG] API返回数据数量:", list ? list.length : 0);
+        if (list && list.length > 0) {
+          console.log("[DEBUG] API返回的第一个建筑:", JSON.stringify(list[0], null, 2));
+        }
         this.buildings = Array.isArray(list) ? list : [];
       } catch (error) {
         console.error("加载古建筑名录失败:", error);
@@ -872,11 +842,48 @@ export default {
     onScroll(e) {
       const scrollTop = e.detail.scrollTop;
       const windowHeight = uni.getSystemInfoSync().windowHeight;
-      
+
       // 回到顶部按钮显示
       this.showBackToTop = scrollTop > windowHeight;
-      
+
+      // 图表区域显示
+      this.showChart = scrollTop > windowHeight * 0.5;
+
       this.checkVisibleCards();
+    },
+
+    // 切换图表标签
+    switchChartTab(tabKey) {
+      this.activeChartTab = tabKey;
+    },
+
+    // 图表点击事件
+    onChartClick(params) {
+      console.log('点击了散点图:', params);
+      if (params && params.name) {
+        const building = this.filteredBuildings.find(b => b.name === params.name);
+        if (building) {
+          this.goToDetail(building);
+        }
+      }
+    },
+
+    // 分类图表点击事件
+    onCategoryChartClick(params) {
+      console.log('点击了分类图表:', params);
+      const categoryMap = {
+        '宫殿': 'palace',
+        '园林': 'garden',
+        '桥梁': 'bridge',
+        '城防': 'defense',
+        '民居': 'residence',
+        '楼阁': 'tower',
+        '水利': 'water'
+      };
+      const category = categoryMap[params.name];
+      if (category) {
+        this.selectCategory(category);
+      }
     },
 
     checkVisibleCards() {
@@ -1569,6 +1576,197 @@ export default {
 
 .error-text {
   color: #b85450;
+}
+
+/* ========== 图表区域样式 ========== */
+.chart-section {
+  margin: 40rpx 0;
+  padding: 40rpx;
+  background: linear-gradient(135deg, #fffef9 0%, #faf6ed 100%);
+  border-radius: 24rpx;
+  border: 2rpx solid #e8dcc8;
+  box-shadow: 0 8rpx 32rpx rgba(139, 69, 19, 0.08);
+  opacity: 0;
+  transform: translateY(40px);
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chart-section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.chart-header {
+  text-align: center;
+  margin-bottom: 30rpx;
+}
+
+.chart-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #3c2a1d;
+  letter-spacing: 2rpx;
+}
+
+.chart-container {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  border: 1rpx solid #e8dcc8;
+}
+
+/* 图表降级方案 */
+.chart-fallback {
+  padding: 60rpx 40rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  border: 1rpx solid #e8dcc8;
+}
+
+.chart-fallback .fallback-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.chart-fallback .fallback-icon {
+  font-size: 64rpx;
+}
+
+.chart-fallback .fallback-text {
+  font-size: 28rpx;
+  color: #8b7355;
+}
+
+.geo-stats {
+  text-align: center;
+  margin-top: 20rpx;
+}
+
+.geo-stat-text {
+  font-size: 26rpx;
+  color: #3c2a1d;
+  font-weight: 500;
+}
+
+/* ========== 新的图表区域样式 ========== */
+.charts-section {
+  padding: 24rpx 20rpx;
+  margin: 20rpx;
+  background: linear-gradient(135deg, #fffef9 0%, #faf6ed 100%);
+  border-radius: 20rpx;
+  border: 2rpx solid #e8dcc8;
+  box-shadow: 0 4rpx 16rpx rgba(139, 69, 19, 0.08);
+}
+
+.charts-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+}
+
+.chart-tab {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  padding: 12rpx 20rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  border: 1rpx solid #e8dcc8;
+  transition: all 0.3s ease;
+}
+
+.chart-tab:active {
+  transform: scale(0.96);
+}
+
+.chart-tab.active {
+  background: linear-gradient(135deg, #c82506 0%, #8b0000 100%);
+  border-color: #c82506;
+  box-shadow: 0 3rpx 10rpx rgba(200, 37, 6, 0.3);
+}
+
+.chart-tab-icon {
+  font-size: 24rpx;
+}
+
+.chart-tab-text {
+  font-size: 24rpx;
+  color: #6b5643;
+  font-weight: 500;
+}
+
+.chart-tab.active .chart-tab-text {
+  color: #fff;
+}
+
+.chart-display-area {
+  background: #fff;
+  border-radius: 16rpx;
+  border: 1rpx solid #e8dcc8;
+  overflow: hidden;
+}
+
+.chart-wrapper {
+  padding: 0;
+}
+
+.chart-title-bar {
+  padding: 16rpx 20rpx;
+  background: linear-gradient(135deg, #faf6ed 0%, #f5efe0 100%);
+  border-bottom: 1rpx solid #e8dcc8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chart-title-text {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #3c2a1d;
+  letter-spacing: 2rpx;
+}
+
+.chart-subtitle {
+  font-size: 22rpx;
+  color: #8b7355;
+  font-weight: 400;
+}
+
+.chart-fallback-simple {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 260rpx;
+  background: #faf6ed;
+}
+
+.chart-fallback-simple .fallback-text {
+  font-size: 26rpx;
+  color: #8b7355;
+}
+
+/* 响应式布局 */
+@media (min-width: 768px) {
+  .charts-tabs {
+    gap: 24rpx;
+  }
+
+  .chart-tab {
+    padding: 14rpx 28rpx;
+  }
+
+  .chart-tab-text {
+    font-size: 26rpx;
+  }
+}
+
+.geo-stat-hint {
+  font-size: 24rpx;
+  color: #8b7355;
+  margin-top: 8rpx;
 }
 
 /* 轻量化卡片设计 - 与首页统一 */

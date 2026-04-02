@@ -172,14 +172,39 @@
         </view>
 
         <!-- 数据概览 Tab -->
-        <view v-if="activeTab === 'chart' && visualizationData.chartData" class="detail-card">
+        <view v-if="activeTab === 'chart'" class="detail-card">
           <view class="detail-header">
-            <text class="detail-title">数据概览</text>
+            <text class="detail-title">建筑特征雷达图</text>
           </view>
-          <VisualChart
-            :chart-data="visualizationData.chartData"
-            :chart-type="visualizationData.chartData.type || 'bar'"
-          />
+
+          <!-- #ifdef H5 -->
+          <view class="chart-wrapper">
+            <VisualChart
+              type="radar"
+              :data="radarChartData"
+              :height="400"
+              @click="onChartClick"
+            />
+          </view>
+          <!-- #endif -->
+
+          <!-- #ifndef H5 -->
+          <view class="chart-fallback">
+            <view class="fallback-content">
+              <text class="fallback-icon">📊</text>
+              <text class="fallback-text">雷达图请在 H5 环境下查看</text>
+              <view class="feature-list">
+                <view v-for="(item, index) in radarFeatures" :key="index" class="feature-item">
+                  <text class="feature-name">{{ item.name }}</text>
+                  <view class="feature-bar">
+                    <view class="feature-progress" :style="{ width: item.value + '%' }"></view>
+                  </view>
+                  <text class="feature-value">{{ item.value }}</text>
+                </view>
+              </view>
+            </view>
+          </view>
+          <!-- #endif -->
         </view>
       </view>
     </view>
@@ -260,7 +285,7 @@ const TAB_CONFIG = [
   { key: 'basic', label: '基础信息', required: true },
   { key: 'infographic', label: '结构解析', dataKey: 'infographic' },
   { key: 'animation', label: '动态演示', dataKey: 'animationId' },
-  { key: 'chart', label: '数据概览', dataKey: 'chartData' },
+  { key: 'chart', label: '特征分析', required: true },
 ];
 
 export default {
@@ -335,6 +360,94 @@ export default {
         return !!this.visualizationData[tab.dataKey];
       });
     },
+
+    // 雷达图特征数据（降级方案用）
+    radarFeatures() {
+      // 根据建筑分类返回不同的特征数据
+      const categoryFeatures = {
+        palace: [
+          { name: '规模宏大', value: 95 },
+          { name: '等级森严', value: 90 },
+          { name: '装饰华丽', value: 85 },
+          { name: '布局严谨', value: 88 },
+          { name: '工艺精湛', value: 92 },
+          { name: '历史悠久', value: 85 }
+        ],
+        bridge: [
+          { name: '结构稳固', value: 95 },
+          { name: '造型优美', value: 88 },
+          { name: '工艺独特', value: 90 },
+          { name: '历史价值', value: 92 },
+          { name: '实用性', value: 95 },
+          { name: '艺术性', value: 85 }
+        ],
+        garden: [
+          { name: '意境深远', value: 95 },
+          { name: '布局精巧', value: 90 },
+          { name: '造景艺术', value: 92 },
+          { name: '文化内涵', value: 88 },
+          { name: '自然和谐', value: 95 },
+          { name: '空间层次', value: 87 }
+        ],
+        defense: [
+          { name: '防御功能', value: 95 },
+          { name: '结构坚固', value: 92 },
+          { name: '规模宏大', value: 88 },
+          { name: '历史价值', value: 90 },
+          { name: '完整性', value: 85 },
+          { name: '代表性', value: 87 }
+        ],
+        residence: [
+          { name: '居住舒适', value: 90 },
+          { name: '地域特色', value: 92 },
+          { name: '工艺水平', value: 85 },
+          { name: '文化传承', value: 88 },
+          { name: '实用性', value: 90 },
+          { name: '美观性', value: 82 }
+        ],
+        tower: [
+          { name: '高度优势', value: 92 },
+          { name: '造型独特', value: 90 },
+          { name: '结构精巧', value: 88 },
+          { name: '文化意义', value: 95 },
+          { name: '观景功能', value: 90 },
+          { name: '历史价值', value: 87 }
+        ],
+        water: [
+          { name: '工程价值', value: 95 },
+          { name: '实用性', value: 92 },
+          { name: '科学性', value: 90 },
+          { name: '历史意义', value: 88 },
+          { name: '持久性', value: 95 },
+          { name: '影响力', value: 87 }
+        ]
+      };
+
+      const features = categoryFeatures[this.building.category] || categoryFeatures.palace;
+      return features;
+    },
+
+    // 雷达图数据
+    radarChartData() {
+      const features = this.radarFeatures;
+      return {
+        indicator: features.map(f => ({ name: f.name, max: 100 })),
+        series: [{
+          name: '建筑特征',
+          value: features.map(f => f.value),
+          areaStyle: {
+            color: 'rgba(200, 37, 6, 0.2)'
+          },
+          lineStyle: {
+            color: '#c82506',
+            width: 2
+          },
+          itemStyle: {
+            color: '#c82506'
+          }
+        }]
+      };
+    }
   },
 
   onLoad(options) {
@@ -466,6 +579,12 @@ export default {
           url: node.link,
         });
       }
+    },
+
+    // 图表点击事件
+    onChartClick(params) {
+      console.log('点击了雷达图:', params);
+      // 可以在这里添加图表点击后的逻辑
     },
 
     // ========== 收藏功能 ==========
@@ -816,6 +935,81 @@ export default {
   font-weight: bold;
   font-family: 'ZCOOL XiaoWei', serif;
   letter-spacing: 4rpx;
+}
+
+/* 图表区域样式 */
+.chart-wrapper {
+  padding: 20rpx;
+  background: #faf6ed;
+  border-radius: 16rpx;
+  border: 1rpx solid #e8dcc8;
+}
+
+.chart-fallback {
+  padding: 40rpx;
+  background: #faf6ed;
+  border-radius: 16rpx;
+  border: 1rpx solid #e8dcc8;
+}
+
+.fallback-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.fallback-icon {
+  font-size: 64rpx;
+}
+
+.fallback-text {
+  font-size: 28rpx;
+  color: #8b7355;
+}
+
+.feature-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  margin-top: 20rpx;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.feature-name {
+  width: 140rpx;
+  font-size: 26rpx;
+  color: #3c2a1d;
+  flex-shrink: 0;
+}
+
+.feature-bar {
+  flex: 1;
+  height: 16rpx;
+  background: #e8dcc8;
+  border-radius: 8rpx;
+  overflow: hidden;
+}
+
+.feature-progress {
+  height: 100%;
+  background: linear-gradient(90deg, #c82506 0%, #e84a38 100%);
+  border-radius: 8rpx;
+  transition: width 0.8s ease;
+}
+
+.feature-value {
+  width: 60rpx;
+  font-size: 24rpx;
+  color: #c82506;
+  font-weight: bold;
+  text-align: right;
 }
 
 .detail-favorite-btn {
