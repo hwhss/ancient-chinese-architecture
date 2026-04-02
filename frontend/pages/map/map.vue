@@ -255,7 +255,7 @@
 </template>
 
 <script>
-import { getBuildings } from "../../services/apiWithCache.js";
+import { getBuildings, getVisualizationMapPoints } from "../../services/apiWithCache.js";
 import SkeletonScreen from "../../components/SkeletonScreen.vue";
 import VisualChart from "../../components/VisualChart.vue";
 import { throttle } from "../../utils/lazyLoad.js";
@@ -277,6 +277,84 @@ const categories = [
   { key: "tower", name: "🏯 楼阁" },
   { key: "water", name: "💧 水利" },
 ];
+
+const LEAFLET_CSS_HREF = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+const LEAFLET_JS_SRC = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+let leafletAssetPromise = null;
+
+function loadRemoteStylesheet(href) {
+  if (typeof document === "undefined") {
+    return Promise.resolve();
+  }
+
+  if (document.querySelector(`link[href=\"${href}\"]`)) {
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve, reject) => {
+    const link = document.createElement("link");
+    link.rel = "stylesheet";
+    link.href = href;
+    link.onload = () => resolve();
+    link.onerror = () => reject(new Error(`加载样式失败: ${href}`));
+    document.head.appendChild(link);
+  });
+}
+
+function loadRemoteScript(src) {
+  if (typeof document === "undefined") {
+    return Promise.resolve();
+  }
+
+  if (window.L) {
+    return Promise.resolve();
+  }
+
+  const existing = document.querySelector(`script[src=\"${src}\"]`);
+  if (existing) {
+    return new Promise((resolve, reject) => {
+      if (window.L) {
+        resolve();
+        return;
+      }
+      existing.addEventListener("load", () => resolve(), { once: true });
+      existing.addEventListener("error", () => reject(new Error(`加载脚本失败: ${src}`)), { once: true });
+    });
+  }
+
+  return new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = src;
+    script.async = true;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error(`加载脚本失败: ${src}`));
+    document.head.appendChild(script);
+  });
+}
+
+function ensureLeafletAssets() {
+  if (typeof window === "undefined") {
+    return Promise.resolve();
+  }
+
+  if (window.L) {
+    return Promise.resolve();
+  }
+
+  if (!leafletAssetPromise) {
+    leafletAssetPromise = Promise.all([
+      loadRemoteStylesheet(LEAFLET_CSS_HREF),
+      loadRemoteScript(LEAFLET_JS_SRC)
+    ])
+      .then(() => undefined)
+      .catch((error) => {
+        leafletAssetPromise = null;
+        throw error;
+      });
+  }
+
+  return leafletAssetPromise;
+}
 
 export default {
   components: {
@@ -302,6 +380,10 @@ export default {
       },
       mapZoom: 4,
       mapMarkers: [],
+      mapPoints: [],
+      mapPointsById: Object.create(null),
+      mapPointsByName: Object.create(null),
+      mapDataReady: false,
       mapInstance: null,
       markersInstance: [],
       lastClusterSignature: null,
@@ -313,7 +395,9 @@ export default {
       ],
       mapEventThrottler: null,
       perfConfig: null,
-      isRenderingMarkers: false
+      isRenderingMarkers: false,
+      leafletReady: false,
+      scheduleMapMarkerSync: null
     };
   },
 
@@ -321,15 +405,21 @@ export default {
     if (options.category) {
       this.currentCategory = options.category;
     }
-    // 初始化节流函数
+
+    // 初始化节流和防抖函数
     this.throttledOnScroll = throttle(this.onScroll.bind(this), 100);
+    this.scheduleMapMarkerSync = debounce(() => {
+      if (this.currentView === 'map') {
+        this.updateMapMarkers();
+      }
+    }, 120);
     this.loadBuildings();
   },
   
   onUnload() {
-    // 页面卸载时清理地图
-    if (this.mapInstance) {
-      this.mapInstance = null;
+    this.destroyMap();
+    if (typeof window !== 'undefined' && window.goToBuildingDetail) {
+      delete window.goToBuildingDetail;
     }
   },
 
@@ -361,7 +451,6 @@ export default {
 
     // 地理位置散点图数据
     geoChartData() {
-      const buildingCoordinates = this.getBuildingCoordinates();
       const series = [];
 
       // 按分类分组数据
@@ -393,14 +482,7 @@ export default {
           categoryGroups[cat] = [];
         }
 
-        let coords = buildingCoordinates[b.name];
-        if (!coords) {
-          const nameHash = b.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-          coords = {
-            lat: 35.0 + (nameHash % 10) * 0.5,
-            lng: 110.0 + (nameHash % 20) * 0.5
-          };
-        }
+        const coords = this.resolveBuildingCoordinates(b);
 
         categoryGroups[cat].push({
           name: b.name,
@@ -493,9 +575,14 @@ export default {
     filteredBuildings: {
       handler() {
         this.visibleCards = new Array(this.filteredBuildings.length).fill(false);
-        // 修复：延迟更新地图标记，确保 DOM 已更新
         this.$nextTick(() => {
-          this.updateMapMarkers();
+          if (this.currentView === 'map') {
+            if (this.scheduleMapMarkerSync) {
+              this.scheduleMapMarkerSync();
+            } else {
+              this.updateMapMarkers();
+            }
+          }
           this.checkVisibleCards();
         });
       },
@@ -507,19 +594,13 @@ export default {
     switchView(view) {
       this.currentView = view;
       if (view === 'map') {
-        // 切换到地图视图时初始化地图
         this.$nextTick(() => {
           if (!this.mapInstance) {
             this.initMap();
           } else {
-            // 修复：多次延迟确保容器已渲染并刷新地图
             setTimeout(() => {
               this.mapInstance.invalidateSize(true);
-              // 修复：重新设置视图以刷新地图显示
-              const currentCenter = this.mapInstance.getCenter();
-              const currentZoom = this.mapInstance.getZoom();
-              this.mapInstance.setView(currentCenter, currentZoom, { animate: false });
-              this.updateMapMarkers();
+              this.syncMapMarkers(true);
             }, 150);
           }
         });
@@ -538,25 +619,16 @@ export default {
     // 初始化 Leaflet 地图
     initMap() {
       if (typeof window === 'undefined') return;
-      
-      if (window.L) {
-        this.createLeafletMap();
-        return;
-      }
-      
-      // 加载 Leaflet CSS
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-      document.head.appendChild(link);
-      
-      // 加载 Leaflet JS
-      const script = document.createElement('script');
-      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-      script.onload = () => {
-        this.createLeafletMap();
-      };
-      document.head.appendChild(script);
+
+      ensureLeafletAssets()
+        .then(() => {
+          this.leafletReady = true;
+          this.createLeafletMap();
+        })
+        .catch((error) => {
+          console.error('加载地图资源失败:', error);
+          this.error = error.message || '地图资源加载失败';
+        });
     },
     
     // 创建 Leaflet 地图
@@ -575,6 +647,8 @@ export default {
 
       // 清空容器
       container.innerHTML = '';
+
+      this.ensureMapBridge();
 
       // 使用优化的地图配置
       const mapConfig = {
@@ -600,7 +674,7 @@ export default {
       // 延迟更新标记以确保地图完全初始化
       requestAnimationFrame(() => {
         this.mapInstance.invalidateSize();
-        this.updateMapMarkers();
+        this.syncMapMarkers(true);
       });
 
       // 使用优化的事件节流器
@@ -633,6 +707,107 @@ export default {
           rafId = null;
         });
       });
+    },
+
+    destroyMap() {
+      if (this.mapEventThrottler) {
+        this.mapEventThrottler.stop();
+        this.mapEventThrottler = null;
+      }
+
+      this.clearMarkers();
+
+      if (this.mapInstance) {
+        this.mapInstance.off();
+        this.mapInstance.remove();
+        this.mapInstance = null;
+      }
+
+      this.lastClusterSignature = null;
+      this.markersInstance = [];
+    },
+
+    ensureMapBridge() {
+      if (typeof window === 'undefined') return;
+
+      window.goToBuildingDetail = (id) => {
+        const building = this.buildings.find((item) => String(item.id) === String(id));
+        if (building) {
+          this.goToDetail(building);
+        }
+      };
+    },
+
+    buildMapPointLookup() {
+      const byId = Object.create(null);
+      const byName = Object.create(null);
+
+      this.mapPoints.forEach((point) => {
+        if (!point) return;
+        if (point.id !== undefined && point.id !== null) {
+          byId[String(point.id)] = point;
+        }
+        if (point.name) {
+          byName[String(point.name)] = point;
+        }
+      });
+
+      this.mapPointsById = byId;
+      this.mapPointsByName = byName;
+    },
+
+    getMapPointForBuilding(building) {
+      if (!building) return null;
+
+      const idKey = String(building.id || '');
+      const nameKey = String(building.name || '');
+
+      return this.mapPointsById[idKey] || this.mapPointsByName[nameKey] || null;
+    },
+
+    resolveBuildingCoordinates(building) {
+      const point = this.getMapPointForBuilding(building);
+      if (point && point.coordinates) {
+        const lat = Number(point.coordinates.lat);
+        const lng = Number(point.coordinates.lng);
+        if (Number.isFinite(lat) && Number.isFinite(lng)) {
+          return { lat, lng };
+        }
+      }
+
+      const lat = Number(building && building.lat);
+      const lng = Number(building && building.lng);
+      if (Number.isFinite(lat) && Number.isFinite(lng)) {
+        return { lat, lng };
+      }
+
+      const legacyCoordinates = this.getBuildingCoordinates();
+      const legacy = legacyCoordinates[building.name];
+      if (legacy) {
+        return legacy;
+      }
+
+      const fallbackHash = String(building.name || building.id || '')
+        .split('')
+        .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+
+      return {
+        lat: 35.0 + (fallbackHash % 10) * 0.5,
+        lng: 110.0 + (fallbackHash % 20) * 0.5
+      };
+    },
+
+    syncMapMarkers(force = false) {
+      if (!this.mapDataReady && !force) {
+        return;
+      }
+
+      if (this.scheduleMapMarkerSync && !force) {
+        this.scheduleMapMarkerSync();
+        return;
+      }
+
+      this.updateMapMarkers();
     },
 
     // 更新标记位置（不重新创建，仅更新位置）
@@ -692,27 +867,31 @@ export default {
     },
     
     updateMapMarkers() {
-      const buildingCoordinates = this.getBuildingCoordinates();
-      
-      this.mapMarkers = this.filteredBuildings.map((building, index) => {
-        let coords = buildingCoordinates[building.name];
-        
-        if (!coords) {
-          const nameHash = building.name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-          coords = {
-            lat: 35.0 + (nameHash % 10) * 0.5,
-            lng: 110.0 + (nameHash % 20) * 0.5
-          };
-        }
-        
+      const nextMarkers = this.filteredBuildings.map((building, index) => {
+        const coords = this.resolveBuildingCoordinates(building);
+        const point = this.getMapPointForBuilding(building);
+
         return {
-          id: index,
+          id: building.id || index,
           lat: coords.lat,
           lng: coords.lng,
           title: building.name,
-          buildingData: building
+          buildingData: building,
+          point
         };
       });
+
+      this.mapMarkers = nextMarkers;
+
+      const markerSignature = nextMarkers
+        .map((marker) => `${marker.id}:${marker.lat.toFixed(6)}:${marker.lng.toFixed(6)}`)
+        .join('|');
+
+      if (this.lastClusterSignature === markerSignature && this.mapInstance) {
+        return;
+      }
+
+      this.lastClusterSignature = markerSignature;
       
       // 在地图上添加标记
       this.renderMarkers();
@@ -750,19 +929,6 @@ export default {
           this.clearMarkers();
           return;
         }
-
-        // 获取当前缩放级别
-        const currentZoom = this.mapInstance.getZoom();
-
-        // 直接为每个标记创建实例，不进行聚类
-        const markerSignature = this.mapMarkers.map(m => `s:${m.title}`).join('|');
-
-        // 如果标记没有变化，跳过渲染
-        if (this.lastClusterSignature === markerSignature) {
-          this.isRenderingMarkers = false;
-          return;
-        }
-        this.lastClusterSignature = markerSignature;
 
         // 清除旧标记
         this.clearMarkers();
@@ -883,14 +1049,6 @@ export default {
         marker.openPopup();
       });
 
-      // 将跳转函数挂载到 window 对象
-      window.goToBuildingDetail = (id) => {
-        const building = this.filteredBuildings.find(b => b.id === id);
-        if (building) {
-          this.goToDetail(building);
-        }
-      };
-
       this.markersInstance.push(marker);
       return marker;
     },
@@ -913,17 +1071,34 @@ export default {
       this.error = "";
 
       try {
-        // 使用带缓存的API，默认使用缓存
-        const list = await getBuildings({}, forceRefresh);
-        console.log("[DEBUG] API返回数据数量:", list ? list.length : 0);
-        if (list && list.length > 0) {
-          console.log("[DEBUG] API返回的第一个建筑:", JSON.stringify(list[0], null, 2));
-        }
+        const [buildingResult, pointResult] = await Promise.allSettled([
+          getBuildings({}, forceRefresh),
+          getVisualizationMapPoints(forceRefresh)
+        ]);
+
+        const list = buildingResult.status === 'fulfilled' ? buildingResult.value : [];
+        const mapPointPayload = pointResult.status === 'fulfilled' ? pointResult.value : null;
+
         this.buildings = Array.isArray(list) ? list : [];
+        this.mapPoints = Array.isArray(mapPointPayload && mapPointPayload.points)
+          ? mapPointPayload.points
+          : [];
+        this.buildMapPointLookup();
+        this.mapDataReady = true;
+
+        if (this.currentView === 'map') {
+          if (this.scheduleMapMarkerSync) {
+            this.scheduleMapMarkerSync();
+          } else {
+            this.updateMapMarkers();
+          }
+        }
       } catch (error) {
         console.error("加载古建筑名录失败:", error);
         this.error = error.message || "网络异常，暂时无法加载数据";
         this.buildings = [];
+        this.mapPoints = [];
+        this.buildMapPointLookup();
       } finally {
         this.loading = false;
       }
