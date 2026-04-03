@@ -179,7 +179,7 @@ export default {
   opacity: 0.08;
   pointer-events: none;
   z-index: 0;
-  border: 2rpx solid #8b4513;
+  border: 2rpx solid var(--secondary);
 }
 
 .corner-decoration.top-left {
@@ -251,7 +251,7 @@ export default {
   right: -80rpx;
   width: 100rpx;
   height: 100rpx;
-  background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: #fff8e6;
   font-size: 34rpx;
   font-weight: bold;
@@ -332,7 +332,7 @@ export default {
 .window-pattern {
   width: 120rpx;
   height: 6rpx;
-  background: #c41e3a;
+  background: var(--primary);
   border-radius: 4rpx;
   position: relative;
 }
@@ -344,7 +344,7 @@ export default {
   top: 50%;
   width: 20rpx;
   height: 20rpx;
-  border: 4rpx solid #c41e3a;
+  border: 4rpx solid var(--primary);
   transform: translateY(-50%) rotate(45deg);
 }
 
@@ -390,15 +390,15 @@ export default {
 }
 
 .hero-btn.primary {
-  background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: #fff8e6;
   box-shadow: 0 8rpx 24rpx rgba(139, 0, 0, 0.4);
 }
 
 .hero-btn.secondary {
   background: #fff;
-  color: #8b4513;
-  border: 3rpx solid #8b4513;
+  color: var(--secondary);
+  border: 3rpx solid var(--secondary);
   box-shadow: 0 4rpx 16rpx rgba(139, 69, 19, 0.2);
 }
 
@@ -454,14 +454,14 @@ export default {
 .stat-number {
   font-size: 40rpx;
   font-weight: bold;
-  color: #c41e3a;
+  color: var(--primary);
   line-height: 1;
   font-family: 'ZCOOL XiaoWei', serif;
 }
 
 .stat-label {
   font-size: 22rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
   letter-spacing: 2rpx;
 }
 
@@ -504,7 +504,7 @@ export default {
 
 .category-text {
   font-size: 24rpx;
-  color: #6b5643;
+  color: var(--text-secondary);
   font-weight: 500;
 }
 
@@ -546,7 +546,7 @@ export default {
   left: 0;
   right: 0;
   height: 5rpx;
-  background: linear-gradient(90deg, #c82506 0%, #e8b860 30%, #e8b860 70%, #c82506 100%);
+  background: linear-gradient(90deg, #c82506 0%, var(--warning) 30%, var(--warning) 70%, #c82506 100%);
   opacity: 0.9;
 }
 
@@ -586,7 +586,7 @@ export default {
   justify-content: center;
   background: linear-gradient(145deg, #fff8d8 0%, #f5e6c8 50%, #f0dcc0 100%);
   border-radius: 50%;
-  border: 3rpx solid #e8b860;
+  border: 3rpx solid var(--warning);
   box-shadow:
     0 6rpx 16rpx rgba(232, 184, 96, 0.3),
     inset 0 2rpx 4rpx rgba(255, 255, 255, 0.8);
@@ -649,7 +649,7 @@ export default {
 .favorites-title {
   font-size: 36rpx;
   font-weight: bold;
-  color: #3c2a1d;
+  color: var(--text-primary);
   letter-spacing: 8rpx;
   font-family: 'ZCOOL XiaoWei', serif;
   line-height: 1.2;

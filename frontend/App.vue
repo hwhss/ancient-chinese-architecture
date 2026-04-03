@@ -74,7 +74,7 @@ export default {
 }
 
 /* ========== CSS 变量定义 ========== */
-:root {
+page {
   /* 浅色主题（默认） */
   --primary: #c41e3a;
   --primary-dark: #8b0000;
@@ -754,7 +754,7 @@ scroll-view {
 
 /* 宣纸纹理背景 */
 .rice-paper-bg {
-  background-color: var(--bg-primary, #f8f4e8);
+  background-color: var(--bg-primary, var(--bg-primary));
   background-image: 
     radial-gradient(ellipse at 20% 30%, rgba(139, 69, 19, 0.02) 0%, transparent 50%),
     radial-gradient(ellipse at 80% 70%, rgba(139, 69, 19, 0.02) 0%, transparent 50%);
@@ -762,7 +762,7 @@ scroll-view {
 
 /* 印章边框 - 朱砂色粗边框 */
 .seal-border {
-  border: 4rpx solid #c41e3a;
+  border: 4rpx solid var(--primary);
   border-radius: 8rpx;
   position: relative;
 }

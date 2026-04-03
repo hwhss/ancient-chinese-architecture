@@ -302,7 +302,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(135deg, #8b4513 0%, #6b3410 100%);
+  background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%);
   padding: 30rpx 30rpx 40rpx;
   box-shadow: 0 4rpx 16rpx rgba(139, 69, 19, 0.3);
   position: relative;

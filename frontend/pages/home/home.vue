@@ -481,34 +481,34 @@ export default {
    ============================================ */
 :root {
   /* 主色调 - 朱砂红 */
-  --color-primary: #c41e3a;
-  --color-primary-dark: #8b0000;
-  --color-primary-light: #d6455a;
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-light: var(--primary-light);
   
   /* 辅助色 - 古铜棕 */
-  --color-secondary: #8b4513;
-  --color-secondary-dark: #6b3410;
-  --color-secondary-light: #a67c52;
+  --color-secondary: var(--secondary);
+  --color-secondary-dark: var(--secondary-dark);
+  --color-secondary-light: var(--secondary-light);
   
   /* 中性色 */
-  --color-text-primary: #3c2a1d;
-  --color-text-secondary: #6b5643;
-  --color-text-tertiary: #8b7355;
-  --color-text-muted: #a89078;
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-muted: var(--text-muted);
   
   /* 背景色 */
-  --color-bg-primary: #f8f4e8;
-  --color-bg-secondary: #f0e9d8;
-  --color-bg-tertiary: #e8dcc8;
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-tertiary: var(--bg-tertiary);
   --color-bg-card: #ffffff;
   
   /* 边框色 */
-  --color-border: #e8dcc8;
+  --color-border: var(--bg-tertiary);
   --color-border-light: #dcc8b0;
   
   /* 功能色 */
-  --color-error: #b85450;
-  --color-success: #5b8c5a;
+  --color-error: var(--error);
+  --color-success: var(--success);
   
   /* 阴影 */
   --shadow-sm: 0 2rpx 8rpx rgba(139, 69, 19, 0.08);
@@ -599,9 +599,9 @@ export default {
 .skeleton {
   background: linear-gradient(
     90deg,
-    #e8dcc8 25%,
-    #f0e9d8 50%,
-    #e8dcc8 75%
+    var(--bg-tertiary) 25%,
+    var(--bg-secondary) 50%,
+    var(--bg-tertiary) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
@@ -720,14 +720,14 @@ export default {
 }
 
 .scroll-view::-webkit-scrollbar-track {
-  background: #f8f4e8;
+  background: var(--bg-primary);
   border-radius: 6rpx;
 }
 
 .scroll-view::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #c41e3a 0%, #8b0000 100%);
+  background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
   border-radius: 6rpx;
-  border: 2rpx solid #f8f4e8;
+  border: 2rpx solid var(--bg-primary);
 }
 
 .scroll-view::-webkit-scrollbar-thumb:hover {
@@ -741,7 +741,7 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(ellipse at center, #f8f4e8 0%, #f0e9d8 40%, #e8dcc8 70%, #dcc8b0 100%);
+  background: radial-gradient(ellipse at center, var(--bg-primary) 0%, var(--bg-secondary) 40%, var(--bg-tertiary) 70%, #dcc8b0 100%);
   pointer-events: none;
   z-index: 0;
 }
@@ -806,7 +806,7 @@ export default {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: linear-gradient(180deg, #f8f4e8 0%, #f0e9d8 50%, #e8dcc8 100%);
+  background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-tertiary) 100%);
   position: relative;
 }
 
@@ -824,7 +824,7 @@ export default {
   right: 40rpx;
   width: 100rpx;
   height: 100rpx;
-  background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   border-radius: 12rpx;
   display: flex;
   flex-direction: column;
@@ -876,7 +876,7 @@ export default {
 .footer-slogan {
   display: block;
   font-size: 28rpx;
-  color: #8b4513;
+  color: var(--secondary);
   letter-spacing: 4rpx;
   margin-bottom: 16rpx;
   font-family: 'ZCOOL XiaoWei', serif;
@@ -885,7 +885,7 @@ export default {
 .footer-copyright {
   display: block;
   font-size: 22rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
 }
 
 /* 按钮下方的分类快捷入口 */
@@ -932,7 +932,7 @@ export default {
 
 .category-text {
   font-size: 20rpx;
-  color: #8b4513;
+  color: var(--secondary);
   font-weight: 500;
   letter-spacing: 1rpx;
   line-height: 1;

@@ -92,7 +92,7 @@ export default {
 .section-title {
   font-size: 40rpx;
   font-weight: bold;
-  color: #8b4513;
+  color: var(--secondary);
   letter-spacing: 8rpx;
   display: block;
   margin-bottom: 16rpx;
@@ -109,7 +109,7 @@ export default {
 .window-pattern {
   width: 200rpx;
   height: 4rpx;
-  background: linear-gradient(90deg, transparent, #8b4513, transparent);
+  background: linear-gradient(90deg, transparent, var(--secondary), transparent);
   position: relative;
 }
 
@@ -119,7 +119,7 @@ export default {
   position: absolute;
   width: 8rpx;
   height: 8rpx;
-  background: #8b4513;
+  background: var(--secondary);
   top: 50%;
   transform: translateY(-50%) rotate(45deg);
 }
@@ -165,14 +165,14 @@ export default {
 .svg-icon {
   width: 64rpx;
   height: 64rpx;
-  color: #c41e3a;
+  color: var(--primary);
 }
 
 .feature-title {
   display: block;
   font-size: 32rpx;
   font-weight: bold;
-  color: #8b4513;
+  color: var(--secondary);
   margin-bottom: 14rpx;
   letter-spacing: 2rpx;
 }
@@ -180,7 +180,7 @@ export default {
 .feature-desc {
   display: block;
   font-size: 28rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
   line-height: 1.7;
   letter-spacing: 1rpx;
 }

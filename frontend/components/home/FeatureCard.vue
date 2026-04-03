@@ -40,7 +40,7 @@ export default {
   background: linear-gradient(135deg, #fff 0%, #faf6ed 100%);
   border-radius: 20rpx;
   padding: 40rpx 32rpx;
-  border: 1rpx solid #e8dcc8;
+  border: 1rpx solid var(--bg-tertiary);
   box-shadow: 0 4rpx 16rpx rgba(139, 69, 19, 0.08);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   opacity: 0;
@@ -75,14 +75,14 @@ export default {
 .feature-title {
   font-size: 30rpx;
   font-weight: 600;
-  color: #3c2a1d;
+  color: var(--text-primary);
   margin-bottom: 16rpx;
   display: block;
 }
 
 .feature-desc {
   font-size: 24rpx;
-  color: #6b5643;
+  color: var(--text-secondary);
   line-height: 1.6;
   display: block;
 }

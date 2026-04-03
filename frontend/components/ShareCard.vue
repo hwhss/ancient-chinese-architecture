@@ -290,7 +290,7 @@ export default {
         const cardElement = document.querySelector('.share-card')
         if (cardElement) {
           html2canvas(cardElement, {
-            backgroundColor: '#f8f4e8',
+            backgroundColor: 'var(--bg-primary)',
             scale: 2,
             useCORS: true,
             allowTaint: true
@@ -328,7 +328,7 @@ export default {
       const ctx = uni.createCanvasContext('shareCanvas', this)
 
       // 设置背景
-      ctx.setFillStyle('#f8f4e8')
+      ctx.setFillStyle('var(--bg-primary)')
       ctx.fillRect(0, 0, 600, 900)
 
       // 绘制边框装饰
@@ -341,7 +341,7 @@ export default {
       ctx.fillRect(30, 30, 540, 80)
 
       // 绘制建筑名称
-      ctx.setFillStyle('#3c2a1d')
+      ctx.setFillStyle('var(--text-primary)')
       ctx.setFontSize(32)
       ctx.setTextAlign('center')
       ctx.fillText(this.building.name || '古建筑', 300, 85)
@@ -385,7 +385,7 @@ export default {
       })
 
       // 绘制底部信息
-      ctx.setFillStyle('#8b7355')
+      ctx.setFillStyle('var(--text-tertiary)')
       ctx.setFontSize(20)
       ctx.fillText('中华古建筑导览', 50, 820)
       ctx.setFontSize(16)
@@ -395,7 +395,7 @@ export default {
       ctx.setStrokeStyle('#e0d0c0')
       ctx.setLineWidth(2)
       ctx.strokeRect(450, 780, 100, 100)
-      ctx.setFillStyle('#8b7355')
+      ctx.setFillStyle('var(--text-tertiary)')
       ctx.setFontSize(14)
       ctx.setTextAlign('center')
       ctx.fillText('扫码探索', 500, 835)
@@ -690,7 +690,7 @@ export default {
 .building-name {
   font-size: 36rpx;
   font-weight: bold;
-  color: #3c2a1d;
+  color: var(--text-primary);
   font-family: 'ZCOOL XiaoWei', serif;
   letter-spacing: 4rpx;
 }
@@ -722,7 +722,7 @@ export default {
 
 .location-text {
   font-size: 26rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
 }
 
 .building-desc {
@@ -741,7 +741,7 @@ export default {
 
 .tag {
   font-size: 22rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
   background: linear-gradient(135deg, #f7f1e6 0%, #ebe4d6 100%);
   padding: 8rpx 18rpx;
   border-radius: 20rpx;
@@ -757,7 +757,7 @@ export default {
 
 .footer-line {
   height: 2rpx;
-  background: linear-gradient(90deg, transparent, #e8b860, transparent);
+  background: linear-gradient(90deg, transparent, var(--warning), transparent);
   margin-bottom: 20rpx;
 }
 
@@ -785,14 +785,14 @@ export default {
 .brand-name {
   font-size: 28rpx;
   font-weight: bold;
-  color: #3c2a1d;
+  color: var(--text-primary);
   font-family: 'ZCOOL XiaoWei', serif;
   letter-spacing: 2rpx;
 }
 
 .brand-slogan {
   font-size: 22rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
   margin-top: 4rpx;
 }
 
@@ -814,7 +814,7 @@ export default {
 
 .qr-text {
   font-size: 18rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
   text-align: center;
   line-height: 1.3;
 }
@@ -851,7 +851,7 @@ export default {
 }
 
 .save-btn {
-  background: linear-gradient(145deg, #5b8c5a 0%, #4a7a49 100%);
+  background: linear-gradient(145deg, var(--success) 0%, #4a7a49 100%);
   box-shadow: 0 6rpx 18rpx rgba(91, 140, 90, 0.35);
 }
 
@@ -869,7 +869,7 @@ export default {
 }
 
 .close-btn {
-  background: linear-gradient(145deg, #8b7355 0%, #6b5643 100%);
+  background: linear-gradient(145deg, var(--text-tertiary) 0%, var(--text-secondary) 100%);
   box-shadow: 0 6rpx 18rpx rgba(139, 115, 85, 0.35);
 }
 

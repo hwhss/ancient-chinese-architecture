@@ -64,21 +64,21 @@ export default {
 }
 
 .action-button.primary {
-  background: linear-gradient(135deg, #c82506 0%, #8b0000 100%);
+  background: linear-gradient(135deg, #c82506 0%, var(--primary-dark) 100%);
   color: #fff;
   box-shadow: 0 8rpx 24rpx rgba(200, 37, 6, 0.3);
 }
 
 .action-button.secondary {
   background: linear-gradient(135deg, #fff 0%, #faf6ed 100%);
-  color: #3c2a1d;
-  border: 2rpx solid #e8dcc8;
+  color: var(--text-primary);
+  border: 2rpx solid var(--bg-tertiary);
   box-shadow: 0 4rpx 12rpx rgba(139, 69, 19, 0.1);
 }
 
 .action-button.text {
   background: transparent;
-  color: #3c2a1d;
+  color: var(--text-primary);
   padding: 16rpx 24rpx;
 }
 

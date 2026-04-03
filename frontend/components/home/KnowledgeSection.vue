@@ -100,7 +100,7 @@ export default {
   display: block;
   font-size: 40rpx;
   font-weight: bold;
-  color: #3c2a1d;
+  color: var(--text-primary);
   margin-bottom: 12rpx;
   font-family: 'ZCOOL XiaoWei', serif;
 }
@@ -108,7 +108,7 @@ export default {
 .section-subtitle {
   display: block;
   font-size: 26rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
 }
 
 .window-divider {
@@ -122,7 +122,7 @@ export default {
 .window-pattern {
   width: 200rpx;
   height: 4rpx;
-  background: linear-gradient(90deg, transparent, #8b4513, transparent);
+  background: linear-gradient(90deg, transparent, var(--secondary), transparent);
   position: relative;
 }
 
@@ -132,7 +132,7 @@ export default {
   position: absolute;
   width: 8rpx;
   height: 8rpx;
-  background: #8b4513;
+  background: var(--secondary);
   top: 50%;
   transform: translateY(-50%) rotate(45deg);
 }
@@ -154,10 +154,10 @@ export default {
   display: inline-block;
   width: 560rpx;
   margin-right: 24rpx;
-  background: linear-gradient(135deg, #fff 0%, #f8f4e8 100%);
+  background: linear-gradient(135deg, #fff 0%, var(--bg-primary) 100%);
   border-radius: 20rpx;
   padding: 40rpx 32rpx;
-  border-left: 6rpx solid #c41e3a;
+  border-left: 6rpx solid var(--primary);
   box-shadow: 0 4rpx 16rpx rgba(139, 69, 19, 0.1);
   position: relative;
   overflow: hidden;
@@ -196,7 +196,7 @@ export default {
   display: block;
   font-size: 32rpx;
   font-weight: bold;
-  color: #3c2a1d;
+  color: var(--text-primary);
   margin-bottom: 16rpx;
   font-family: 'ZCOOL XiaoWei', serif;
 }
@@ -204,7 +204,7 @@ export default {
 .knowledge-card-text {
   display: block;
   font-size: 26rpx;
-  color: #6b5643;
+  color: var(--text-secondary);
   line-height: 1.8;
   white-space: normal;
 }
@@ -215,7 +215,7 @@ export default {
   left: 0;
   right: 0;
   height: 4rpx;
-  background: linear-gradient(90deg, #c41e3a, #8b4513);
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
   opacity: 0.3;
 }
 
@@ -231,20 +231,20 @@ export default {
 .indicator-line {
   width: 120rpx;
   height: 4rpx;
-  background: #e8dcc8;
+  background: var(--bg-tertiary);
   border-radius: 2rpx;
   overflow: hidden;
 }
 
 .indicator-progress {
   height: 100%;
-  background: linear-gradient(90deg, #c41e3a, #8b4513);
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
   border-radius: 2rpx;
   transition: width 0.1s ease;
 }
 
 .indicator-text {
   font-size: 22rpx;
-  color: #a89078;
+  color: var(--text-muted);
 }
 </style>

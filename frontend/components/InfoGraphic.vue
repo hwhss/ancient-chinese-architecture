@@ -108,16 +108,16 @@ export default {
         // 木色背景
         nodeFill: '#f5e6c8',
         // 棕色边框
-        nodeStroke: '#8B4513',
+        nodeStroke: 'var(--secondary)',
         // 深棕色文字
-        textFill: '#3c2a1d',
+        textFill: 'var(--text-primary)',
         // 边颜色
         edgeStroke: '#b8956a',
         // 激活状态
         activeFill: '#fff8d8',
         activeStroke: '#c82506',
         // 画布背景
-        background: '#f8f4e9'
+        background: 'var(--bg-primary)'
       };
     }
   },
@@ -419,10 +419,10 @@ export default {
 <style scoped>
 .info-graphic-container {
   width: 100%;
-  background: #f8f4e9;
+  background: var(--bg-primary);
   border-radius: 16rpx;
   overflow: hidden;
-  border: 2rpx solid #e8dcc8;
+  border: 2rpx solid var(--bg-tertiary);
 }
 
 .loading-state,
@@ -436,12 +436,12 @@ export default {
 
 .loading-text {
   font-size: 28rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
 }
 
 .error-text {
   font-size: 28rpx;
-  color: #b85450;
+  color: var(--error);
   text-align: center;
 }
 

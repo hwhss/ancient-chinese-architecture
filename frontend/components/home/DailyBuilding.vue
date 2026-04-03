@@ -143,7 +143,7 @@ export default {
 .section-title {
   font-size: 56rpx;
   font-weight: bold;
-  color: #3c2a1d;
+  color: var(--text-primary);
   font-family: 'ZCOOL XiaoWei', serif;
   letter-spacing: 6rpx;
 }
@@ -157,12 +157,12 @@ export default {
 
 .daily-date {
   font-size: 26rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
   font-weight: 500;
   background: linear-gradient(135deg, #fff8d8 0%, #f5e6c8 100%);
   padding: 12rpx 28rpx;
   border-radius: 30rpx;
-  border: 2rpx solid #e8b860;
+  border: 2rpx solid var(--warning);
   box-shadow: 0 4rpx 12rpx rgba(232, 184, 96, 0.2);
 }
 
@@ -178,7 +178,7 @@ export default {
 .window-pattern {
   width: 120rpx;
   height: 6rpx;
-  background: #c41e3a;
+  background: var(--primary);
   border-radius: 4rpx;
   position: relative;
 }
@@ -190,7 +190,7 @@ export default {
   top: 50%;
   width: 20rpx;
   height: 20rpx;
-  border: 4rpx solid #c41e3a;
+  border: 4rpx solid var(--primary);
   transform: translateY(-50%) rotate(45deg);
 }
 

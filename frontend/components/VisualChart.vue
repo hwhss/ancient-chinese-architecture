@@ -113,24 +113,24 @@ export default {
         primary: '#c82506',
         primaryLight: '#e84a38',
         // 辅助色
-        secondary: '#8B4513',
-        secondaryLight: '#a67c52',
+        secondary: 'var(--secondary)',
+        secondaryLight: 'var(--secondary-light)',
         // 背景色
-        background: '#f8f4e9',
+        background: 'var(--bg-primary)',
         // 文字色
-        text: '#3c2a1d',
-        textSecondary: '#6b5643',
+        text: 'var(--text-primary)',
+        textSecondary: 'var(--text-secondary)',
         // 网格线
-        gridLine: '#e8dcc8',
+        gridLine: 'var(--bg-tertiary)',
         // 数据色板
         colorPalette: [
           '#c82506', // 主红
-          '#8B4513', // 棕色
-          '#e8b860', // 金色
-          '#5b8c5a', // 绿色
+          'var(--secondary)', // 棕色
+          'var(--warning)', // 金色
+          'var(--success)', // 绿色
           '#b8956a', // 浅棕
-          '#d6455a', // 粉红
-          '#6b3410', // 深棕
+          'var(--primary-light)', // 粉红
+          'var(--secondary-dark)', // 深棕
           '#f5e6c8'  // 米色
         ]
       };
@@ -393,7 +393,7 @@ export default {
               formatter: function(params) {
                 return `<div style="padding: 8px;">
                   <b style="color: ${params.color}; font-size: 14px;">${params.name}</b><br/>
-                  <span style="color: #6b5643;">数量: ${params.value}处</span><br/>
+                  <span style="color: var(--text-secondary);">数量: ${params.value}处</span><br/>
                   <span style="color: #c82506; font-weight: bold;">占比: ${params.percent}%</span>
                 </div>`;
               }
@@ -879,7 +879,7 @@ export default {
         this.chart.showLoading({
           text: '加载中...',
           color: '#c82506',
-          textColor: '#3c2a1d',
+          textColor: 'var(--text-primary)',
           maskColor: 'rgba(248, 244, 233, 0.8)'
         });
       }
@@ -917,10 +917,10 @@ export default {
 <style scoped>
 .visual-chart-container {
   width: 100%;
-  background: #f8f4e9;
+  background: var(--bg-primary);
   border-radius: 16rpx;
   overflow: hidden;
-  border: 2rpx solid #e8dcc8;
+  border: 2rpx solid var(--bg-tertiary);
 }
 
 .loading-state,
@@ -934,12 +934,12 @@ export default {
 
 .loading-text {
   font-size: 28rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
 }
 
 .error-text {
   font-size: 28rpx;
-  color: #b85450;
+  color: var(--error);
   text-align: center;
 }
 

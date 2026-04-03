@@ -75,7 +75,7 @@ export default {
 .section-title {
   font-size: 40rpx;
   font-weight: bold;
-  color: #8b4513;
+  color: var(--secondary);
   letter-spacing: 8rpx;
   display: block;
   margin-bottom: 16rpx;
@@ -92,7 +92,7 @@ export default {
 .window-pattern {
   width: 200rpx;
   height: 4rpx;
-  background: linear-gradient(90deg, transparent, #8b4513, transparent);
+  background: linear-gradient(90deg, transparent, var(--secondary), transparent);
   position: relative;
 }
 
@@ -102,7 +102,7 @@ export default {
   position: absolute;
   width: 8rpx;
   height: 8rpx;
-  background: #8b4513;
+  background: var(--secondary);
   top: 50%;
   transform: translateY(-50%) rotate(45deg);
 }
@@ -185,13 +185,13 @@ export default {
 .card-name {
   font-size: 28rpx;
   font-weight: 600;
-  color: #3c2a1d;
+  color: var(--text-primary);
   line-height: 1.4;
 }
 
 .card-desc {
   font-size: 22rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
   line-height: 1.5;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -209,7 +209,7 @@ export default {
 
 .card-tag {
   font-size: 20rpx;
-  color: #8b4513;
+  color: var(--secondary);
   background: rgba(139, 69, 19, 0.08);
   padding: 4rpx 12rpx;
   border-radius: 10rpx;

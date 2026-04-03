@@ -263,7 +263,7 @@ export default {
 <style>
 .container {
   min-height: 100vh;
-  background: #f8f4e9;
+  background: var(--bg-primary);
   padding: 24rpx;
 }
 
@@ -271,7 +271,7 @@ export default {
 .form-card,
 .status-card {
   background: #fff;
-  border: 1rpx solid #e8dcc8;
+  border: 1rpx solid var(--bg-tertiary);
   border-radius: 12rpx;
   padding: 24rpx;
   margin-bottom: 20rpx;
@@ -280,7 +280,7 @@ export default {
 .title {
   display: block;
   font-size: 36rpx;
-  color: #3c2a1d;
+  color: var(--text-primary);
   font-weight: bold;
 }
 
@@ -288,13 +288,13 @@ export default {
   display: block;
   margin-top: 10rpx;
   font-size: 24rpx;
-  color: #6b5643;
+  color: var(--text-secondary);
 }
 
 .label {
   display: block;
   font-size: 28rpx;
-  color: #3c2a1d;
+  color: var(--text-primary);
   margin-bottom: 14rpx;
 }
 
@@ -304,7 +304,7 @@ export default {
   border-radius: 10rpx;
   padding: 0 18rpx;
   font-size: 28rpx;
-  color: #3c2a1d;
+  color: var(--text-primary);
   background: #fff;
 }
 
@@ -333,7 +333,7 @@ export default {
 }
 
 .preset-item.active {
-  border-color: #8b4513;
+  border-color: var(--secondary);
   background: #f9efe2;
 }
 
@@ -344,7 +344,7 @@ export default {
 .preset-name {
   display: block;
   font-size: 28rpx;
-  color: #3c2a1d;
+  color: var(--text-primary);
   font-weight: bold;
 }
 
@@ -352,7 +352,7 @@ export default {
   display: block;
   margin-top: 8rpx;
   font-size: 22rpx;
-  color: #6b5643;
+  color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -373,19 +373,19 @@ export default {
   line-height: 76rpx;
   border-radius: 10rpx;
   font-size: 28rpx;
-  color: #8b4513;
-  border: 1rpx solid #8b4513;
+  color: var(--secondary);
+  border: 1rpx solid var(--secondary);
   background: #fff;
 }
 
 .btn.primary {
-  background: #8b4513;
+  background: var(--secondary);
   color: #fff;
 }
 
 .btn.warn {
-  color: #b85450;
-  border-color: #b85450;
+  color: var(--error);
+  border-color: var(--error);
 }
 
 .status {
@@ -394,7 +394,7 @@ export default {
 }
 
 .status.info {
-  color: #6b5643;
+  color: var(--text-secondary);
 }
 
 .status.success {
@@ -402,6 +402,6 @@ export default {
 }
 
 .status.error {
-  color: #b85450;
+  color: var(--error);
 }
 </style>

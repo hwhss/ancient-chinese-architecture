@@ -357,10 +357,10 @@ export default {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  background: #f8f4e9;
+  background: var(--bg-primary);
   border-radius: 16rpx;
   overflow: hidden;
-  border: 2rpx solid #e8dcc8;
+  border: 2rpx solid var(--bg-tertiary);
   padding: 20rpx;
 }
 
@@ -376,12 +376,12 @@ export default {
 
 .loading-text {
   font-size: 28rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
 }
 
 .error-text {
   font-size: 28rpx;
-  color: #b85450;
+  color: var(--error);
   text-align: center;
 }
 
@@ -399,7 +399,7 @@ export default {
   gap: 30rpx;
   margin-top: 20rpx;
   padding-top: 20rpx;
-  border-top: 1rpx solid #e8dcc8;
+  border-top: 1rpx solid var(--bg-tertiary);
   width: 100%;
 }
 

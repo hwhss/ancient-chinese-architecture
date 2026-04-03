@@ -34,7 +34,7 @@ export default {
 .section-title {
   font-size: 36rpx;
   font-weight: 700;
-  color: #3c2a1d;
+  color: var(--text-primary);
   letter-spacing: 4rpx;
   margin-bottom: 16rpx;
   display: block;
@@ -42,7 +42,7 @@ export default {
 
 .section-subtitle {
   font-size: 26rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
   margin-bottom: 20rpx;
   display: block;
 }

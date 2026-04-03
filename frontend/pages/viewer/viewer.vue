@@ -1073,7 +1073,7 @@ export default {
 .hotspot-popup-title {
   font-size: 28rpx;
   font-weight: 600;
-  color: #8b4513;
+  color: var(--secondary);
   flex: 1;
 }
 
@@ -1085,7 +1085,7 @@ export default {
   justify-content: center;
   background: transparent;
   border: none;
-  color: #8b4513;
+  color: var(--secondary);
   font-size: 36rpx;
   line-height: 1;
   padding: 0;

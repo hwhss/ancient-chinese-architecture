@@ -748,7 +748,7 @@ export default {
 
 .stat-label {
   font-size: 26rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
 }
 
 .stat-divider {
@@ -804,7 +804,7 @@ export default {
 
 .pill-name {
   font-size: 28rpx;
-  color: #3c2a1d;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
@@ -814,7 +814,7 @@ export default {
 
 .pill-count {
   font-size: 22rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
   background: #f5f5f5;
   padding: 4rpx 12rpx;
   border-radius: 20rpx;
@@ -906,7 +906,7 @@ export default {
   box-shadow:
     0 8rpx 32rpx rgba(139, 69, 19, 0.1),
     0 2rpx 8rpx rgba(139, 69, 19, 0.05);
-  border: 2rpx solid #e8dcc8;
+  border: 2rpx solid var(--bg-tertiary);
   animation: cardEnter 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -1026,7 +1026,7 @@ export default {
 .grid-name {
   font-size: 30rpx;
   font-weight: 600;
-  color: #3c2a1d;
+  color: var(--text-primary);
   line-height: 1.4;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1052,7 +1052,7 @@ export default {
 
 .grid-location {
   font-size: 24rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
   display: flex;
   align-items: center;
   gap: 6rpx;
@@ -1083,17 +1083,17 @@ export default {
 
 .grid-tag {
   font-size: 20rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
   background: linear-gradient(145deg, #faf6ed 0%, #f5efe6 100%);
   padding: 6rpx 14rpx;
   border-radius: 12rpx;
-  border: 1rpx solid #e8dcc8;
+  border: 1rpx solid var(--bg-tertiary);
   transition: all 0.3s ease;
 }
 
 .grid-tag:hover {
   background: linear-gradient(145deg, #fff8d8 0%, #f5e6c8 100%);
-  border-color: #e8b860;
+  border-color: var(--warning);
   color: #c82506;
 }
 
@@ -1163,7 +1163,7 @@ export default {
 }
 
 .grid-action-btn:hover .action-icon-small {
-  color: #3c2a1d;
+  color: var(--text-primary);
 }
 
 .grid-action-btn.remove .action-icon-small {
@@ -1214,7 +1214,7 @@ export default {
   right: -30rpx;
   width: 60rpx;
   height: 60rpx;
-  background: linear-gradient(135deg, #e8b860 0%, #c82506 100%);
+  background: linear-gradient(135deg, var(--warning) 0%, #c82506 100%);
   border-radius: 50%;
   opacity: 0.3;
 }
@@ -1222,14 +1222,14 @@ export default {
 .empty-title {
   font-size: 36rpx;
   font-weight: bold;
-  color: #3c2a1d;
+  color: var(--text-primary);
   margin-bottom: 16rpx;
   letter-spacing: 4rpx;
 }
 
 .empty-desc {
   font-size: 28rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
   line-height: 1.6;
   margin-bottom: 50rpx;
 }
@@ -1273,7 +1273,7 @@ export default {
 }
 
 .empty-btn.secondary .btn-text {
-  color: #3c2a1d;
+  color: var(--text-primary);
 }
 
 /* 弹窗样式 */
@@ -1324,7 +1324,7 @@ export default {
 .modal-title {
   font-size: 34rpx;
   font-weight: bold;
-  color: #3c2a1d;
+  color: var(--text-primary);
 }
 
 .modal-close {
@@ -1350,13 +1350,13 @@ export default {
   border-radius: 16rpx;
   padding: 0 28rpx;
   font-size: 30rpx;
-  color: #3c2a1d;
+  color: var(--text-primary);
   background: #faf6ed;
   transition: border-color 0.3s ease;
 }
 
 .collection-input:focus {
-  border-color: #e8b860;
+  border-color: var(--warning);
   outline: none;
 }
 
@@ -1450,7 +1450,7 @@ export default {
 
 .move-collection-name {
   font-size: 30rpx;
-  color: #3c2a1d;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
@@ -1514,7 +1514,7 @@ export default {
 
 .manage-collection-name {
   font-size: 30rpx;
-  color: #3c2a1d;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
@@ -1525,7 +1525,7 @@ export default {
 
 .manage-collection-count {
   font-size: 26rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
 }
 
 .manage-collection-actions {
@@ -1541,7 +1541,7 @@ export default {
 }
 
 .manage-action-btn.edit {
-  color: #e8b860;
+  color: var(--warning);
 }
 
 .manage-action-btn.delete {

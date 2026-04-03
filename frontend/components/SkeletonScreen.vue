@@ -299,7 +299,7 @@ export default {
   background: linear-gradient(
     90deg,
     #f0e6d3 25%,
-    #e8dcc8 50%,
+    var(--bg-tertiary) 50%,
     #f0e6d3 75%
   );
   background-size: 200% 100%;

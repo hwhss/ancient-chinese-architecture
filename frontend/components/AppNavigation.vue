@@ -290,7 +290,7 @@ export default {
   justify-content: space-between;
   padding: 0 30rpx;
   height: 100rpx;
-  background: linear-gradient(135deg, #8b4513 0%, #6b3410 100%);
+  background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%);
   box-shadow: 0 4rpx 20rpx rgba(139, 69, 19, 0.3);
   position: fixed;
   top: 0;
@@ -479,7 +479,7 @@ export default {
   bottom: 0;
   width: 70%;
   max-width: 500rpx;
-  background: linear-gradient(180deg, #f8f4e8 0%, #f0e9d8 100%);
+  background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
   box-shadow: 4rpx 0 30rpx rgba(0, 0, 0, 0.2);
   transform: translateX(-100%);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -497,7 +497,7 @@ export default {
   align-items: center;
   justify-content: space-between;
   padding: 40rpx 30rpx;
-  background: linear-gradient(135deg, #8b4513 0%, #6b3410 100%);
+  background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%);
 }
 
 .mobile-nav-title {
@@ -537,7 +537,7 @@ export default {
 }
 
 .mobile-nav-item.active {
-  background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   box-shadow: 0 4rpx 16rpx rgba(196, 30, 58, 0.3);
 }
 
@@ -554,13 +554,13 @@ export default {
 .mobile-nav-text {
   flex: 1;
   font-size: 30rpx;
-  color: #3c2a1d;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
 .mobile-nav-arrow {
   font-size: 36rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
 }
 
 .mobile-nav-item.active .mobile-nav-arrow {
@@ -571,7 +571,7 @@ export default {
 .breadcrumb {
   padding: 20rpx 30rpx;
   background: rgba(248, 244, 232, 0.95);
-  border-bottom: 2rpx solid #e8dcc8;
+  border-bottom: 2rpx solid var(--bg-tertiary);
   position: fixed;
   top: 100rpx;
   left: 0;
@@ -595,27 +595,27 @@ export default {
 
 .breadcrumb-link {
   font-size: 26rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
   transition: all 0.2s ease;
 }
 
 .breadcrumb-link.is-link {
-  color: #8b4513;
+  color: var(--secondary);
   cursor: pointer;
 }
 
 .breadcrumb-link.is-link:hover {
-  color: #c41e3a;
+  color: var(--primary);
 }
 
 .breadcrumb-link.is-last {
-  color: #3c2a1d;
+  color: var(--text-primary);
   font-weight: 600;
 }
 
 .breadcrumb-separator {
   font-size: 24rpx;
-  color: #a89078;
+  color: var(--text-muted);
 }
 
 /* ========== 底部导航栏（移动端） ========== */
@@ -625,8 +625,8 @@ export default {
   left: 0;
   right: 0;
   height: 120rpx;
-  background: linear-gradient(180deg, #f8f4e8 0%, #f0e9d8 100%);
-  border-top: 2rpx solid #e8dcc8;
+  background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  border-top: 2rpx solid var(--bg-tertiary);
   display: flex;
   align-items: center;
   justify-content: space-around;
@@ -654,7 +654,7 @@ export default {
 }
 
 .bottom-nav-item.active {
-  background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   box-shadow: 0 4rpx 16rpx rgba(196, 30, 58, 0.3);
   transform: translateY(-8rpx);
 }
@@ -670,7 +670,7 @@ export default {
 
 .bottom-nav-text {
   font-size: 22rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
   transition: all 0.3s ease;
 }
 

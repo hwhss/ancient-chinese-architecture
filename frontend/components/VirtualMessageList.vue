@@ -243,11 +243,11 @@ export default {
 }
 
 .ai-avatar {
-  background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
 }
 
 .user-avatar {
-  background: linear-gradient(135deg, #8b4513 0%, #6b3410 100%);
+  background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%);
 }
 
 .avatar-icon {
@@ -280,13 +280,13 @@ export default {
 
 .message-sender {
   font-size: 24rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
   font-weight: 500;
 }
 
 .message-time {
   font-size: 20rpx;
-  color: #a89078;
+  color: var(--text-muted);
 }
 
 /* 消息气泡 */
@@ -300,13 +300,13 @@ export default {
 
 .message.ai {
   background: #fff;
-  border: 2rpx solid #e8dcc8;
-  color: #3c2a1d;
+  border: 2rpx solid var(--bg-tertiary);
+  color: var(--text-primary);
   border-top-left-radius: 4rpx;
 }
 
 .message.user {
-  background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: #fff;
   border-top-right-radius: 4rpx;
 }
@@ -333,7 +333,7 @@ export default {
 .view-btn {
   margin-top: 16rpx;
   padding: 12rpx 24rpx;
-  background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: #fff;
   font-size: 26rpx;
   border-radius: 30rpx;
@@ -350,7 +350,7 @@ export default {
 
 .candidate-title {
   font-size: 24rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
   display: block;
   margin-bottom: 12rpx;
 }
@@ -366,14 +366,14 @@ export default {
   background: rgba(139, 69, 19, 0.08);
   border-radius: 24rpx;
   font-size: 24rpx;
-  color: #8b4513;
+  color: var(--secondary);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .candidate-tag:hover {
   background: rgba(196, 30, 58, 0.15);
-  color: #c41e3a;
+  color: var(--primary);
 }
 
 /* 消息操作 */
@@ -410,7 +410,7 @@ export default {
 
 .action-text {
   font-size: 22rpx;
-  color: #8b7355;
+  color: var(--text-tertiary);
 }
 
 /* 底部占位 */
