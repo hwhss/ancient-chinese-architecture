@@ -15,7 +15,11 @@
         :class="{ 'visible': visibleCards[index] }"
         @click="onGoToDetail(building)"
       >
-        <view class="card-image" :style="{ backgroundImage: 'url(' + building.image + ')' }"></view>
+        <view v-if="hasImage(building)" class="card-image" :style="{ backgroundImage: 'url(' + building.image + ')' }"></view>
+        <view v-else class="card-image card-image-empty">
+          <text class="card-image-empty-icon">🏛️</text>
+          <text class="card-image-empty-text">后端未下发图片</text>
+        </view>
         <view class="card-info">
           <text class="card-name">{{ building.name }}</text>
           <text class="card-desc">{{ building.description }}</text>
@@ -46,6 +50,9 @@ export default {
     }
   },
   methods: {
+    hasImage(building) {
+      return Boolean(String((building && building.image) || '').trim());
+    },
     onGoToDetail(building) {
       this.$emit('go-to-detail', building);
     }
@@ -169,6 +176,24 @@ export default {
   background-size: cover;
   background-position: center;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-image-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #faf3e6 0%, #ead9c0 100%);
+}
+
+.card-image-empty-icon {
+  font-size: 42rpx;
+  margin-bottom: 10rpx;
+}
+
+.card-image-empty-text {
+  font-size: 20rpx;
+  color: var(--text-secondary);
 }
 
 .preview-card:hover .card-image {

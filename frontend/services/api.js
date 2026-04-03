@@ -103,9 +103,11 @@ function request(url, method = "GET", data) {
         }
 
         const message = buildHttpErrorMessage(statusCode, result.msg);
-        reject(
-          normalizeError(result, message)
-        );
+        const error = normalizeError(result, message);
+        error.statusCode = statusCode;
+        error.responseData = result;
+        error.detail = result.error || null;
+        reject(error);
       },
       fail: (error) => {
         const fallback =

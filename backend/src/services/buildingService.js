@@ -5,6 +5,7 @@ const {
 } = require('../repositories/dataRepository');
 const config = require('../config');
 const { buildSignedAssetUrl } = require('../utils/signedAsset');
+const { verifyAssetOwnership } = require('./assetVerification');
 
 const CATEGORY_TEXT_MAP = {
   palace: '皇宫',
@@ -40,6 +41,55 @@ function buildVisualizationMeta(item) {
       end: mainEraEnd
     }
   };
+}
+
+function buildBuildingAssetVerification(item) {
+  return verifyAssetOwnership(item.image, {
+    id: item.id,
+    name: item.name,
+    category: item.category,
+    tags: item.tags || [],
+    keywords: item.tags || [],
+    location: item.location,
+    province: item.province,
+    city: item.city,
+    description: item.description,
+    assetKey: item.assetKey,
+    assetName: item.assetName,
+    fileName: item.fileName,
+    imageKey: item.imageKey,
+    qiniuKey: item.qiniuKey
+  }, {
+    kind: 'building',
+    trustExplicitBinding: true,
+    explicitOwnerId: item.id
+  });
+}
+
+function buildListThumbnailUrl(resourceUrl) {
+  const raw = String(resourceUrl || '').trim();
+  if (!raw) {
+    return '';
+  }
+
+  // Home/list cards should load lightweight previews first.
+  if (!raw.includes('/api/qiniu/image?')) {
+    return raw;
+  }
+
+  const hasQuery = raw.includes('?');
+  const hasW = /(?:\?|&)w=/.test(raw);
+  const hasQ = /(?:\?|&)q=/.test(raw);
+  let next = raw;
+
+  if (!hasW) {
+    next += `${hasQuery ? '&' : '?'}w=480`;
+  }
+  if (!hasQ) {
+    next += `${next.includes('?') ? '&' : '?'}q=75`;
+  }
+
+  return next;
 }
 
 function buildModel3d(profile, fallbackPoster) {
@@ -266,7 +316,10 @@ function buildPreloadInfo(model3d, defaultVersion, buildingId, requester) {
 function buildBuildingSummary(item) {
   return getBuildingProfileById(item.id).then((profile) => {
     const safeProfile = profile || {};
-    const model3d = buildModel3d(safeProfile, item.image);
+    const assetVerification = buildBuildingAssetVerification(item);
+    const safeImage = assetVerification.verified ? assetVerification.url : '';
+    const listImage = buildListThumbnailUrl(safeImage);
+    const model3d = buildModel3d(safeProfile, listImage);
     const visualization = buildVisualizationMeta(item);
 
     return {
@@ -281,18 +334,23 @@ function buildBuildingSummary(item) {
       heritageLevel: visualization.heritageLevel,
       openStatus: visualization.openStatus,
       mainEra: visualization.mainEra,
-      coverImage: item.image,
+      image: listImage,
+      coverImage: listImage,
+      originalImage: safeImage,
       tags: item.tags || [],
       overviewSummary: safeProfile.overviewSummary || item.description || '',
       has3d: model3d.canView,
-      model3dStatus: model3d.status
+      model3dStatus: model3d.status,
+      assetVerification
     };
   });
 }
 
 async function buildBuildingDetail(item) {
   const profile = await getBuildingProfileById(item.id) || {};
-  const model3d = buildModel3d(profile, item.image);
+  const assetVerification = buildBuildingAssetVerification(item);
+  const safeImage = assetVerification.verified ? assetVerification.url : '';
+  const model3d = buildModel3d(profile, safeImage);
   const visualization = buildVisualizationMeta(item);
 
   return {
@@ -308,7 +366,7 @@ async function buildBuildingDetail(item) {
     openStatus: visualization.openStatus,
     mainEra: visualization.mainEra,
     description: item.description,
-    image: item.image,
+    image: safeImage,
     tags: item.tags || [],
     overview: {
       summary: profile.overviewSummary || item.description || '',
@@ -319,7 +377,8 @@ async function buildBuildingDetail(item) {
     history: profile.history || item.description || '暂无详细历史信息',
     architectureHighlights: profile.architectureHighlights || [],
     culturalValue: profile.culturalValue || '暂无补充说明',
-    model3d
+    model3d,
+    assetVerification
   };
 }
 

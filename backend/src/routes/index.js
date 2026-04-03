@@ -17,6 +17,7 @@ const {
 	getBuildingModel,
 	getBuildingModelManifest
 } = require('../controllers/buildingController');
+const { getQiniuDownloadUrl, getQiniuObject, getQiniuImage } = require('../controllers/qiniuController');
 
 const router = express.Router();
 
@@ -44,5 +45,8 @@ router.get('/api/buildings', getBuildingList);
 router.get('/api/buildings/:id', getBuildingDetail);
 router.get('/api/buildings/:id/model3d', getBuildingModel);
 router.get('/api/buildings/:id/model3d/manifest', getBuildingModelManifest);
+router.get('/api/qiniu/download-url', getQiniuDownloadUrl);
+router.get('/api/qiniu/object', getQiniuObject);
+router.get('/api/qiniu/image', getQiniuImage);
 
 module.exports = router;

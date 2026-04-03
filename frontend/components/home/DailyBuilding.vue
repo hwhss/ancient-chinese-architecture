@@ -13,7 +13,12 @@
     <view v-if="building" class="daily-card-wrapper">
       <view class="daily-card card-ink" @click="onCardClick">
         <!-- 整体背景图片 -->
-        <view class="daily-image-bg" :style="{ backgroundImage: 'url(' + building.image + ')' }">
+        <view v-if="hasImage" class="daily-image-bg" :style="{ backgroundImage: 'url(' + building.image + ')' }">
+          <view class="daily-overlay"></view>
+        </view>
+        <view v-else class="daily-image-bg daily-image-empty">
+          <text class="daily-image-empty-icon">🏛️</text>
+          <text class="daily-image-empty-text">后端未下发图片</text>
           <view class="daily-overlay"></view>
         </view>
         
@@ -102,6 +107,11 @@ export default {
     isFavorite: {
       type: Boolean,
       default: false
+    }
+  },
+  computed: {
+    hasImage() {
+      return Boolean(String((this.building && this.building.image) || '').trim());
     }
   },
   methods: {
@@ -242,6 +252,28 @@ export default {
   background-position: center;
   transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1;
+}
+
+.daily-image-empty {
+  background: linear-gradient(180deg, #fdf7ee 0%, #efe1cb 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+}
+
+.daily-image-empty-icon {
+  position: relative;
+  z-index: 1;
+  font-size: 72rpx;
+}
+
+.daily-image-empty-text {
+  position: relative;
+  z-index: 1;
+  font-size: 24rpx;
+  color: rgba(60, 39, 20, 0.72);
 }
 
 .daily-card:hover .daily-image-bg {

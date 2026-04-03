@@ -173,6 +173,8 @@ DATA_SOURCE=postgres
 | `/test` | GET | 服务状态测试 |
 | `/api/chat` | POST | AI问答接口 |
 | `/api/material` | GET | 素材查询接口 |
+| `/api/qiniu/download-url` | GET | 获取七牛对象签名下载链接（`key`必填） |
+| `/api/qiniu/object` | GET | 读取七牛对象内容（支持JSON/Text） |
 
 ### 3. 运行前端项目
 

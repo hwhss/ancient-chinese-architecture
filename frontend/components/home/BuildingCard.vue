@@ -5,10 +5,15 @@
     @click="handleClick"
   >
     <view class="card-image-wrapper">
-      <view 
-        class="card-image" 
+      <view
+        v-if="hasImage"
+        class="card-image"
         :style="{ backgroundImage: 'url(' + building.image + ')' }"
       ></view>
+      <view v-else class="card-image card-image-empty">
+        <text class="card-image-empty-icon">🏛️</text>
+        <text class="card-image-empty-text">后端未下发图片</text>
+      </view>
       <view class="card-image-overlay"></view>
     </view>
     <view class="card-content">
@@ -50,6 +55,8 @@ export default {
   },
   emits: ['click'],
   setup(props, { emit }) {
+    const hasImage = computed(() => Boolean(String(props.building.image || '').trim()))
+
     const truncatedDesc = computed(() => {
       const desc = props.building.description || ''
       if (desc.length <= props.maxDescLength) return desc
@@ -66,6 +73,7 @@ export default {
     }
 
     return {
+      hasImage,
       truncatedDesc,
       displayTags,
       handleClick

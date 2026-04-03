@@ -16,11 +16,16 @@
         <!-- 图片区域 -->
         <view class="card-image-wrapper">
           <image
+            v-if="hasImage"
             class="card-image"
             :src="building.image"
             mode="aspectFill"
             @error="onImageError"
           />
+          <view v-else class="card-image card-image-empty">
+            <text class="card-image-empty-icon">🏛️</text>
+            <text class="card-image-empty-text">后端未下发图片</text>
+          </view>
           <view class="image-overlay"></view>
           <view class="building-name-overlay">
             <text class="overlay-name">{{ building.name }}</text>
@@ -130,10 +135,13 @@ export default {
   data() {
     return {
       descExpanded: false,
-      defaultImage: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=600&h=400&fit=crop'
+      imageFailed: false
     }
   },
   computed: {
+    hasImage() {
+      return Boolean(String(this.building.image || '').trim()) && !this.imageFailed
+    },
     displayDescription() {
       const desc = this.building.description || '暂无介绍'
       if (this.descExpanded || desc.length <= 60) {
@@ -146,12 +154,17 @@ export default {
       return tags.slice(0, 3)
     }
   },
+  watch: {
+    'building.image'() {
+      this.imageFailed = false;
+    }
+  },
   methods: {
     close() {
       this.$emit('close')
     },
     onImageError() {
-      this.building.image = this.defaultImage
+      this.imageFailed = true
     },
     saveCard() {
       // 保存卡片功能 - 使用画布生成图片
@@ -648,6 +661,24 @@ export default {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.card-image-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #fbf4e8 0%, #ead9c2 100%);
+}
+
+.card-image-empty-icon {
+  font-size: 56rpx;
+  margin-bottom: 16rpx;
+}
+
+.card-image-empty-text {
+  font-size: 26rpx;
+  color: rgba(75, 52, 27, 0.7);
 }
 
 .image-overlay {

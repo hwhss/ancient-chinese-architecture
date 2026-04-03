@@ -3,12 +3,21 @@
     <!-- 图片素材 -->
     <view v-if="material.type === 'image'" class="material-wrapper">
       <image
+        v-if="hasImage"
         class="material-image"
         :src="material.url"
         mode="widthFix"
         lazy-load="true"
         @error="$emit('image-error')"
       />
+      <view v-else class="material-empty">
+        <view class="material-empty-icon">🏛️</view>
+        <text class="material-empty-title">后端未下发图片</text>
+        <text class="material-empty-subtitle">{{ emptyStateText }}</text>
+        <text v-if="material.assetVerification && !material.assetVerification.verified" class="material-empty-detail">
+          校验结果：{{ material.assetVerification.reason || 'asset_name_mismatch' }}
+        </text>
+      </view>
       <view class="material-info">
         <text class="material-title">{{ materialTitle }}</text>
         <text class="material-source">参考素材来源：{{ material.source || "未知" }}</text>
@@ -60,6 +69,17 @@ export default {
       type: String,
       default: ""
     }
+  },
+  computed: {
+    hasImage() {
+      return Boolean(String(this.material.url || '').trim());
+    },
+    emptyStateText() {
+      if (this.material.assetVerification && this.material.assetVerification.verified === false) {
+        return '图片已被后端拦截，请检查命名或映射规则';
+      }
+      return '当前素材暂未下发可用图片';
+    }
   }
 }
 </script>
@@ -74,6 +94,43 @@ export default {
     0 2rpx 8rpx rgba(139, 69, 19, 0.06);
   border: 2rpx solid var(--bg-tertiary);
   margin-bottom: 20rpx;
+}
+
+.material-empty {
+  min-height: 360rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48rpx 32rpx;
+  background: linear-gradient(180deg, #fffaf3 0%, #f7efe2 100%);
+}
+
+.material-empty-icon {
+  font-size: 84rpx;
+  margin-bottom: 20rpx;
+}
+
+.material-empty-title {
+  display: block;
+  font-size: 32rpx;
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: 12rpx;
+}
+
+.material-empty-subtitle,
+.material-empty-detail {
+  display: block;
+  text-align: center;
+  font-size: 24rpx;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.material-empty-detail {
+  margin-top: 10rpx;
+  color: var(--warning);
 }
 
 .material-image {

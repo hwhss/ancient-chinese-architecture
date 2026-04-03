@@ -164,7 +164,7 @@ export default {
       this.currentCategory = options.category;
     }
     this.throttledOnScroll = throttle(this.onScroll.bind(this), 100);
-    this.loadBuildings();
+    this.loadBuildings(true);
   },
   computed: {
     filteredBuildings() {
@@ -357,7 +357,17 @@ export default {
         const list = buildingResult.status === 'fulfilled' ? buildingResult.value : [];
         const mapPointPayload = pointResult.status === 'fulfilled' ? pointResult.value : null;
 
-        this.buildings = Array.isArray(list) ? list : [];
+        this.buildings = Array.isArray(list)
+          ? list.map((item) => {
+            const image = String(item && (item.image || item.coverImage || item.originalImage) || '').trim();
+            return {
+              ...item,
+              image,
+              coverImage: image,
+              originalImage: String(item && (item.originalImage || item.image || item.coverImage) || '').trim()
+            };
+          })
+          : [];
         this.mapPoints = Array.isArray(mapPointPayload && mapPointPayload.points)
           ? mapPointPayload.points
           : [];

@@ -265,8 +265,8 @@ export default {
         const duration = Date.now() - startTime;
         recordApiCall('getMaterialById', duration, false);
         console.error("加载素材失败:", error);
-        this.setPlaceholderData();
-        this.materialNotice = "当前素材暂不可用，已展示示例图";
+        this.setFailureData(error);
+        this.materialNotice = this.getMaterialErrorNotice(error);
       }
     },
 
@@ -303,13 +303,31 @@ export default {
       });
     },
 
-    setPlaceholderData() {
-      const randomNum = parseInt(this.materialId.replace(/\D/g, "")) || Math.floor(Math.random() * 100);
+    setFailureData(error) {
       this.material = {
-        url: `https://picsum.photos/800/600?random=${randomNum}`,
+        url: "",
         type: "image",
-        source: "示例图片",
+        source: "后端未下发图片",
+        assetVerification: error && error.detail ? error.detail : null,
       };
+    },
+
+    getMaterialErrorNotice(error) {
+      if (!error) {
+        return "当前素材暂不可用，后端未返回图片。";
+      }
+
+      if (error.statusCode === 422) {
+        const detail = error.detail || {};
+        const reason = detail.reason || "asset_name_mismatch";
+        return `后端校验未通过：${reason === 'missing_asset_name' ? '缺少图片命名' : '图片命名与实体不匹配'}`;
+      }
+
+      if (error.statusCode === 404) {
+        return "当前素材不存在，后端未下发图片。";
+      }
+
+      return error.message || "当前素材暂不可用，后端未下发图片。";
     },
 
     onImageError() {
