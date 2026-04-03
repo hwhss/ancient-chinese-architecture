@@ -9,7 +9,7 @@
  * @returns {Function} - 懒加载函数
  */
 export function lazyLoadComponent(path) {
-  return () => import(/* webpackChunkName: "[request]" */ `${path}`);
+  return () => import(/* @vite-ignore */ /* webpackChunkName: "[request]" */ `${path}`);
 }
 
 /**
@@ -20,12 +20,12 @@ export function preloadComponent(path) {
   // 使用requestIdleCallback在浏览器空闲时预加载
   if (typeof requestIdleCallback !== 'undefined') {
     requestIdleCallback(() => {
-      import(/* webpackPrefetch: true */ `${path}`);
+      import(/* @vite-ignore */ /* webpackPrefetch: true */ `${path}`);
     });
   } else {
     // 降级方案：使用setTimeout
     setTimeout(() => {
-      import(/* webpackPrefetch: true */ `${path}`);
+      import(/* @vite-ignore */ /* webpackPrefetch: true */ `${path}`);
     }, 1000);
   }
 }
