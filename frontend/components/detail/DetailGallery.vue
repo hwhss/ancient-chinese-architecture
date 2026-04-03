@@ -2,14 +2,27 @@
   <view>
     <!-- 图片素材 -->
     <view v-if="material.type === 'image'" class="material-wrapper">
-      <image
+      <swiper
         v-if="hasImage"
-        class="material-image"
-        :src="material.url"
-        mode="widthFix"
-        lazy-load="true"
-        @error="$emit('image-error')"
-      />
+        class="material-swiper"
+        :style="{ height: swiperHeight + 'px' }"
+        :circular="imageList.length > 1"
+        :indicator-dots="imageList.length > 1"
+        indicator-color="rgba(139, 69, 19, 0.3)"
+        indicator-active-color="#8b4513"
+      >
+        <swiper-item v-for="(imgSrc, index) in imageList" :key="index">
+          <image
+            class="material-image material-swiper-img"
+            :src="imgSrc"
+            mode="widthFix"
+            lazy-load="true"
+            @load="(e) => onImageLoad(e, index)"
+            @error="$emit('image-error')"
+            @click="previewImage(index)"
+          />
+        </swiper-item>
+      </swiper>
       <view v-else class="material-empty">
         <view class="material-empty-icon">🏛️</view>
         <text class="material-empty-title">后端未下发图片</text>
@@ -70,15 +83,57 @@ export default {
       default: ""
     }
   },
+  data() {
+    return {
+      swiperHeight: 250 // 默认高度暂定 250px，会在图片加载后重新计算
+    };
+  },
   computed: {
+    imageList() {
+      if (this.material.images && this.material.images.length > 0) {
+        return this.material.images;
+      }
+      if (this.material.url) {
+        return [this.material.url];
+      }
+      return [];
+    },
     hasImage() {
-      return Boolean(String(this.material.url || '').trim());
+      return this.imageList.length > 0;
     },
     emptyStateText() {
       if (this.material.assetVerification && this.material.assetVerification.verified === false) {
         return '图片已被后端拦截，请检查命名或映射规则';
       }
       return '当前素材暂未下发可用图片';
+    }
+  },
+  methods: {
+    onImageLoad(e, index) {
+      if (index === 0) {
+        try {
+          const sysInfo = uni.getSystemInfoSync();
+          const windowWidth = sysInfo.windowWidth;
+          // .content 容器 padding 为 30rpx，总计 60rpx
+          const paddingPx = (60 / 750) * windowWidth;
+          const containerWidth = windowWidth - paddingPx;
+          
+          const originalWidth = e.detail.width || 1;
+          const originalHeight = e.detail.height || 1;
+          
+          const calculatedHeight = containerWidth * (originalHeight / originalWidth);
+          // 限制高度
+          this.swiperHeight = Math.max(150, Math.min(calculatedHeight, sysInfo.windowHeight * 0.8));
+        } catch (err) {
+          console.warn('计算图片高度失败', err);
+        }
+      }
+    },
+    previewImage(index) {
+      uni.previewImage({
+        urls: this.imageList,
+        current: index
+      });
     }
   }
 }
@@ -131,6 +186,16 @@ export default {
 .material-empty-detail {
   margin-top: 10rpx;
   color: var(--warning);
+}
+
+.material-swiper {
+  width: 100%;
+  background: rgba(139, 69, 19, 0.04);
+}
+
+.material-swiper-img {
+  width: 100%;
+  display: block;
 }
 
 .material-image {
