@@ -76,27 +76,28 @@ export default {
 /* ========== CSS 变量定义 ========== */
 page {
   /* 浅色主题（默认） */
-  --primary: #c41e3a;
-  --primary-dark: #8b0000;
-  --primary-light: #d6455a;
-  --secondary: #8b4513;
-  --secondary-dark: #6b3410;
-  --secondary-light: #a67c52;
-  --text-primary: #3c2a1d;
-  --text-secondary: #6b5643;
-  --text-tertiary: #8b7355;
-  --text-muted: #a89078;
-  --bg-primary: #f8f4e8;
-  --bg-secondary: #f0e9d8;
-  --bg-tertiary: #e8dcc8;
-  --bg-card: #ffffff;
-  --border: #e8dcc8;
-  --border-light: #dcc8b0;
-  --error: #b85450;
-  --success: #5b8c5a;
-  --warning: #e8b860;
-  --shadow: rgba(139, 69, 19, 0.12);
-  --shadow-primary: rgba(196, 30, 58, 0.3);
+  /* 远中古木主题 - Antique / Muted Palette */
+  --primary: #a63131;        /* 故宫红（微黯） */
+  --primary-dark: #7a1d1d;
+  --primary-light: #c24d4d;
+  --secondary: #725a3d;     /* 古铜/青铜 */
+  --secondary-dark: #4d3d29;
+  --secondary-light: #9c7e5a;
+  --text-primary: #2c1e13;   /* 焦墨 */
+  --text-secondary: #5a4a3a; /* 水墨 */
+  --text-tertiary: #8b7355;  /* 赭石 */
+  --text-muted: #a08c70;
+  --bg-primary: #f2ead3;     /* 古旧绢本/生宣 */
+  --bg-secondary: #e8dec3;
+  --bg-tertiary: #decfa8;
+  --bg-card: #f9f5e8;        /* 熟宣 */
+  --border: #d4c4a8;
+  --border-light: #e0d1b5;
+  --error: #b74d4d;
+  --success: #5a7d5a;
+  --warning: #d49c4d;        /* 佛金 */
+  --shadow: rgba(44, 30, 19, 0.08); /* 焦墨影 */
+  --shadow-primary: rgba(166, 49, 49, 0.2);
   
   /* 字体变量 */
   --font-title: 'TsangerJinKai', 'Source Han Serif CN', 'Noto Serif SC', 'SimSun', serif;
@@ -108,7 +109,45 @@ page {
   font-family: var(--font-body);
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.4s ease, color 0.4s ease;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch' /%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+/* ========== 宣纸/绢本纹理 ========== */
+.rice-paper {
+  position: relative;
+  background-color: var(--bg-card);
+  background-image: 
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Cfilter id='paper-texture'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.04' numOctaves='5' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncR type='discrete' tableValues='0 1'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23paper-texture)' opacity='0.02'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse at 50% 50%, rgba(255, 255, 255, 0.2) 0%, transparent 80%);
+}
+
+/* ========== 墨韵毛笔边框 ========== */
+.brush-border-ink {
+  border: none;
+  position: relative;
+}
+
+.brush-border-ink::after {
+  content: '';
+  position: absolute;
+  top: -2rpx;
+  left: -2rpx;
+  right: -2rpx;
+  bottom: -2rpx;
+  pointer-events: none;
+  border: 4rpx solid transparent;
+  border-image: linear-gradient(to right, rgba(44, 30, 19, 0.4), rgba(44, 30, 19, 0.1) 50%, rgba(44, 30, 19, 0.4)) 1;
+  -webkit-mask-image: radial-gradient(circle, white 98%, transparent 100%);
+  mask-image: radial-gradient(circle, white 98%, transparent 100%);
+  -webkit-mask-composite: source-over;
+  mask-composite: exclude;
+}
+
+/* ========== 墨迹压印文字效果 ========== */
+.ink-pressed {
+  text-shadow: 0.5rpx 0.5rpx 0px rgba(255,255,255,0.8), 0 2rpx 4rpx rgba(0,0,0,0.1);
+  letter-spacing: 2rpx;
 }
 
 /* 标题字体 */

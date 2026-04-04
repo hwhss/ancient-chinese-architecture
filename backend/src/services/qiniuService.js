@@ -37,7 +37,7 @@ function resolveQiniuDomain() {
   return `${config.qiniuBucket}.qiniudn.com`;
 }
 
-function getSignedDownloadUrl(key, expiresSeconds = config.qiniuDownloadExpireSeconds) {
+function getSignedDownloadUrl(key, expiresSeconds = config.qiniuDownloadExpireSeconds, options = {}) {
   validateQiniuConfig();
 
   const normalizedKey = normalizeKey(key);
@@ -51,7 +51,15 @@ function getSignedDownloadUrl(key, expiresSeconds = config.qiniuDownloadExpireSe
 
   const protocol = config.qiniuUseHttps ? 'https' : 'http';
   const domain = resolveQiniuDomain();
-  const publicUrl = `${protocol}://${domain}/${encodeURI(normalizedKey)}`;
+  
+  // 处理图片样式（如果提供了 options）
+  const processQuery = buildImageProcessQuery(options);
+  let urlPath = encodeURI(normalizedKey);
+  if (processQuery) {
+    urlPath += (urlPath.includes('?') ? '&' : '?') + processQuery;
+  }
+
+  const publicUrl = `${protocol}://${domain}/${urlPath}`;
 
   if (!config.qiniuPrivateBucket) {
     return {
@@ -68,6 +76,18 @@ function getSignedDownloadUrl(key, expiresSeconds = config.qiniuDownloadExpireSe
     key: normalizedKey,
     expiresIn: safeExpires
   };
+}
+
+/**
+ * 获取优化后的图片链接（默认 WebP/瘦身/限制质量）
+ * 此方法不会发起网络请求，仅根据七牛规则生成签名链接
+ */
+function getOptimizedSignedUrl(key, options = {}) {
+  const defaultOptions = {
+    quality: 75,
+    ...options
+  };
+  return getSignedDownloadUrl(key, config.qiniuDownloadExpireSeconds, defaultOptions);
 }
 
 async function fetchObjectFromQiniu(key) {
@@ -136,7 +156,7 @@ function buildImageProcessQuery(options = {}) {
 async function fetchBinaryFromQiniu(key, options = {}) {
   const processQuery = buildImageProcessQuery(options);
   const signed = getSignedDownloadUrl(
-    processQuery ? `${key}?${processQuery}` : key
+    key, config.qiniuDownloadExpireSeconds, options
   );
   const response = await axios.get(signed.url, {
     responseType: 'arraybuffer',
@@ -158,6 +178,7 @@ async function fetchBinaryFromQiniu(key, options = {}) {
 
 module.exports = {
   getSignedDownloadUrl,
+  getOptimizedSignedUrl,
   fetchObjectFromQiniu,
   fetchBinaryFromQiniu
 };

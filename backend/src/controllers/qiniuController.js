@@ -96,27 +96,16 @@ async function getQiniuImage(req, res, next) {
     const height = Number(req.query.h || req.query.height);
     const quality = Number(req.query.q || req.query.quality);
 
-    const result = await fetchBinaryFromQiniu(key, {
+    // 生成签名且优化的直连 URL
+    const result = getSignedDownloadUrl(key, undefined, {
       width,
       height,
       quality
     });
-    res.setHeader('Content-Type', result.contentType || 'application/octet-stream');
-    res.setHeader('Cache-Control', result.cacheControl || 'public, max-age=300');
-    if (result.etag) {
-      res.setHeader('ETag', result.etag);
-    }
 
-    return res.status(200).send(result.body);
+    // 使用 302 重定向到七牛 CDN，减少后端带宽和延迟
+    return res.redirect(302, result.url);
   } catch (error) {
-    if (error && error.response && error.response.status === 404) {
-      return sendError(res, 404, '七牛图片不存在');
-    }
-
-    if (error && error.response && error.response.status === 401) {
-      return sendError(res, 401, '七牛鉴权失败，请检查密钥配置');
-    }
-
     if (error && error.message) {
       return sendError(res, 400, error.message);
     }

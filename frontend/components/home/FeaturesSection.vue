@@ -1,81 +1,78 @@
 <template>
   <view class="section-features" :class="{ 'visible': visible }">
     <view class="section-header">
-      <text class="section-title">我们的特色</text>
+      <view class="title-with-icon">
+        <TraditionalIcon name="defense" size="48" style="color: var(--secondary)" />
+        <text class="section-title">古建特色</text>
+      </view>
       <view class="window-divider">
         <view class="window-pattern"></view>
       </view>
     </view>
     
     <view class="features-grid">
-      <view class="feature-card card-ink">
-        <view class="feature-icon">
-          <svg viewBox="0 0 64 64" class="svg-icon">
-            <path d="M32 8 L48 16 L48 48 L32 56 L16 48 L16 16 Z" fill="none" stroke="currentColor" stroke-width="3"/>
-            <path d="M32 16 L40 20 L40 40 L32 44 L24 40 L24 20 Z" fill="none" stroke="currentColor" stroke-width="2"/>
-          </svg>
+      <view v-for="(feature, index) in localFeatures" :key="index" class="feature-card rice-paper brush-border-ink">
+        <view class="feature-icon-wrapper">
+          <TraditionalIcon :name="feature.icon" size="64" />
         </view>
-        <text class="feature-title">17 处古建全覆盖</text>
-        <text class="feature-desc">从明清皇家宫殿到客家民居，跨越千年的17处代表性古建精华，带你走遍大江南北</text>
-      </view>
-      
-      <view class="feature-card card-ink">
-        <view class="feature-icon">
-          <svg viewBox="0 0 64 64" class="svg-icon">
-            <circle cx="32" cy="24" r="12" fill="none" stroke="currentColor" stroke-width="3"/>
-            <path d="M20 48 Q32 32 44 48" fill="none" stroke="currentColor" stroke-width="3"/>
-            <circle cx="32" cy="24" r="4" fill="currentColor"/>
-          </svg>
+        <view class="feature-info">
+          <text class="feature-title ink-pressed">{{ feature.title }}</text>
+          <text class="feature-desc">{{ feature.desc }}</text>
         </view>
-        <text class="feature-title">AI 智能导览</text>
-        <text class="feature-desc">基于大模型的智能问答，不管是古建历史还是构造细节，你想问的都能秒速解答</text>
-      </view>
-      
-      <view class="feature-card card-ink">
-        <view class="feature-icon">
-          <svg viewBox="0 0 64 64" class="svg-icon">
-            <rect x="12" y="12" width="40" height="8" rx="2" fill="none" stroke="currentColor" stroke-width="2.5"/>
-            <rect x="12" y="24" width="40" height="8" rx="2" fill="none" stroke="currentColor" stroke-width="2.5"/>
-            <rect x="12" y="36" width="30" height="8" rx="2" fill="none" stroke="currentColor" stroke-width="2.5"/>
-          </svg>
-        </view>
-        <text class="feature-title">分类快速浏览</text>
-        <text class="feature-desc">宫殿/园林/桥梁/城防四大分类，一键筛选，快速定位你感兴趣的古建</text>
-      </view>
-      
-      <view class="feature-card card-ink">
-        <view class="feature-icon">
-          <svg viewBox="0 0 64 64" class="svg-icon">
-            <path d="M12 48 L24 24 L32 32 L40 24 L52 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-            <circle cx="24" cy="20" r="2" fill="currentColor"/>
-            <circle cx="40" cy="20" r="2" fill="currentColor"/>
-          </svg>
-        </view>
-        <text class="feature-title">沉浸式体验</text>
-        <text class="feature-desc">全新的新中式UI与动效，滚动渐入+悬浮交互，给你身临其境的探索体验</text>
       </view>
     </view>
   </view>
 </template>
 
 <script>
+import TraditionalIcon from '../shared/TraditionalIcon.vue';
+
 export default {
   name: 'FeaturesSection',
+  components: {
+    TraditionalIcon
+  },
   props: {
     visible: {
       type: Boolean,
       default: false
     }
+  },
+  data() {
+    return {
+      localFeatures: [
+        { 
+          icon: "palace", 
+          title: "十七处精选", 
+          desc: "横跨数百年的精选古建，从皇家园林至民间居所，尽览中华建筑之美。" 
+        },
+        { 
+          icon: "chat", 
+          title: "AI 智启迪", 
+          desc: "传统建筑百科知识，辅助智能导览，随时为您解答每一处营造法式。" 
+        },
+        { 
+          icon: "map", 
+          title: "地理寻脉", 
+          desc: "地理维度的古建分类与搜索，一键跨越山河，寻访历史的真实纹路。" 
+        },
+        { 
+          icon: "garden", 
+          title: "沉浸雅致", 
+          desc: "新中式审美与动效交互，传统纸墨韵味，为您打造顶级的文化探索之旅。" 
+        }
+      ]
+    };
   }
 }
 </script>
 
 <style scoped>
 .section-features {
-  padding: 60rpx 40rpx;
+  padding: 80rpx 40rpx;
   opacity: 0;
   transform: translateY(30px);
-  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   will-change: transform, opacity;
 }
 
@@ -85,103 +82,96 @@ export default {
 }
 
 .section-header {
-  text-align: center;
-  margin-bottom: 48rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 60rpx;
+}
+
+.title-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
 }
 
 .section-title {
-  font-size: 40rpx;
+  font-size: 48rpx;
   font-weight: bold;
-  color: var(--secondary);
-  letter-spacing: 8rpx;
-  display: block;
-  margin-bottom: 16rpx;
-  font-family: 'ZCOOL XiaoWei', serif;
+  color: var(--text-primary);
+  font-family: 'TsangerJinKai', serif;
+  letter-spacing: 6rpx;
 }
 
 .window-divider {
+  width: 100%;
+  height: 20rpx;
+  position: relative;
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 16rpx;
 }
 
 .window-pattern {
-  width: 200rpx;
+  width: 180rpx;
   height: 4rpx;
-  background: linear-gradient(90deg, transparent, var(--secondary), transparent);
-  position: relative;
-}
-
-.window-pattern::before,
-.window-pattern::after {
-  content: '';
-  position: absolute;
-  width: 8rpx;
-  height: 8rpx;
   background: var(--secondary);
-  top: 50%;
-  transform: translateY(-50%) rotate(45deg);
-}
-
-.window-pattern::before {
-  left: 0;
-}
-
-.window-pattern::after {
-  right: 0;
+  opacity: 0.3;
 }
 
 /* 项目亮点 */
 .features-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 28rpx;
+  gap: 32rpx;
 }
 
 .feature-card {
-  background: #fff;
-  border-radius: 24rpx;
-  padding: 40rpx 28rpx;
+  background: var(--bg-card);
+  border-radius: 8rpx;
+  padding: 48rpx 32rpx;
   text-align: center;
-  box-shadow: 0 4rpx 16rpx rgba(139, 69, 19, 0.1);
-  transform: translateZ(0) translateY(0);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.feature-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 8rpx 24rpx rgba(139, 69, 19, 0.18);
-}
-
-.feature-icon {
-  font-size: 64rpx;
-  margin-bottom: 20rpx;
+  box-shadow: 0 10rpx 30rpx rgba(44, 30, 19, 0.08);
+  border: 1rpx solid var(--border);
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
 }
 
-.svg-icon {
-  width: 64rpx;
-  height: 64rpx;
+.feature-card:hover {
+  transform: translateY(-8rpx);
+  box-shadow: 0 20rpx 50rpx rgba(44, 30, 19, 0.15);
+  border-color: var(--secondary);
+}
+
+.feature-icon-wrapper {
   color: var(--primary);
+  margin-bottom: 24rpx;
+  opacity: 0.8;
+}
+
+.feature-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
 }
 
 .feature-title {
-  display: block;
-  font-size: 32rpx;
+  font-size: 34rpx;
   font-weight: bold;
-  color: var(--secondary);
-  margin-bottom: 14rpx;
+  color: var(--text-primary);
+  font-family: 'TsangerJinKai', serif;
   letter-spacing: 2rpx;
 }
 
+.ink-pressed {
+  text-shadow: 0.5rpx 0.5rpx 0px rgba(255,255,255,1), 0 2rpx 4rpx rgba(0,0,0,0.1);
+}
+
 .feature-desc {
-  display: block;
-  font-size: 28rpx;
+  font-size: 24rpx;
   color: var(--text-tertiary);
-  line-height: 1.7;
+  line-height: 1.6;
   letter-spacing: 1rpx;
 }
 </style>

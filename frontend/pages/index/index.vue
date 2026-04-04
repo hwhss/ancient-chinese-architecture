@@ -15,21 +15,20 @@
     />
     
     <!-- 顶部标题 -->
-    <view class="header">
+    <view class="header rice-paper">
       <!-- 侧边栏切换按钮 -->
-      <view class="sidebar-toggle" @click="toggleSidebar">
-        <text class="toggle-icon">☰</text>
+      <view class="sidebar-toggle btn-ink" @click="toggleSidebar">
+        <TraditionalIcon name="chat" size="36" color="var(--secondary)" />
       </view>
 
       <!-- 搜索模式下的返回按钮 -->
-      <view v-if="showSearch" class="sidebar-toggle" @click="closeSearch">
-        <text class="toggle-icon">←</text>
+      <view v-if="showSearch" class="sidebar-toggle btn-ink" @click="closeSearch">
+        <TraditionalIcon name="arrow-left" size="36" color="var(--secondary)" />
       </view>
 
       <!-- 标题或搜索框 -->
       <view v-if="!showSearch" class="header-center">
-        <view class="header-decoration"></view>
-        <text class="title">🏯 古建筑AI导览</text>
+        <text class="title ink-pressed">古建AI导览</text>
         <view class="header-decoration"></view>
       </view>
 
@@ -46,21 +45,32 @@
           focus
         />
         <view v-if="searchQuery" class="search-clear" @click="clearSearch">
-          <text class="clear-icon">×</text>
+          <TraditionalIcon name="close" size="24" color="var(--text-muted)" />
         </view>
       </view>
 
       <!-- 搜索按钮 / 清空按钮 -->
-      <button v-if="!showSearch && messages.length > 0" class="clear-btn" @click="openSearch">🔍</button>
-      <button v-else-if="showSearch" class="clear-btn" @click="performSearch">搜索</button>
+      <view v-if="!showSearch && messages.length > 0" class="header-action-icon" @click="openSearch">
+        <TraditionalIcon name="search" size="40" color="var(--secondary)" />
+      </view>
+      <view v-else-if="showSearch" class="search-confirm-text" @click="performSearch">搜索</view>
     </view>
 
     <!-- 快捷入口 -->
-    <view v-if="messages.length === 0" class="quick-actions">
-      <button class="quick-btn" @click="goToMap">🗺️ 浏览古建筑名录</button>
-      <button class="quick-btn secondary" @click="goToDevSettings">
-        ⚙️ 开发设置
-      </button>
+    <view v-if="messages.length === 0" class="quick-actions rice-paper">
+      <view class="quick-btn-wrapper" @click="goToMap">
+        <view class="quick-btn-icon">
+          <TraditionalIcon name="map" size="32" />
+        </view>
+        <text class="quick-btn-text">古建筑名录</text>
+      </view>
+      <view class="quick-divider"></view>
+      <view class="quick-btn-wrapper" @click="goToDevSettings">
+        <view class="quick-btn-icon">
+          <TraditionalIcon name="defense" size="32" />
+        </view>
+        <text class="quick-btn-text">开发设置</text>
+      </view>
     </view>
 
     <!-- 搜索结果面板组件 -->
@@ -94,8 +104,8 @@
 
       <!-- 加载状态 -->
       <view v-if="loading && !hasPendingAiMessage" class="message-wrapper ai loading-wrapper">
-        <view class="avatar ai-avatar">
-          <text class="avatar-icon">🏯</text>
+        <view class="avatar ai-avatar rice-paper brush-border-ink">
+          <TraditionalIcon name="palace" size="36" color="var(--primary)" />
         </view>
         <view class="message-content">
           <view class="message-header">
@@ -146,6 +156,7 @@ import ChatSidebar from "../../components/chat/ChatSidebar.vue";
 import WelcomeHero from "../../components/chat/WelcomeHero.vue";
 import SearchResults from "../../components/chat/SearchResults.vue";
 import ChatInputArea from "../../components/chat/ChatInputArea.vue";
+import TraditionalIcon from "../../components/shared/TraditionalIcon.vue";
 
 // 缓存键
 const CACHE_KEY = "CHAT_HISTORY";
@@ -209,7 +220,8 @@ export default {
     ChatSidebar,
     WelcomeHero,
     SearchResults,
-    ChatInputArea
+    ChatInputArea,
+    TraditionalIcon
   },
   
   data() {
@@ -770,30 +782,44 @@ export default {
 }
 
 .header {
-  background: linear-gradient(135deg, #e84a38 0%, #c82506 50%, #a81c07 100%);
-  padding: 30rpx 20rpx 40rpx;
+  background: var(--bg-card);
+  padding: 40rpx 30rpx;
   display: flex;
   align-items: center;
   justify-content: space-between;
   position: relative;
-  z-index: 1;
+  z-index: 10;
+  border-bottom: 4rpx solid var(--border);
+  box-shadow: 0 4rpx 20rpx var(--shadow);
+}
+
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2rpx;
+  background: linear-gradient(90deg, transparent, var(--secondary), transparent);
+  opacity: 0.3;
 }
 
 .header-search {
   flex: 1;
   display: flex;
   align-items: center;
-  background: rgba(255, 248, 230, 0.2);
+  background: var(--bg-primary);
   border-radius: 40rpx;
-  padding: 12rpx 20rpx;
-  margin: 0 16rpx;
-  border: 1rpx solid rgba(255, 248, 230, 0.3);
+  padding: 12rpx 30rpx;
+  margin: 0 20rpx;
+  border: 1rpx solid var(--border);
+  box-shadow: inset 0 2rpx 6rpx rgba(0,0,0,0.05);
 }
 
 .search-input {
   flex: 1;
   font-size: 28rpx;
-  color: #fff8e6;
+  color: var(--text-primary);
   background: transparent;
   border: none;
   outline: none;
@@ -815,31 +841,17 @@ export default {
 }
 
 .sidebar-toggle {
-  width: 64rpx;
-  height: 64rpx;
+  width: 72rpx;
+  height: 72rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 248, 230, 0.15);
-  border-radius: 50%;
-  border: 1rpx solid rgba(255, 248, 230, 0.3);
+  border-radius: 12rpx;
+  border: 1rpx solid var(--border);
+  background: var(--bg-card);
+  box-shadow: 2rpx 2rpx 10rpx var(--shadow);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  flex-shrink: 0;
-}
-
-.sidebar-toggle:hover {
-  background: rgba(255, 248, 230, 0.3);
-  transform: scale(1.05);
-}
-
-.sidebar-toggle:active {
-  transform: scale(0.95);
-}
-
-.toggle-icon {
-  font-size: 32rpx;
-  color: #fff8e6;
+  transition: all 0.3s ease;
 }
 
 .header-center {
@@ -847,23 +859,37 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 20rpx;
 }
 
 .header-decoration {
-  height: 2rpx;
-  width: 60%;
-  margin: 8rpx auto;
-  background: rgba(255, 248, 230, 0.4);
+  height: 4rpx;
+  width: 40rpx;
+  background: var(--secondary);
+  opacity: 0.3;
+  margin-top: 4rpx;
 }
 
 .title {
-  color: #fff8e6;
-  font-size: 36rpx;
+  color: var(--text-primary);
+  font-size: 38rpx;
   font-weight: bold;
-  letter-spacing: 6rpx;
-  line-height: 1.6;
-  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.3);
+  font-family: 'TsangerJinKai', serif;
+  letter-spacing: 4rpx;
+}
+
+.header-action-icon {
+  width: 72rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-confirm-text {
+  font-size: 28rpx;
+  color: var(--primary);
+  font-weight: bold;
+  padding: 0 10rpx;
 }
 
 .clear-btn {
@@ -927,54 +953,46 @@ export default {
 }
 
 .quick-actions {
-  padding: 24rpx 30rpx;
-  background: linear-gradient(180deg, #fffef9 0%, #faf6ed 100%);
-  border-bottom: 1rpx solid #e8d8c8;
+  padding: 30rpx 40rpx;
+  background: var(--bg-card);
+  border-bottom: 2rpx solid var(--border);
   display: flex;
-  gap: 16rpx;
+  align-items: center;
+  justify-content: space-around;
   position: relative;
-  z-index: 1;
+  z-index: 5;
 }
 
-.quick-btn {
-  flex: 1;
+.quick-btn-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.quick-btn-icon {
+  width: 80rpx;
   height: 80rpx;
-  line-height: 80rpx;
-  background: transparent;
-  color: #8c92ac;
-  font-size: 28rpx;
-  border-radius: 40rpx;
-  border: 2rpx solid #8c92ac;
-  transform: translateZ(0) translateY(0);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
+  background: var(--bg-secondary);
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--secondary);
+  border: 1rpx solid var(--border);
 }
 
-.quick-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4rpx 12rpx rgba(140, 146, 172, 0.25);
+.quick-btn-text {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
-.quick-btn:active {
-  transform: translateY(-1px) scale(0.97);
-  background: linear-gradient(135deg, #e84a38 0%, #c82506 100%);
-  color: #fff8e6;
-  border-color: #c82506;
-  box-shadow: 0 2rpx 8rpx rgba(200, 37, 6, 0.25);
-}
-
-.quick-btn.secondary {
-  background: #fffef9;
-  color: #c82506;
-  border: 1rpx solid var(--warning);
-}
-
-.quick-btn.secondary:hover {
-  box-shadow: 0 4rpx 12rpx rgba(200, 37, 6, 0.2);
-}
-
-.quick-btn.secondary:active {
-  box-shadow: 0 2rpx 8rpx rgba(200, 37, 6, 0.2);
+.quick-divider {
+  width: 1rpx;
+  height: 60rpx;
+  background: var(--border);
+  opacity: 0.5;
 }
 
 .error-retry {

@@ -1,7 +1,7 @@
 <template>
   <view class="filter-area">
-    <view class="search-box">
-      <text class="search-icon">🔍</text>
+    <view class="search-box rice-paper">
+      <TraditionalIcon name="search" size="32" color="var(--secondary)" />
       <input 
         class="search-input" 
         :value="searchKeyword"
@@ -10,7 +10,7 @@
         placeholder-class="search-placeholder"
       />
       <view class="search-clear" v-if="searchKeyword" @click="$emit('update:searchKeyword', '')">
-        <text>×</text>
+        <TraditionalIcon name="close" size="24" color="var(--text-muted)" />
       </view>
     </view>
     
@@ -21,31 +21,39 @@
           <view
             v-for="cat in categories"
             :key="cat.key"
-            class="filter-tab tap-feedback"
+            class="filter-tab btn-ink"
             :class="{ active: currentCategory === cat.key }"
             @click="$emit('select-category', cat.key)"
           >
-            {{ cat.name }}
+            <view class="tab-icon-wrapper" v-if="cat.icon">
+              <TraditionalIcon :name="cat.icon" size="24" :color="currentCategory === cat.key ? '#fff' : 'var(--secondary)'" />
+            </view>
+            <text class="tab-text">{{ cat.name }}</text>
           </view>
         </view>
       </scroll-view>
       
-      <view class="sort-btn tap-feedback" @click="$emit('toggle-sort')">
-        <text class="sort-icon">🔤</text>
+      <view class="sort-btn btn-ink" @click="$emit('toggle-sort')">
+        <TraditionalIcon name="map" size="36" color="var(--secondary)" />
       </view>
     </view>
     
     <view class="active-filters" v-if="currentCategory !== 'all' || searchKeyword">
       <text class="filter-result-text">筛选结果：{{ filteredCount }} 处古建</text>
-      <view class="clear-filters" @click="$emit('clear-filters')" v-if="currentCategory !== 'all'">
-        <text>清除筛选</text>
+      <view class="clear-filters rice-paper" @click="$emit('clear-filters')" v-if="currentCategory !== 'all'">
+        <text>清空</text>
       </view>
     </view>
   </view>
 </template>
 
 <script>
+import TraditionalIcon from '../shared/TraditionalIcon.vue';
+
 export default {
+  components: {
+    TraditionalIcon
+  },
   props: {
     searchKeyword: {
       type: String,
@@ -74,11 +82,12 @@ export default {
 
 <style scoped>
 .filter-area {
-  background: #fff;
-  padding: 24rpx 30rpx;
-  border-bottom: 2rpx solid var(--bg-tertiary);
+  background: var(--bg-card);
+  padding: 30rpx;
+  border-bottom: 2rpx solid var(--border);
   position: relative;
-  z-index: 2;
+  z-index: 10;
+  box-shadow: 0 4rpx 20rpx var(--shadow);
 }
 
 .search-box {
@@ -86,21 +95,17 @@ export default {
   align-items: center;
   background: var(--bg-primary);
   border-radius: 44rpx;
-  padding: 20rpx 28rpx;
-  border: 2rpx solid var(--bg-tertiary);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  margin-bottom: 20rpx;
+  padding: 16rpx 28rpx;
+  border: 1rpx solid var(--border);
+  transition: all 0.3s;
+  margin-bottom: 24rpx;
+  box-shadow: inset 0 2rpx 6rpx rgba(0,0,0,0.05);
 }
 
 .search-box:focus-within {
   border-color: var(--secondary);
-  background: #fff;
-  box-shadow: 0 4rpx 16rpx rgba(139, 69, 19, 0.15);
-}
-
-.search-icon {
-  font-size: 32rpx;
-  margin-right: 16rpx;
+  background: var(--bg-card);
+  box-shadow: 0 4rpx 16rpx var(--shadow);
 }
 
 .search-input {
@@ -166,14 +171,16 @@ export default {
 }
 
 .filter-tab {
-  display: inline-block;
-  padding: 14rpx 28rpx;
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 12rpx 24rpx;
   background: var(--bg-primary);
-  border-radius: 28rpx;
+  border-radius: 30rpx;
   font-size: 24rpx;
   color: var(--text-secondary);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1rpx solid transparent;
+  transition: all 0.3s;
+  border: 1rpx solid var(--border);
   cursor: pointer;
 }
 
@@ -187,10 +194,10 @@ export default {
 }
 
 .filter-tab.active {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  background: var(--primary);
   color: #fff;
-  border-color: var(--secondary);
-  box-shadow: 0 4rpx 12rpx rgba(196, 30, 58, 0.3);
+  border-color: var(--primary-dark);
+  box-shadow: 0 4rpx 12rpx var(--shadow-primary);
 }
 
 .filter-divider {

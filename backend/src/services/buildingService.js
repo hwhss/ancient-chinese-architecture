@@ -6,6 +6,23 @@ const {
 const config = require('../config');
 const { buildSignedAssetUrl } = require('../utils/signedAsset');
 const { verifyAssetOwnership } = require('./assetVerification');
+const { getOptimizedSignedUrl } = require('./qiniuService');
+
+/**
+ * 确保返回的是可直接访问的签名 URL。
+ * 处理逻辑同 materialService。
+ */
+function ensureSignedUrl(url, options = {}) {
+  const value = String(url || '').trim();
+  if (!value || /^https?:\/\//i.test(value)) {
+    return value;
+  }
+  try {
+    return getOptimizedSignedUrl(value, options).url;
+  } catch (error) {
+    return value;
+  }
+}
 
 const CATEGORY_TEXT_MAP = {
   palace: '皇宫',
@@ -67,29 +84,8 @@ function buildBuildingAssetVerification(item) {
 }
 
 function buildListThumbnailUrl(resourceUrl) {
-  const raw = String(resourceUrl || '').trim();
-  if (!raw) {
-    return '';
-  }
-
-  // Home/list cards should load lightweight previews first.
-  if (!raw.includes('/api/qiniu/image?')) {
-    return raw;
-  }
-
-  const hasQuery = raw.includes('?');
-  const hasW = /(?:\?|&)w=/.test(raw);
-  const hasQ = /(?:\?|&)q=/.test(raw);
-  let next = raw;
-
-  if (!hasW) {
-    next += `${hasQuery ? '&' : '?'}w=480`;
-  }
-  if (!hasQ) {
-    next += `${next.includes('?') ? '&' : '?'}q=75`;
-  }
-
-  return next;
+  // 列表页使用 480 宽度的缩略图
+  return ensureSignedUrl(resourceUrl, { width: 480, quality: 75 });
 }
 
 function buildModel3d(profile, fallbackPoster) {
@@ -111,12 +107,14 @@ function buildModel3d(profile, fallbackPoster) {
     || (hasVersionModel ? model3d.versions.find((item) => item && item.modelUrl).modelUrl : '');
 
   const canView = Boolean(fallbackModelUrl) && (model3d.status === 'ready' || model3d.status === 'demo');
+  const posterUrl = model3d.poster || fallbackPoster || '';
+
   return {
     status: model3d.status || 'planned',
     canView,
     viewerType: model3d.viewerType || 'model-viewer',
     modelUrl: fallbackModelUrl,
-    poster: model3d.poster || fallbackPoster || '',
+    poster: ensureSignedUrl(posterUrl, { quality: 85 }),
     note: model3d.note || ''
   };
 }
@@ -317,8 +315,9 @@ function buildBuildingSummary(item) {
   return getBuildingProfileById(item.id).then((profile) => {
     const safeProfile = profile || {};
     const assetVerification = buildBuildingAssetVerification(item);
-    const safeImage = assetVerification.verified ? assetVerification.url : '';
-    const listImage = buildListThumbnailUrl(safeImage);
+    const rawImage = assetVerification.verified ? assetVerification.url : '';
+    const safeImage = ensureSignedUrl(rawImage, { quality: 85 });
+    const listImage = buildListThumbnailUrl(rawImage);
     const model3d = buildModel3d(safeProfile, listImage);
     const visualization = buildVisualizationMeta(item);
 
@@ -349,7 +348,9 @@ function buildBuildingSummary(item) {
 async function buildBuildingDetail(item) {
   const profile = await getBuildingProfileById(item.id) || {};
   const assetVerification = buildBuildingAssetVerification(item);
-  const safeImage = assetVerification.verified ? assetVerification.url : '';
+  const rawImage = assetVerification.verified ? assetVerification.url : '';
+  // 详情页主图，设置较大尺寸和较好质量
+  const safeImage = ensureSignedUrl(rawImage, { width: 1200, quality: 85 });
   const model3d = buildModel3d(profile, safeImage);
   const visualization = buildVisualizationMeta(item);
 

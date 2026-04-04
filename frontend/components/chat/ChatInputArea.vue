@@ -34,20 +34,25 @@
         <text class="char-count" :class="{ 'near-limit': (inputText || '').length > 450 }">{{ (inputText || '').length }}/500</text>
       </view>
       <button
-        class="send-btn"
+        class="send-btn btn-ink"
         :disabled="!canSend || isSending"
         :class="{ 'sending': isSending, 'has-content': canSend }"
         @click="$emit('send')"
       >
-        <text class="send-icon">➤</text>
+        <TraditionalIcon name="arrow-right" size="32" :color="canSend ? '#fff' : 'rgba(255,255,255,0.5)'" />
       </button>
     </view>
   </view>
 </template>
 
 <script>
+import TraditionalIcon from '../shared/TraditionalIcon.vue';
+
 export default {
   name: 'ChatInputArea',
+  components: {
+    TraditionalIcon
+  },
   props: {
     inputText: {
       type: String,
@@ -83,20 +88,21 @@ export default {
 
 <style scoped>
 .example-questions-area {
-  padding: 16rpx 20rpx;
-  background: linear-gradient(180deg, #faf6ed 0%, #f7f1e6 100%);
-  border-top: 1rpx solid #e8d8c8;
-  border-bottom: 1rpx solid #e8d8c8;
+  padding: 24rpx 30rpx;
+  background: var(--bg-card);
+  border-top: 2rpx solid var(--border);
+  border-bottom: 2rpx solid var(--border);
   position: relative;
-  z-index: 1;
+  z-index: 10;
 }
 
 .example-title {
   display: block;
   font-size: 24rpx;
-  color: #c82506;
-  margin-bottom: 12rpx;
-  font-weight: 500;
+  color: var(--secondary);
+  margin-bottom: 16rpx;
+  font-weight: 600;
+  letter-spacing: 2rpx;
 }
 
 .example-list {
@@ -107,28 +113,26 @@ export default {
 
 .example-tag {
   display: inline-block;
-  padding: 10rpx 20rpx;
-  background: #fff8d8;
-  border: 1rpx solid var(--warning);
-  border-radius: 30rpx;
+  padding: 12rpx 24rpx;
+  background: var(--bg-primary);
+  border: 1rpx solid var(--border);
+  border-radius: 40rpx;
   font-size: 24rpx;
-  color: #c82506;
+  color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
-  transform: translateZ(0) translateY(0);
 }
 
 .example-tag:hover {
-  background: #f5d56a;
-  color: #a81c07;
-  transform: translateY(-2px);
-  box-shadow: 0 2rpx 8rpx rgba(200, 37, 6, 0.12);
+  background: var(--bg-tertiary);
+  color: var(--primary);
+  border-color: var(--secondary);
 }
 
 .example-tag:active {
-  transform: translateY(0) scale(0.96);
-  box-shadow: 0 1rpx 4rpx rgba(200, 37, 6, 0.08);
+  transform: scale(0.95);
+  background: var(--bg-tertiary);
 }
 
 .example-tag.disabled {
@@ -140,42 +144,44 @@ export default {
 .input-area {
   display: flex;
   align-items: flex-end;
-  padding: 20rpx;
-  background: linear-gradient(180deg, #fffef9 0%, #faf6ed 100%);
-  border-top: 1rpx solid #e8d8c8;
-  transition: all 0.2s;
+  padding: 30rpx;
+  background: var(--bg-card);
+  border-top: 2rpx solid var(--border);
+  transition: all 0.3s;
   position: relative;
-  z-index: 1;
-  gap: 16rpx;
+  z-index: 10;
+  gap: 20rpx;
 }
 
 .keyboard-active {
-  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  padding-bottom: calc(30rpx + env(safe-area-inset-bottom));
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 100;
-  background: #fffef9;
-  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.1);
+  background: var(--bg-card);
+  box-shadow: 0 -10rpx 40rpx var(--shadow);
 }
 
 .input-wrapper {
   flex: 1;
   position: relative;
-  background: #fffef9;
-  border-radius: 24rpx;
-  border: 1rpx solid #d8c8b8;
-  padding: 16rpx 24rpx;
-  padding-bottom: 40rpx;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  background: var(--bg-primary);
+  border-radius: 20rpx;
+  border: 1rpx solid var(--border);
+  padding: 20rpx 24rpx;
+  padding-bottom: 48rpx;
+  transition: all 0.3s;
   max-height: 240rpx;
   overflow: hidden;
+  box-shadow: inset 0 2rpx 8rpx rgba(0,0,0,0.03);
 }
 
 .input-wrapper:focus-within {
-  border-color: #c82506;
-  box-shadow: 0 0 0 2rpx rgba(200, 37, 6, 0.1);
+  border-color: var(--secondary);
+  background: var(--bg-card);
+  box-shadow: 0 4rpx 16rpx var(--shadow);
 }
 
 .textarea {
@@ -193,7 +199,7 @@ export default {
 }
 
 .textarea::placeholder {
-  color: #999;
+  color: var(--text-muted);
 }
 
 .char-count {
@@ -211,24 +217,23 @@ export default {
 }
 
 .send-btn {
-  width: 80rpx;
-  height: 80rpx;
+  width: 96rpx;
+  height: 96rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #d0d0d0 0%, #b0b0b0 100%);
-  border-radius: 50%;
-  border: none;
-  transform: translateZ(0) translateY(0);
+  background: var(--bg-tertiary);
+  border-radius: 24rpx;
+  border: 1rpx solid var(--border);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
   cursor: pointer;
   flex-shrink: 0;
 }
 
 .send-btn.has-content {
-  background: linear-gradient(135deg, #e84a38 0%, #c82506 100%);
-  box-shadow: 0 4rpx 12rpx rgba(200, 37, 6, 0.35);
+  background: var(--primary);
+  border-color: var(--primary-dark);
+  box-shadow: 0 6rpx 20rpx var(--shadow-primary);
 }
 
 .send-icon {

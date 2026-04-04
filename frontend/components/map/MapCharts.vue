@@ -9,7 +9,9 @@
         :class="{ active: activeChartTab === tab.key }"
         @click="$emit('switch-chart-tab', tab.key)"
       >
-        <text class="chart-tab-icon">{{ tab.icon }}</text>
+        <view class="chart-tab-icon" v-if="tab.icon">
+          <TraditionalIcon :name="tab.icon" size="28" :color="activeChartTab === tab.key ? '#fff' : 'var(--secondary)'" />
+        </view>
         <text class="chart-tab-text">{{ tab.name }}</text>
       </view>
     </view>
@@ -19,7 +21,10 @@
       <!-- 分类分布饼图 -->
       <view v-if="activeChartTab === 'category'" class="chart-wrapper">
         <view class="chart-title-bar">
-          <text class="chart-title-text">🏛️ 建筑类型分布</text>
+          <view class="chart-title-left">
+            <TraditionalIcon name="palace" size="32" color="var(--primary)" />
+            <text class="chart-title-text ink-pressed">建筑类型分布</text>
+          </view>
         </view>
         <!-- #ifdef H5 -->
         <VisualChart
@@ -39,7 +44,10 @@
       <!-- 地理位置散点图 -->
       <view v-if="activeChartTab === 'geo'" class="chart-wrapper">
         <view class="chart-title-bar">
-          <text class="chart-title-text">📍 地理位置分布</text>
+          <view class="chart-title-left">
+            <TraditionalIcon name="map" size="32" color="var(--primary)" />
+            <text class="chart-title-text ink-pressed">地理位置分布</text>
+          </view>
           <text class="chart-subtitle">共 {{ dataCount }} 处古建筑</text>
         </view>
         <!-- #ifdef H5 -->
@@ -62,9 +70,13 @@
 
 <script>
 import VisualChart from "../VisualChart.vue";
+import TraditionalIcon from "../shared/TraditionalIcon.vue";
 
 export default {
-  components: { VisualChart },
+  components: { 
+    VisualChart,
+    TraditionalIcon
+  },
   props: {
     hasData: Boolean,
     activeChartTab: String,
@@ -109,13 +121,15 @@ export default {
 }
 
 .chart-tab.active {
-  background: linear-gradient(135deg, #c82506 0%, var(--primary-dark) 100%);
-  border-color: #c82506;
-  box-shadow: 0 3rpx 10rpx rgba(200, 37, 6, 0.3);
+  background: var(--primary);
+  border-color: var(--primary-dark);
+  box-shadow: 0 4rpx 12rpx var(--shadow-primary);
 }
 
 .chart-tab-icon {
-  font-size: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .chart-tab-text {
@@ -148,10 +162,17 @@ export default {
   justify-content: space-between;
 }
 
+.chart-title-left {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
 .chart-title-text {
-  font-size: 26rpx;
-  font-weight: 600;
+  font-size: 28rpx;
+  font-weight: bold;
   color: var(--text-primary);
+  font-family: 'TsangerJinKai', serif;
   letter-spacing: 2rpx;
 }
 

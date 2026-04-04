@@ -67,10 +67,10 @@
 
           <!-- 底部按钮 -->
           <view class="bottom-actions">
-            <button class="action-btn secondary ink-ripple" @click="goToChat">
-              <text class="btn-icon">💬</text>
-              <text class="btn-text">返回AI问答</text>
-            </button>
+            <view class="action-btn-antique btn-ink" @click="goToChat">
+              <TraditionalIcon name="chat" size="36" color="#fff" />
+              <text class="btn-text">咨询 AI 助手</text>
+            </view>
           </view>
         </scroll-view>
 
@@ -96,12 +96,12 @@
     
     <view 
       v-if="currentView === 'list'"
-      class="back-to-top" 
+      class="back-to-top btn-ink" 
       :class="{ 'visible': showBackToTop }"
       @click="scrollToTop"
     >
-      <text class="back-to-top-text">↑</text>
-      <text class="back-to-top-seal">古建</text>
+      <TraditionalIcon name="arrow-left" size="40" color="#fff" style="transform: rotate(90deg);" />
+      <text class="back-to-top-seal">回顶</text>
     </view>
   </view>
 </template>
@@ -116,16 +116,17 @@ import MapFilter from "../../components/map/MapFilter.vue";
 import BuildingList from "../../components/map/BuildingList.vue";
 import MapCharts from "../../components/map/MapCharts.vue";
 import TencentMapContainer from "../../components/map/TencentMapContainer.vue";
+import TraditionalIcon from "../../components/shared/TraditionalIcon.vue";
 
 const categories = [
-  { key: "all", name: "全部" },
-  { key: "palace", name: "🏛️ 皇宫" },
-  { key: "bridge", name: "🌉 桥梁" },
-  { key: "garden", name: "🌿 园林" },
-  { key: "defense", name: "🏰 城防" },
-  { key: "residence", name: "🏠 民居" },
-  { key: "tower", name: "🏯 楼阁" },
-  { key: "water", name: "💧 水利" },
+  { key: "all", name: "全部", icon: "palace" },
+  { key: "palace", name: "皇宫", icon: "palace" },
+  { key: "bridge", name: "桥梁", icon: "bridge" },
+  { key: "garden", name: "园林", icon: "garden" },
+  { key: "defense", name: "城防", icon: "defense" },
+  { key: "residence", name: "民居", icon: "home" },
+  { key: "tower", name: "楼阁", icon: "tower" },
+  { key: "water", name: "水利", icon: "tower" },
 ];
 
 export default {
@@ -135,7 +136,8 @@ export default {
     MapFilter,
     BuildingList,
     MapCharts,
-    TencentMapContainer
+    TencentMapContainer,
+    TraditionalIcon
   },
   data() {
     return {
@@ -154,8 +156,8 @@ export default {
       showChart: false,
       activeChartTab: 'category',
       chartTabs: [
-        { key: 'category', name: '类型分布', icon: '🏛️' },
-        { key: 'geo', name: '地理分布', icon: '📍' }
+        { key: 'category', name: '类型分布', icon: 'tower' },
+        { key: 'geo', name: '地理分布', icon: 'map' }
       ]
     };
   },
@@ -700,66 +702,35 @@ export default {
 }
 
 .bottom-actions {
-  background: #fff;
-  padding: 24rpx 30rpx;
-  border-top: 2rpx solid var(--bg-tertiary);
+  background: var(--bg-card);
+  padding: 40rpx 30rpx;
+  border-top: 2rpx solid var(--border);
   display: flex;
   justify-content: center;
   position: relative;
-  z-index: 2;
+  z-index: 10;
+  box-shadow: 0 -4rpx 20rpx var(--shadow);
 }
 
-.action-btn {
-  width: 300rpx;
-  height: 88rpx;
-  line-height: 88rpx;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+.action-btn-antique {
+  width: 80%;
+  height: 100rpx;
+  background: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  border-radius: 50rpx;
   color: #fff;
-  font-size: 30rpx;
-  border-radius: 44rpx;
-  border: none;
-  transform: translateZ(0) translateY(0);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  box-shadow: 0 6rpx 16rpx rgba(139, 0, 0, 0.3);
+  font-size: 32rpx;
+  font-weight: bold;
+  box-shadow: 0 8rpx 24rpx var(--shadow-primary);
+  transition: all 0.3s;
 }
 
-.action-btn:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10rpx 24rpx rgba(139, 0, 0, 0.4);
-}
-
-.action-btn:active {
-  transform: translateY(-2px) scale(0.98);
-  box-shadow: 0 4rpx 12rpx rgba(139, 0, 0, 0.25);
-}
-
-.action-btn.secondary {
-  background: #fff;
-  color: var(--secondary);
-  border: 3rpx solid var(--secondary);
-  box-shadow: 0 4rpx 12rpx rgba(139, 69, 19, 0.15);
-}
-
-.action-btn.secondary:hover {
-  box-shadow: 0 8rpx 20rpx rgba(139, 69, 19, 0.25);
-  background: var(--bg-primary);
-}
-
-.action-btn.secondary:active {
-  box-shadow: 0 4rpx 12rpx rgba(139, 69, 19, 0.2);
-}
-
-.action-btn .btn-icon {
-  display: inline-block;
-  margin-right: 8rpx;
-  font-size: 28rpx;
-  vertical-align: middle;
-}
-
-.action-btn .btn-text {
-  display: inline-block;
-  vertical-align: middle;
+.action-btn-antique:active {
+  transform: scale(0.96);
+  background: var(--primary-dark);
 }
 
 .back-to-top {

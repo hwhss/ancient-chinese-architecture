@@ -16,8 +16,8 @@
         :id="'msg-' + index"
       >
         <!-- AI 头像 -->
-        <view v-if="msg.role === 'ai'" class="avatar ai-avatar">
-          <text class="avatar-icon">🏯</text>
+        <view v-if="msg.role === 'ai'" class="avatar ai-avatar rice-paper brush-border-ink">
+          <TraditionalIcon name="palace" size="44" color="var(--primary)" />
         </view>
 
         <view class="message-content">
@@ -70,19 +70,19 @@
           <!-- 消息操作栏 -->
           <view v-if="!msg.isTyping" class="message-actions">
             <view class="action-btn" @click="copyMessage(msg.content)" title="复制">
-              <text class="action-icon">📋</text>
+              <TraditionalIcon name="chat" size="24" color="var(--text-muted)" />
               <text class="action-text">复制</text>
             </view>
             <view v-if="msg.role === 'ai'" class="action-btn" @click="regenerateResponse(index)" title="重新生成">
-              <text class="action-icon">🔄</text>
-              <text class="action-text">重新生成</text>
+              <TraditionalIcon name="arrow-right" size="24" color="var(--text-muted)" />
+              <text class="action-text">重思</text>
             </view>
           </view>
         </view>
 
         <!-- 用户头像 -->
-        <view v-if="msg.role === 'user'" class="avatar user-avatar">
-          <text class="avatar-icon">👤</text>
+        <view v-if="msg.role === 'user'" class="avatar user-avatar rice-paper">
+          <TraditionalIcon name="chat" size="40" color="var(--secondary)" />
         </view>
       </view>
 
@@ -94,9 +94,13 @@
 
 <script>
 import { parseMarkdown, renderToHtml, containsMarkdown } from "../utils/markdown.js";
+import TraditionalIcon from "./shared/TraditionalIcon.vue";
 
 export default {
   name: 'VirtualMessageList',
+  components: {
+    TraditionalIcon
+  },
 
   props: {
     messages: {
@@ -243,15 +247,14 @@ export default {
 }
 
 .ai-avatar {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  background: var(--bg-card);
+  border: 1rpx solid var(--border);
+  box-shadow: 2rpx 2rpx 10rpx var(--shadow);
 }
 
 .user-avatar {
-  background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%);
-}
-
-.avatar-icon {
-  font-size: 40rpx;
+  background: var(--bg-secondary);
+  border: 1rpx solid var(--border);
 }
 
 /* 消息内容 */
@@ -299,16 +302,18 @@ export default {
 }
 
 .message.ai {
-  background: #fff;
-  border: 2rpx solid var(--bg-tertiary);
+  background: var(--bg-card);
+  border: 2rpx solid var(--border);
   color: var(--text-primary);
   border-top-left-radius: 4rpx;
+  box-shadow: 2rpx 4rpx 12rpx var(--shadow);
 }
 
 .message.user {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  background: var(--primary);
   color: #fff;
   border-top-right-radius: 4rpx;
+  box-shadow: 0 4rpx 12rpx var(--shadow-primary);
 }
 
 .message-rich-text {
@@ -331,14 +336,20 @@ export default {
 
 /* 查看按钮 */
 .view-btn {
-  margin-top: 16rpx;
-  padding: 12rpx 24rpx;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-  color: #fff;
+  margin-top: 20rpx;
+  padding: 12rpx 32rpx;
+  background: var(--bg-primary);
+  color: var(--primary);
   font-size: 26rpx;
-  border-radius: 30rpx;
-  border: none;
+  border-radius: 40rpx;
+  border: 2rpx solid var(--primary);
   display: inline-block;
+  font-weight: bold;
+}
+
+.view-btn:active {
+  opacity: 0.7;
+  transform: scale(0.98);
 }
 
 /* 候选列表 */

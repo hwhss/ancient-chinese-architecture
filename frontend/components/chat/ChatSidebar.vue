@@ -8,18 +8,21 @@
     ></view>
     
     <!-- 侧边栏历史会话 -->
-    <view class="sidebar" :class="{ 'show': showSidebar }">
+    <view class="sidebar rice-paper" :class="{ 'show': showSidebar }">
       <view class="sidebar-header">
-        <text class="sidebar-title">💬 历史会话</text>
-        <view class="sidebar-close" @click="$emit('toggle-sidebar')">
-          <text class="close-icon">✕</text>
+        <view class="sidebar-header-left">
+          <TraditionalIcon name="chat" size="40" color="var(--secondary)" />
+          <text class="sidebar-title ink-pressed">历史会话</text>
+        </view>
+        <view class="sidebar-close btn-ink" @click="$emit('toggle-sidebar')">
+          <TraditionalIcon name="close" size="32" color="var(--text-muted)" />
         </view>
       </view>
       
       <scroll-view class="sidebar-content" scroll-y>
         <!-- 新建会话按钮 -->
-        <view class="new-chat-btn" @click="$emit('create-new')">
-          <text class="new-chat-icon">+</text>
+        <view class="new-chat-btn btn-ink" @click="$emit('create-new')">
+          <TraditionalIcon name="chat" size="32" color="var(--primary)" />
           <text class="new-chat-text">新建会话</text>
         </view>
         
@@ -32,22 +35,26 @@
             :class="{ 'active': currentSessionId === session.id }"
             @click="$emit('switch-session', session.id)"
           >
-            <view class="session-icon">💭</view>
+            <view class="session-icon">
+              <TraditionalIcon :name="currentSessionId === session.id ? 'palace' : 'chat'" size="32" />
+            </view>
             <view class="session-info">
               <text class="session-title">{{ session.title }}</text>
               <text class="session-time">{{ formatSessionTime(session.time) }}</text>
             </view>
             <view class="session-actions">
-              <text class="session-delete" @click.stop="$emit('delete-session', session.id)">🗑️</text>
+              <view class="session-delete" @click.stop="$emit('delete-session', session.id)">
+                <TraditionalIcon name="close" size="24" color="var(--primary-light)" />
+              </view>
             </view>
           </view>
         </view>
         
         <!-- 空状态 -->
         <view v-if="sessionList.length === 0" class="sidebar-empty">
-          <text class="empty-icon">📝</text>
+          <TraditionalIcon name="map" size="80" color="var(--text-muted)" style="opacity: 0.3; margin-bottom: 20rpx;" />
           <text class="empty-text">暂无历史会话</text>
-          <text class="empty-hint">点击上方按钮开始新对话</text>
+          <text class="empty-hint">开启一段千年古建之旅</text>
         </view>
       </scroll-view>
       
@@ -60,8 +67,13 @@
 </template>
 
 <script>
+import TraditionalIcon from '../shared/TraditionalIcon.vue';
+
 export default {
   name: 'ChatSidebar',
+  components: {
+    TraditionalIcon
+  },
   props: {
     showSidebar: {
       type: Boolean,
@@ -137,28 +149,39 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 40rpx 30rpx 30rpx;
-  background: linear-gradient(135deg, #e84a38 0%, #c82506 100%);
-  border-bottom: 1rpx solid #e8d8c8;
+  padding: 50rpx 30rpx 40rpx;
+  background: var(--bg-card);
+  border-bottom: 2rpx solid var(--border);
+}
+
+.sidebar-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
 }
 
 .sidebar-title {
-  font-size: 34rpx;
+  font-size: 38rpx;
   font-weight: bold;
-  color: #fff8e6;
+  color: var(--text-primary);
+  font-family: 'TsangerJinKai', serif;
   letter-spacing: 4rpx;
 }
 
+.ink-pressed {
+  text-shadow: 0.5rpx 0.5rpx 0px rgba(255,255,255,0.8), 0 2rpx 4rpx rgba(0,0,0,0.1);
+}
+
 .sidebar-close {
-  width: 56rpx;
-  height: 56rpx;
+  width: 64rpx;
+  height: 64rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 248, 230, 0.2);
-  border-radius: 50%;
+  background: var(--bg-primary);
+  border-radius: 12rpx;
+  border: 1rpx solid var(--border);
   cursor: pointer;
-  transition: all 0.25s ease;
 }
 
 .sidebar-close:hover {
@@ -181,33 +204,27 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12rpx;
+  gap: 16rpx;
   padding: 24rpx;
-  margin-bottom: 20rpx;
-  background: linear-gradient(135deg, #fff8d8 0%, #f5e6c8 100%);
-  border: 2rpx dashed var(--warning);
+  margin-bottom: 30rpx;
+  background: var(--bg-card);
+  border: 2rpx dashed var(--secondary);
   border-radius: 16rpx;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s;
 }
 
 .new-chat-btn:hover {
-  background: linear-gradient(135deg, #f5d56a 0%, #e8c850 100%);
+  background: var(--bg-primary);
   border-style: solid;
   transform: translateY(-2rpx);
-  box-shadow: 0 4rpx 12rpx rgba(200, 37, 6, 0.15);
-}
-
-.new-chat-icon {
-  font-size: 32rpx;
-  font-weight: bold;
-  color: #c82506;
 }
 
 .new-chat-text {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #c82506;
+  font-size: 30rpx;
+  font-weight: bold;
+  color: var(--secondary);
+  font-family: 'TsangerJinKai', serif;
 }
 
 .session-list {
@@ -219,26 +236,25 @@ export default {
 .session-item {
   display: flex;
   align-items: center;
-  padding: 20rpx;
-  background: #fffef9;
+  padding: 24rpx 20rpx;
+  background: var(--bg-card);
   border-radius: 12rpx;
-  border: 1rpx solid #e8d8c8;
+  border: 1rpx solid var(--border);
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s;
   position: relative;
+  overflow: hidden;
 }
 
 .session-item:hover {
-  background: #fff8d8;
-  border-color: var(--warning);
+  background: var(--bg-primary);
   transform: translateX(4rpx);
-  box-shadow: 0 2rpx 8rpx rgba(200, 37, 6, 0.1);
 }
 
 .session-item.active {
-  background: linear-gradient(135deg, #fff8d8 0%, #f5e6c8 100%);
-  border-color: #c82506;
-  border-left: 6rpx solid #c82506;
+  background: var(--bg-secondary);
+  border-color: var(--secondary);
+  box-shadow: inset 4rpx 0 0 var(--primary);
 }
 
 .session-icon {
@@ -317,15 +333,16 @@ export default {
 }
 
 .sidebar-footer {
-  padding: 20rpx;
-  background: #f7f1e6;
-  border-top: 1rpx solid #e8d8c8;
+  padding: 30rpx 20rpx;
+  background: var(--bg-card);
+  border-top: 2rpx solid var(--border);
   text-align: center;
 }
 
 .footer-text {
   font-size: 24rpx;
-  color: var(--text-tertiary);
+  color: var(--text-muted);
+  letter-spacing: 2rpx;
 }
 
 @media (min-width: 768px) {

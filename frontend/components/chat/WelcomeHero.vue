@@ -11,11 +11,11 @@
     <view class="welcome-hero">
       <view class="hero-icon-wrapper">
         <view class="hero-icon-ring"></view>
-        <text class="hero-icon">🏯</text>
+        <TraditionalIcon name="palace" size="100" color="var(--primary)" />
         <view class="hero-glow"></view>
       </view>
       <view class="hero-title-wrapper">
-        <text class="hero-title">古建筑AI导览</text>
+        <text class="hero-title ink-pressed">古建筑AI导览</text>
         <view class="title-decoration">
           <view class="title-line"></view>
           <text class="title-icon">◆</text>
@@ -27,21 +27,23 @@
     
     <!-- 功能特性展示 -->
     <view class="welcome-features">
-      <view class="feature-item" v-for="(feature, idx) in welcomeFeatures" :key="idx" :style="{ animationDelay: idx * 0.15 + 's' }">
-        <view class="feature-icon-wrapper">
-          <text class="feature-icon">{{ feature.icon }}</text>
+      <view class="feature-item rice-paper" v-for="(feature, idx) in welcomeFeatures" :key="idx" :style="{ animationDelay: idx * 0.15 + 's' }">
+        <view class="feature-icon-wrapper btn-ink">
+          <TraditionalIcon :name="getFeatureIcon(idx)" size="40" />
         </view>
-        <text class="feature-title">{{ feature.title }}</text>
-        <text class="feature-desc">{{ feature.desc }}</text>
+        <view class="feature-text-content">
+          <text class="feature-title">{{ feature.title }}</text>
+          <text class="feature-desc">{{ feature.desc }}</text>
+        </view>
       </view>
     </view>
     
     <!-- 引导提示 -->
     <view class="welcome-guide">
       <view class="guide-line"></view>
-      <view class="guide-content">
-        <text class="guide-icon">💡</text>
-        <text class="guide-text">点击下方问题或输入您想了解的古建筑知识</text>
+      <view class="guide-content rice-paper">
+        <TraditionalIcon name="chat" size="32" color="var(--primary)" />
+        <text class="guide-text">输入您想了解的古建筑知识</text>
       </view>
       <view class="guide-line"></view>
     </view>
@@ -49,8 +51,13 @@
 </template>
 
 <script>
+import TraditionalIcon from '../shared/TraditionalIcon.vue';
+
 export default {
   name: 'WelcomeHero',
+  components: {
+    TraditionalIcon
+  },
   props: {
     welcomeFeatures: {
       type: Array,
@@ -59,6 +66,12 @@ export default {
         { icon: '🗺️', title: '实景导览', desc: '一键跳转查看古建筑详细资料与实景图片' },
         { icon: '✨', title: '智能推荐', desc: '根据您的兴趣推荐相关古建筑知识' }
       ]
+    }
+  },
+  methods: {
+    getFeatureIcon(idx) {
+      const icons = ['palace', 'map', 'tower'];
+      return icons[idx % icons.length];
     }
   }
 }
@@ -87,8 +100,9 @@ export default {
 
 .cloud {
   position: absolute;
-  background: linear-gradient(135deg, rgba(200, 37, 6, 0.08) 0%, rgba(168, 28, 7, 0.04) 100%);
+  background: linear-gradient(135deg, var(--primary-light) 0%, var(--primary) 100%);
   border-radius: 50%;
+  opacity: 0.08;
   filter: blur(20rpx);
 }
 
@@ -151,8 +165,9 @@ export default {
   position: absolute;
   width: 100%;
   height: 100%;
-  border: 4rpx solid rgba(200, 37, 6, 0.2);
+  border: 4rpx solid var(--secondary);
   border-radius: 50%;
+  opacity: 0.2;
   animation: ringPulse 2s ease-in-out infinite;
 }
 
@@ -163,7 +178,8 @@ export default {
   left: 10rpx;
   right: 10rpx;
   bottom: 10rpx;
-  border: 2rpx solid rgba(200, 37, 6, 0.1);
+  border: 2rpx solid var(--secondary);
+  opacity: 0.1;
   border-radius: 50%;
 }
 
@@ -174,10 +190,11 @@ export default {
 
 .hero-glow {
   position: absolute;
-  width: 140rpx;
-  height: 140rpx;
-  background: radial-gradient(circle, rgba(200, 37, 6, 0.15) 0%, transparent 70%);
+  width: 200rpx;
+  height: 200rpx;
+  background: radial-gradient(circle, var(--primary-light) 0%, transparent 70%);
   border-radius: 50%;
+  opacity: 0.15;
   animation: glowPulse 3s ease-in-out infinite;
 }
 
@@ -205,12 +222,16 @@ export default {
 }
 
 .hero-title {
-  font-size: 48rpx;
+  font-size: 52rpx;
   font-weight: bold;
-  color: #c82506;
+  color: var(--text-primary);
+  font-family: 'TsangerJinKai', serif;
   letter-spacing: 8rpx;
-  text-shadow: 0 2rpx 4rpx rgba(200, 37, 6, 0.2);
-  margin-bottom: 16rpx;
+  margin-bottom: 24rpx;
+}
+
+.ink-pressed {
+  text-shadow: 0.5rpx 0.5rpx 0px rgba(255,255,255,0.8), 0 2rpx 4rpx rgba(0,0,0,0.1);
 }
 
 .title-decoration {
@@ -220,14 +241,14 @@ export default {
 }
 
 .title-line {
-  width: 60rpx;
+  width: 80rpx;
   height: 2rpx;
-  background: linear-gradient(90deg, transparent, #c82506, transparent);
+  background: linear-gradient(90deg, transparent, var(--secondary), transparent);
 }
 
 .title-icon {
-  font-size: 16rpx;
-  color: #c82506;
+  font-size: 20rpx;
+  color: var(--secondary);
   animation: iconRotate 4s linear infinite;
 }
 
@@ -255,11 +276,11 @@ export default {
 .feature-item {
   display: flex;
   align-items: center;
-  padding: 24rpx 30rpx;
-  background: linear-gradient(135deg, #fffef9 0%, #faf6ed 100%);
-  border-radius: 16rpx;
-  border: 1rpx solid #e8d8c8;
-  box-shadow: 0 4rpx 16rpx rgba(139, 69, 19, 0.08);
+  padding: 24rpx 32rpx;
+  background: var(--bg-card);
+  border-radius: 20rpx;
+  border: 4rpx solid var(--border);
+  box-shadow: 4rpx 4rpx 20rpx var(--shadow);
   animation: featureSlideIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -276,20 +297,17 @@ export default {
 }
 
 .feature-icon-wrapper {
-  width: 72rpx;
-  height: 72rpx;
+  width: 88rpx;
+  height: 88rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #c82506 0%, #a81c07 100%);
-  border-radius: 16rpx;
-  margin-right: 24rpx;
+  background: var(--bg-primary);
+  border-radius: 12rpx;
+  margin-right: 32rpx;
   flex-shrink: 0;
-  box-shadow: 0 4rpx 12rpx rgba(200, 37, 6, 0.25);
-}
-
-.feature-icon {
-  font-size: 36rpx;
+  color: var(--secondary);
+  border: 1rpx solid var(--border);
 }
 
 .feature-title {
@@ -322,34 +340,25 @@ export default {
 }
 
 .guide-line {
-  width: 60rpx;
-  height: 1rpx;
-  background: linear-gradient(90deg, transparent, #c82506, transparent);
+  width: 80rpx;
+  height: 2rpx;
+  background: linear-gradient(90deg, transparent, var(--secondary), transparent);
 }
 
 .guide-content {
   display: flex;
   align-items: center;
-  gap: 12rpx;
-  padding: 16rpx 28rpx;
-  background: linear-gradient(135deg, #fff8d8 0%, #f5e6c8 100%);
-  border-radius: 40rpx;
-  border: 1rpx solid var(--warning);
-}
-
-.guide-icon {
-  font-size: 28rpx;
-  animation: iconBounce 1.5s ease-in-out infinite;
-}
-
-@keyframes iconBounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4rpx); }
+  gap: 16rpx;
+  padding: 20rpx 40rpx;
+  background: var(--bg-card);
+  border-radius: 50rpx;
+  border: 1rpx solid var(--border);
+  box-shadow: 0 4rpx 20rpx var(--shadow);
 }
 
 .guide-text {
   font-size: 26rpx;
-  color: #a81c07;
+  color: var(--text-tertiary);
   font-weight: 500;
 }
 </style>
