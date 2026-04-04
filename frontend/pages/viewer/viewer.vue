@@ -1,9 +1,13 @@
 <template>
   <view class="page">
     <view class="topbar">
-      <button class="back" @click="goBack">← 返回</button>
-      <text class="title">3D 导览</text>
-      <view class="topbar-gap"></view>
+      <view class="page-container">
+        <view class="topbar-inner">
+          <button class="back" @click="goBack">← 返回</button>
+          <text class="title">3D 导览</text>
+          <view class="topbar-gap"></view>
+        </view>
+      </view>
     </view>
 
     <view class="body">
@@ -64,47 +68,49 @@
           </view>
         </view>
 
-        <view class="mode-switch" role="tablist">
-          <button
-            class="mode-btn"
-            :class="{ active: activeMode === 'model' }"
-            @click="switchMode('model')"
-          >
-            three.js 模型
-          </button>
-          <button
-            class="mode-btn"
-            :class="{ active: activeMode === 'panorama' }"
-            :disabled="!hasPanorama"
-            @click="switchMode('panorama')"
-          >
-            全景预览
-          </button>
-        </view>
-
-        <view class="meta-card">
-          <text class="meta-title">场景说明</text>
-          <text class="meta-line">{{ manifest.preload.uiHint || "先加载占位资源，再切换高清资源" }}</text>
-          <text class="meta-line">资源格式：{{ manifest.scene.format || "glb" }}</text>
-          <text class="meta-line">过期时间：{{ expireText }}</text>
-          <text class="meta-line">LOD阶段：{{ lodPhaseText }}</text>
-        </view>
-
-        <view class="guide-card">
-          <text class="guide-title">热点讲解</text>
-          <view v-if="!hotspotGuide.length" class="guide-empty">
-            <text>当前版本暂无热点讲解</text>
-          </view>
-          <view v-else>
-            <view
-              v-for="item in hotspotGuide"
-              :key="item.id"
-              class="guide-item"
-              :class="{ selected: selectedHotspotId === item.id }"
-              @click="selectHotspot(item)"
+        <view class="page-container">
+          <view class="mode-switch" role="tablist">
+            <button
+              class="mode-btn"
+              :class="{ active: activeMode === 'model' }"
+              @click="switchMode('model')"
             >
-              <text class="guide-item-title">{{ item.title }}</text>
-              <text class="guide-item-body">{{ item.narration || "暂无讲解内容" }}</text>
+              three.js 模型
+            </button>
+            <button
+              class="mode-btn"
+              :class="{ active: activeMode === 'panorama' }"
+              :disabled="!hasPanorama"
+              @click="switchMode('panorama')"
+            >
+              全景预览
+            </button>
+          </view>
+  
+          <view class="meta-card">
+            <text class="meta-title">场景说明</text>
+            <text class="meta-line">{{ manifest.preload.uiHint || "先加载占位资源，再切换高清资源" }}</text>
+            <text class="meta-line">资源格式：{{ manifest.scene.format || "glb" }}</text>
+            <text class="meta-line">过期时间：{{ expireText }}</text>
+            <text class="meta-line">LOD阶段：{{ lodPhaseText }}</text>
+          </view>
+  
+          <view class="guide-card">
+            <text class="guide-title">热点讲解</text>
+            <view v-if="!hotspotGuide.length" class="guide-empty">
+              <text>当前版本暂无热点讲解</text>
+            </view>
+            <view v-else>
+              <view
+                v-for="item in hotspotGuide"
+                :key="item.id"
+                class="guide-item"
+                :class="{ selected: selectedHotspotId === item.id }"
+                @click="selectHotspot(item)"
+              >
+                <text class="guide-item-title">{{ item.title }}</text>
+                <text class="guide-item-body">{{ item.narration || "暂无讲解内容" }}</text>
+              </view>
             </view>
           </view>
         </view>

@@ -1,78 +1,80 @@
 <template>
   <view class="container">
-    <view class="header-card">
-      <text class="title">开发设置</text>
-      <text class="subtitle">可在此修改后端接口地址</text>
-    </view>
-
-    <view class="form-card">
-      <text class="label">当前 API 地址</text>
-      <input
-        v-model="apiBaseUrlInput"
-        class="input"
-        placeholder="例如：http://localhost:9527"
-      />
-
-      <view class="hint-list">
-        <text class="hint-item">1. 环境变量可选，不是必填。</text>
-        <text class="hint-item"
-          >2. 此处保存后会写入本地缓存 API_BASE_URL。</text
-        >
-        <text class="hint-item"
-          >3. 优先级：本地缓存 > 环境变量 > 默认地址。</text
-        >
+    <view class="page-container">
+      <view class="header-card">
+        <text class="title">开发设置</text>
+        <text class="subtitle">可在此修改后端接口地址</text>
       </view>
-
-      <button class="btn primary" :disabled="saving" @click="saveConfig">
-        {{ saving ? "保存中..." : "保存地址" }}
-      </button>
-      <button class="btn" :disabled="testing" @click="testConnection">
-        {{ testing ? "测试中..." : "测试连接" }}
-      </button>
-      <button class="btn warn" @click="resetDefault">恢复默认地址</button>
-    </view>
-
-    <view class="form-card">
-      <text class="label">快速切换预设地址</text>
-      <view class="preset-list">
-        <view
-          v-for="preset in presets"
-          :key="preset.key"
-          class="preset-item"
-          :class="{
-            active: currentApiBaseUrl === preset.url,
-            disabled: !preset.url,
-          }"
-          @click="applyPreset(preset)"
-        >
-          <text class="preset-name">{{ preset.name }}</text>
-          <text class="preset-url">{{ preset.url || "未配置" }}</text>
+  
+      <view class="form-card">
+        <text class="label">当前 API 地址</text>
+        <input
+          v-model="apiBaseUrlInput"
+          class="input"
+          placeholder="例如：http://localhost:9527"
+        />
+  
+        <view class="hint-list">
+          <text class="hint-item">1. 环境变量可选，不是必填。</text>
+          <text class="hint-item"
+            >2. 此处保存后会写入本地缓存 API_BASE_URL。</text
+          >
+          <text class="hint-item"
+            >3. 优先级：本地缓存 > 环境变量 > 默认地址。</text
+          >
+        </view>
+  
+        <button class="btn primary" :disabled="saving" @click="saveConfig">
+          {{ saving ? "保存中..." : "保存地址" }}
+        </button>
+        <button class="btn" :disabled="testing" @click="testConnection">
+          {{ testing ? "测试中..." : "测试连接" }}
+        </button>
+        <button class="btn warn" @click="resetDefault">恢复默认地址</button>
+      </view>
+  
+      <view class="form-card">
+        <text class="label">快速切换预设地址</text>
+        <view class="preset-list">
+          <view
+            v-for="preset in presets"
+            :key="preset.key"
+            class="preset-item"
+            :class="{
+              active: currentApiBaseUrl === preset.url,
+              disabled: !preset.url,
+            }"
+            @click="applyPreset(preset)"
+          >
+            <text class="preset-name">{{ preset.name }}</text>
+            <text class="preset-url">{{ preset.url || "未配置" }}</text>
+          </view>
+        </view>
+  
+        <view class="preset-edit">
+          <text class="label small">测试环境地址</text>
+          <input
+            v-model="presetTestUrl"
+            class="input"
+            placeholder="例如：https://test-api.example.com"
+          />
+  
+          <text class="label small">生产环境地址</text>
+          <input
+            v-model="presetProdUrl"
+            class="input"
+            placeholder="例如：https://api.example.com"
+          />
+  
+          <button class="btn" :disabled="savingPresets" @click="savePresets">
+            {{ savingPresets ? "保存中..." : "保存预设地址" }}
+          </button>
         </view>
       </view>
-
-      <view class="preset-edit">
-        <text class="label small">测试环境地址</text>
-        <input
-          v-model="presetTestUrl"
-          class="input"
-          placeholder="例如：https://test-api.example.com"
-        />
-
-        <text class="label small">生产环境地址</text>
-        <input
-          v-model="presetProdUrl"
-          class="input"
-          placeholder="例如：https://api.example.com"
-        />
-
-        <button class="btn" :disabled="savingPresets" @click="savePresets">
-          {{ savingPresets ? "保存中..." : "保存预设地址" }}
-        </button>
+  
+      <view class="status-card" v-if="message">
+        <text class="status" :class="statusType">{{ message }}</text>
       </view>
-    </view>
-
-    <view class="status-card" v-if="message">
-      <text class="status" :class="statusType">{{ message }}</text>
     </view>
   </view>
 </template>

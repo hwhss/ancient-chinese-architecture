@@ -3,63 +3,74 @@
     <!-- 背景层 -->
     <view class="radial-gradient-bg"></view>
     <view class="cloud-background"></view>
+    <view class="ink-background"></view>
 
     <!-- 顶部导航 -->
-    <view class="header">
-      <view class="back-btn" @click="goBack">
-        <text class="back-icon">←</text>
-      </view>
-      <view class="header-center">
-        <text class="header-title">我的收藏</text>
-      </view>
-      <view class="header-right" @click="showCollectionManager" v-if="favorites.length > 0">
-        <text class="manage-text">管理</text>
+    <view class="header rice-paper brush-border-ink">
+      <view class="page-container">
+        <view class="header-inner">
+          <view class="back-btn btn-ink" @click="goBack">
+            <TraditionalIcon name="arrow-left" size="32" color="var(--primary)" />
+          </view>
+          <view class="header-center">
+            <text class="header-title ink-pressed">我的收藏</text>
+          </view>
+          <view class="header-right btn-ink" @click="showCollectionManager" v-if="favorites.length > 0">
+            <TraditionalIcon name="chat" size="36" color="var(--primary)" />
+          </view>
+        </view>
       </view>
     </view>
 
     <!-- 统计卡片区域 -->
     <view class="stats-section" v-if="!loading">
-      <view class="stats-card">
-        <view class="stat-item">
-          <text class="stat-number">{{ totalFavorites }}</text>
-          <text class="stat-label">总收藏</text>
-        </view>
-        <view class="stat-divider"></view>
-        <view class="stat-item">
-          <text class="stat-number">{{ collections.length }}</text>
-          <text class="stat-label">收藏夹</text>
-        </view>
-        <view class="stat-divider"></view>
-        <view class="stat-item">
-          <text class="stat-number">{{ currentMonthCount }}</text>
-          <text class="stat-label">本月新增</text>
+      <view class="page-container">
+        <view class="stats-card">
+          <view class="stat-item">
+            <text class="stat-number">{{ totalFavorites }}</text>
+            <text class="stat-label">总收藏</text>
+          </view>
+          <view class="stat-divider"></view>
+          <view class="stat-item">
+            <text class="stat-number">{{ collections.length }}</text>
+            <text class="stat-label">收藏夹</text>
+          </view>
+          <view class="stat-divider"></view>
+          <view class="stat-item">
+            <text class="stat-number">{{ currentMonthCount }}</text>
+            <text class="stat-label">本月新增</text>
+          </view>
         </view>
       </view>
     </view>
 
     <!-- 收藏夹选择器 - 胶囊样式 -->
     <view class="collections-section" v-if="collections.length > 0 && !loading">
-      <scroll-view class="collections-scroll" scroll-x show-scrollbar="false">
-        <view class="collections-list">
-          <view
-            v-for="collection in collections"
-            :key="collection.id"
-            class="collection-pill"
-            :class="{ 'active': currentCollectionId === collection.id }"
-            @click="switchCollection(collection.id)"
-          >
-            <text class="pill-icon">{{ collection.isDefault ? '⭐' : '📁' }}</text>
-            <text class="pill-name">{{ collection.name }}</text>
-            <text class="pill-count">{{ collection.actualCount || collection.count }}</text>
-          </view>
+      <view class="page-container">
+        <scroll-view class="collections-scroll" scroll-x show-scrollbar="false">
+          <view class="collections-list">
+            <view
+              v-for="collection in collections"
+              :key="collection.id"
+              class="collection-pill btn-ink"
+              :class="{ 'active': currentCollectionId === collection.id }"
+              @click="switchCollection(collection.id)"
+            >
+              <view class="pill-icon-wrapper">
+                <TraditionalIcon :name="collection.isDefault ? 'palace' : 'tower'" size="28" :color="currentCollectionId === collection.id ? '#fff' : 'var(--secondary)'" />
+              </view>
+              <text class="pill-name">{{ collection.name }}</text>
+              <text class="pill-count">{{ collection.actualCount || collection.count }}</text>
+            </view>
 
-          <!-- 添加收藏夹按钮 -->
-          <view class="collection-pill add-pill" @click="showCreateCollection">
-            <text class="pill-icon">+</text>
-            <text class="pill-name">新建</text>
+            <!-- 添加收藏夹按钮 -->
+            <view class="collection-pill add-pill btn-ink" @click="showCreateCollection">
+              <TraditionalIcon name="home" size="28" color="var(--secondary)" />
+              <text class="pill-name">新建</text>
+            </view>
           </view>
-        </view>
-      </scroll-view>
+        </scroll-view>
+      </view>
     </view>
 
     <!-- 加载状态 -->
@@ -82,11 +93,12 @@
       v-if="filteredFavorites.length > 0 && !loading"
       @scrolltolower="loadMore"
     >
-      <view class="grid-container">
+      <view class="page-container">
+        <view class="grid-container">
         <view
           v-for="(item, index) in filteredFavorites"
           :key="item.id"
-          class="grid-item"
+          class="grid-item rice-paper brush-border-ink"
           :style="{ animationDelay: index * 0.05 + 's' }"
           @click="goToDetail(item)"
           @longpress="showItemMenu(item)"
@@ -105,7 +117,7 @@
             </view>
             <!-- 收藏夹标签 -->
             <view class="grid-collection-badge" v-if="item.collectionId && item.collectionId !== 'default'">
-              <text class="collection-badge-text">📁</text>
+              <TraditionalIcon name="tower" size="20" color="#fff" />
             </view>
           </view>
 
@@ -114,7 +126,8 @@
             <text class="grid-name">{{ item.name }}</text>
             <view class="grid-meta">
               <text class="grid-location" v-if="item.location">
-                <text class="meta-icon">📍</text>{{ item.location }}
+                <TraditionalIcon name="map" size="20" color="var(--text-muted)" style="margin-right: 4rpx;" />
+                {{ item.location }}
               </text>
               <text class="grid-time">{{ formatTime(item.addedAt) }}</text>
             </view>
@@ -126,37 +139,38 @@
 
           <!-- 操作按钮 -->
           <view class="grid-actions">
-            <view class="grid-action-btn" @click.stop="showMoveDialog(item)" v-if="collections.length > 1" title="移动到">
-              <text class="action-icon-small">📂</text>
+            <view class="grid-action-btn btn-ink" @click.stop="showMoveDialog(item)" v-if="collections.length > 1">
+              <TraditionalIcon name="tower" size="28" color="var(--secondary)" />
             </view>
-            <view class="grid-action-btn remove" @click.stop="removeFavorite(item.id)" title="移除">
-              <text class="action-icon-small">✕</text>
+            <view class="grid-action-btn remove btn-ink" @click.stop="removeFavorite(item.id)">
+              <TraditionalIcon name="close" size="24" color="var(--primary)" />
             </view>
           </view>
+          </view>
         </view>
-      </view>
 
-      <!-- 底部提示 -->
-      <view class="grid-footer">
-        <text class="footer-text">—— {{ currentCollectionName }} · 共 {{ filteredFavorites.length }} 处 ——</text>
+        <!-- 底部提示 -->
+        <view class="grid-footer">
+          <text class="footer-text">—— {{ currentCollectionName }} · 共 {{ filteredFavorites.length }} 处 ——</text>
+        </view>
       </view>
     </scroll-view>
 
     <!-- 空状态 -->
     <view class="empty-state" v-if="filteredFavorites.length === 0 && !loading">
       <view class="empty-illustration">
-        <view class="empty-icon-large">{{ currentCollectionId === 'default' ? '🏛️' : '📂' }}</view>
+        <TraditionalIcon :name="currentCollectionId === 'default' ? 'palace' : 'tower'" size="120" color="var(--border)" />
         <view class="empty-decoration"></view>
       </view>
       <text class="empty-title">{{ currentCollectionId === 'default' ? '还没有收藏古建筑' : '收藏夹是空的' }}</text>
       <text class="empty-desc">{{ emptyStateDesc }}</text>
       <view class="empty-actions">
-        <view class="empty-btn primary" @click="goToExplore">
-          <text class="btn-icon">🔍</text>
+        <view class="empty-btn primary btn-ink" @click="goToExplore">
+          <TraditionalIcon name="search" size="32" color="#fff" style="margin-right: 8rpx;" />
           <text class="btn-text">去发现</text>
         </view>
-        <view class="empty-btn secondary" @click="showCreateCollection" v-if="currentCollectionId === 'default'">
-          <text class="btn-icon">+</text>
+        <view class="empty-btn secondary btn-ink" @click="showCreateCollection" v-if="currentCollectionId === 'default'">
+          <TraditionalIcon name="home" size="32" color="var(--primary)" style="margin-right: 8rpx;" />
           <text class="btn-text">创建收藏夹</text>
         </view>
       </view>
@@ -266,8 +280,8 @@
     </view>
 
     <!-- 悬浮操作按钮 -->
-    <view class="fab-button" v-if="filteredFavorites.length > 0 && !loading" @click="scrollToTop">
-      <text class="fab-icon">↑</text>
+    <view class="fab-button btn-ink" v-if="filteredFavorites.length > 0 && !loading" @click="scrollToTop">
+      <TraditionalIcon name="arrow-left" size="40" color="#fff" style="transform: rotate(90deg);" />
     </view>
   </view>
 </template>
@@ -283,8 +297,12 @@ import {
   getCollectionStats,
   initializeCollections
 } from '../../utils/collectionManager.js';
+import TraditionalIcon from '../../components/shared/TraditionalIcon.vue';
 
 export default {
+  components: {
+    TraditionalIcon
+  },
   data() {
     return {
       collections: [],
@@ -623,7 +641,7 @@ export default {
 <style scoped>
 .container {
   min-height: 100vh;
-  background: linear-gradient(180deg, #faf6ed 0%, #f7f1e6 100%);
+  background: var(--bg-primary);
   position: relative;
 }
 
@@ -634,8 +652,9 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(ellipse at center, rgba(200, 37, 6, 0.03) 0%, transparent 70%);
+  background: radial-gradient(ellipse at center, var(--bg-secondary) 0%, transparent 70%);
   pointer-events: none;
+  z-index: 0;
 }
 
 .cloud-background {
@@ -644,30 +663,45 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20,50 Q30,30 50,30 T80,50 Q90,50 90,60 T80,70 Q70,80 50,80 T20,70 Q10,70 10,60 T20,50' fill='rgba(200,37,6,0.03)'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20,50 Q30,30 50,30 T80,50 Q90,50 90,60 T80,70 Q70,80 50,80 T20,70 Q10,70 10,60 T20,50' fill='rgba(139,69,19,0.03)'/%3E%3C/svg%3E");
   background-size: 200rpx 200rpx;
-  opacity: 0.5;
+  opacity: 0.6;
   pointer-events: none;
+  z-index: 1;
+}
+
+.ink-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800'%3E%3Cpath fill='%235c3d2e' d='M0,700 Q200,600 400,650 Q600,550 800,600 Q1000,500 1200,550 L1200,800 L0,800 Z' opacity='0.03'/%3E%3C/svg%3E");
+  background-size: cover;
+  background-position: bottom;
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* 顶部导航 */
 .header {
-  background: linear-gradient(135deg, #e84a38 0%, #c82506 100%);
-  padding: 50rpx 30rpx 30rpx;
+  padding: 60rpx 30rpx 40rpx;
   display: flex;
   align-items: center;
   justify-content: space-between;
   position: relative;
-  z-index: 1;
+  z-index: 10;
+  box-shadow: 0 4rpx 20rpx var(--shadow);
 }
 
 .back-btn {
-  width: 64rpx;
-  height: 64rpx;
+  width: 72rpx;
+  height: 72rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 248, 230, 0.2);
+  background: var(--bg-secondary);
+  border: 1rpx solid var(--border);
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -693,9 +727,9 @@ export default {
 .header-title {
   font-size: 38rpx;
   font-weight: bold;
-  color: #fff8e6;
-  letter-spacing: 6rpx;
-  font-family: 'ZCOOL XiaoWei', serif;
+  color: var(--primary);
+  letter-spacing: 8rpx;
+  font-family: 'TsangerJinKai', serif;
 }
 
 .header-right {
@@ -722,14 +756,14 @@ export default {
 }
 
 .stats-card {
-  background: linear-gradient(135deg, #fffef9 0%, #faf6ed 100%);
+  background: var(--bg-card);
   border-radius: 24rpx;
   padding: 40rpx;
   display: flex;
   align-items: center;
   justify-content: space-around;
-  box-shadow: 0 8rpx 32rpx rgba(139, 69, 19, 0.12);
-  border: 2rpx solid #e8d8c8;
+  box-shadow: 0 8rpx 32rpx var(--shadow);
+  border: 2rpx solid var(--border);
 }
 
 .stat-item {
@@ -742,8 +776,8 @@ export default {
 .stat-number {
   font-size: 48rpx;
   font-weight: bold;
-  color: #c82506;
-  font-family: 'DIN Alternate', sans-serif;
+  color: var(--primary);
+  font-family: 'TsangerJinKai', serif;
 }
 
 .stat-label {
@@ -754,7 +788,7 @@ export default {
 .stat-divider {
   width: 2rpx;
   height: 60rpx;
-  background: linear-gradient(180deg, transparent, #e8d8c8, transparent);
+  background: linear-gradient(180deg, transparent, var(--border), transparent);
 }
 
 /* 收藏夹选择器 - 胶囊样式 */
@@ -777,17 +811,17 @@ export default {
   align-items: center;
   gap: 12rpx;
   padding: 16rpx 28rpx;
-  background: #fff;
+  background: var(--bg-primary);
   border-radius: 40rpx;
-  border: 2rpx solid #e8d8c8;
+  border: 1rpx solid var(--border);
   transition: all 0.3s ease;
   cursor: pointer;
 }
 
 .collection-pill.active {
-  background: linear-gradient(135deg, #c82506 0%, #e84a38 100%);
-  border-color: #c82506;
-  box-shadow: 0 4rpx 16rpx rgba(200, 37, 6, 0.3);
+  background: var(--primary);
+  border-color: var(--primary-dark);
+  box-shadow: 0 8rpx 24rpx var(--shadow-primary);
 }
 
 .collection-pill:active {
@@ -823,8 +857,8 @@ export default {
 }
 
 .collection-pill.active .pill-count {
-  color: #c82506;
-  background: rgba(255, 255, 255, 0.9);
+  color: var(--primary);
+  background: #fff;
 }
 
 .add-pill {
@@ -899,16 +933,21 @@ export default {
   gap: 20rpx;
 }
 
+@media (min-width: 1024px) {
+  .grid-container {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32rpx;
+  }
+}
+
 .grid-item {
-  background: #fff;
-  border-radius: 24rpx;
+  background: var(--bg-card);
+  border-radius: 20rpx;
   overflow: hidden;
-  box-shadow:
-    0 8rpx 32rpx rgba(139, 69, 19, 0.1),
-    0 2rpx 8rpx rgba(139, 69, 19, 0.05);
-  border: 2rpx solid var(--bg-tertiary);
+  box-shadow: 0 8rpx 24rpx var(--shadow);
+  border: 1rpx solid var(--border);
   animation: cardEnter 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -1032,13 +1071,14 @@ export default {
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   min-height: 84rpx;
   transition: color 0.3s ease;
 }
 
 .grid-item:hover .grid-name {
-  color: #c82506;
+  color: var(--primary);
 }
 
 .grid-meta {
@@ -1120,26 +1160,17 @@ export default {
 }
 
 .grid-action-btn {
-  width: 60rpx;
-  height: 60rpx;
+  width: 64rpx;
+  height: 64rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(145deg, #fff 0%, #faf6ed 100%);
+  background: var(--bg-card);
   border-radius: 50%;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4rpx 16rpx var(--shadow);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 2rpx solid rgba(255, 255, 255, 0.8);
-}
-
-.grid-actions.always-visible .grid-action-btn {
-  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.25);
-}
-
-.grid-action-btn:hover {
-  transform: scale(1.15) rotate(-5deg);
-  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.3);
+  transition: all 0.3s;
+  border: 1rpx solid var(--border);
 }
 
 .grid-action-btn:active {
@@ -1147,8 +1178,8 @@ export default {
 }
 
 .grid-action-btn.remove {
-  background: linear-gradient(145deg, #e84a38 0%, #c82506 100%);
-  border-color: rgba(255, 255, 255, 0.4);
+  background: var(--primary);
+  border-color: var(--primary-dark);
 }
 
 .grid-action-btn.remove:hover {
@@ -1158,12 +1189,12 @@ export default {
 
 .action-icon-small {
   font-size: 26rpx;
-  color: #666;
+  color: var(--secondary);
   transition: all 0.3s ease;
 }
 
 .grid-action-btn:hover .action-icon-small {
-  color: var(--text-primary);
+  color: var(--primary);
 }
 
 .grid-action-btn.remove .action-icon-small {
@@ -1222,9 +1253,10 @@ export default {
 .empty-title {
   font-size: 36rpx;
   font-weight: bold;
-  color: var(--text-primary);
-  margin-bottom: 16rpx;
+  color: var(--primary);
+  margin-bottom: 20rpx;
   letter-spacing: 4rpx;
+  font-family: 'TsangerJinKai', serif;
 }
 
 .empty-desc {
@@ -1249,13 +1281,13 @@ export default {
 }
 
 .empty-btn.primary {
-  background: linear-gradient(135deg, #e84a38 0%, #c82506 100%);
-  box-shadow: 0 8rpx 24rpx rgba(200, 37, 6, 0.3);
+  background: var(--primary);
+  box-shadow: 0 8rpx 24rpx var(--shadow-primary);
 }
 
 .empty-btn.secondary {
-  background: #fff;
-  border: 2rpx solid #e8d8c8;
+  background: var(--bg-card);
+  border: 2rpx solid var(--border);
 }
 
 .empty-btn:active {
@@ -1293,13 +1325,14 @@ export default {
 }
 
 .modal-content {
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 28rpx;
   width: 100%;
   max-width: 640rpx;
   overflow: hidden;
   animation: modalIn 0.3s ease;
-  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20rpx 60rpx var(--shadow);
+  border: 1rpx solid var(--border);
 }
 
 @keyframes modalIn {
@@ -1324,7 +1357,8 @@ export default {
 .modal-title {
   font-size: 34rpx;
   font-weight: bold;
-  color: var(--text-primary);
+  color: var(--primary);
+  font-family: 'TsangerJinKai', serif;
 }
 
 .modal-close {
@@ -1391,7 +1425,7 @@ export default {
 }
 
 .modal-btn.confirm {
-  background: linear-gradient(135deg, #e84a38 0%, #c82506 100%);
+  background: var(--primary);
   color: #fff;
 }
 

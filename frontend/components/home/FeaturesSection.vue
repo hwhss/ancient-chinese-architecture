@@ -1,23 +1,25 @@
 <template>
   <view class="section-features" :class="{ 'visible': visible }">
-    <view class="section-header">
-      <view class="title-with-icon">
-        <TraditionalIcon name="defense" size="48" style="color: var(--secondary)" />
-        <text class="section-title">古建特色</text>
-      </view>
-      <view class="window-divider">
-        <view class="window-pattern"></view>
-      </view>
-    </view>
-    
-    <view class="features-grid">
-      <view v-for="(feature, index) in localFeatures" :key="index" class="feature-card rice-paper brush-border-ink">
-        <view class="feature-icon-wrapper">
-          <TraditionalIcon :name="feature.icon" size="64" />
+    <view class="page-container">
+      <view class="section-header">
+        <view class="title-with-icon">
+          <TraditionalIcon name="defense" size="48" style="color: var(--secondary)" />
+          <text class="section-title">古建特色</text>
         </view>
-        <view class="feature-info">
-          <text class="feature-title ink-pressed">{{ feature.title }}</text>
-          <text class="feature-desc">{{ feature.desc }}</text>
+        <view class="window-divider">
+          <view class="window-pattern"></view>
+        </view>
+      </view>
+      
+      <view class="features-grid">
+        <view v-for="(feature, index) in localFeatures" :key="index" class="feature-card rice-paper brush-border-ink">
+          <view class="feature-icon-wrapper">
+            <TraditionalIcon :name="feature.icon" size="64" />
+          </view>
+          <view class="feature-info">
+            <text class="feature-title ink-pressed">{{ feature.title }}</text>
+            <text class="feature-desc">{{ feature.desc }}</text>
+          </view>
         </view>
       </view>
     </view>

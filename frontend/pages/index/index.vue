@@ -3,148 +3,144 @@
     <!-- 动态祥云背景层 -->
     <view class="cloud-background"></view>
 
-    <!-- 侧边栏及遮罩组件 -->
-    <ChatSidebar
-      :showSidebar="showSidebar"
-      :sessionList="sessionList"
-      :currentSessionId="currentSessionId"
-      @toggle-sidebar="toggleSidebar"
-      @create-new="createNewChat"
-      @switch-session="switchSession"
-      @delete-session="deleteSession"
-    />
-    
     <!-- 顶部标题 -->
     <view class="header rice-paper">
-      <!-- 侧边栏切换按钮 -->
-      <view class="sidebar-toggle btn-ink" @click="toggleSidebar">
-        <TraditionalIcon name="chat" size="36" color="var(--secondary)" />
-      </view>
-
-      <!-- 搜索模式下的返回按钮 -->
-      <view v-if="showSearch" class="sidebar-toggle btn-ink" @click="closeSearch">
-        <TraditionalIcon name="arrow-left" size="36" color="var(--secondary)" />
-      </view>
-
-      <!-- 标题或搜索框 -->
-      <view v-if="!showSearch" class="header-center">
-        <text class="title ink-pressed">古建AI导览</text>
-        <view class="header-decoration"></view>
-      </view>
-
-      <!-- 搜索输入框 -->
-      <view v-else class="header-search">
-        <input
-          v-model="searchQuery"
-          class="search-input"
-          placeholder="搜索历史消息..."
-          placeholder-class="search-placeholder"
-          confirm-type="search"
-          @confirm="performSearch"
-          @input="onSearchInput"
-          focus
-        />
-        <view v-if="searchQuery" class="search-clear" @click="clearSearch">
-          <TraditionalIcon name="close" size="24" color="var(--text-muted)" />
-        </view>
-      </view>
-
-      <!-- 搜索按钮 / 清空按钮 -->
-      <view v-if="!showSearch && messages.length > 0" class="header-action-icon" @click="openSearch">
-        <TraditionalIcon name="search" size="40" color="var(--secondary)" />
-      </view>
-      <view v-else-if="showSearch" class="search-confirm-text" @click="performSearch">搜索</view>
-    </view>
-
-    <!-- 快捷入口 -->
-    <view v-if="messages.length === 0" class="quick-actions rice-paper">
-      <view class="quick-btn-wrapper" @click="goToMap">
-        <view class="quick-btn-icon">
-          <TraditionalIcon name="map" size="32" />
-        </view>
-        <text class="quick-btn-text">古建筑名录</text>
-      </view>
-      <view class="quick-divider"></view>
-      <view class="quick-btn-wrapper" @click="goToDevSettings">
-        <view class="quick-btn-icon">
-          <TraditionalIcon name="defense" size="32" />
-        </view>
-        <text class="quick-btn-text">开发设置</text>
-      </view>
-    </view>
-
-    <!-- 搜索结果面板组件 -->
-    <SearchResults
-      :showSearch="showSearch"
-      :searchResults="searchResults"
-      :searchQuery="searchQuery"
-      @close-search="closeSearch"
-      @jump-to-message="jumpToMessage"
-    />
-
-    <!-- 消息区域 -->
-    <view
-      class="message-area"
-      :class="{ 'with-search-results': showSearch && searchResults.length > 0 }"
-    >
-      <!-- 全新欢迎页设计组件 -->
-      <WelcomeHero v-if="messages.length === 0" :welcomeFeatures="welcomeFeatures" />
-
-      <!-- 使用虚拟列表渲染消息 -->
-      <virtual-message-list
-        v-else
-        ref="messageList"
-        :messages="messages"
-        :container-height="messageAreaHeight"
-        :item-height="120"
-        :buffer-size="3"
-        @go-to-detail="goToDetail"
-        @regenerate="regenerateResponse"
-      />
-
-      <!-- 加载状态 -->
-      <view v-if="loading && !hasPendingAiMessage" class="message-wrapper ai loading-wrapper">
-        <view class="avatar ai-avatar rice-paper brush-border-ink">
-          <TraditionalIcon name="palace" size="36" color="var(--primary)" />
-        </view>
-        <view class="message-content">
-          <view class="message-header">
-            <text class="message-sender">古建筑助手</text>
+      <view class="page-container">
+        <view class="header-inner">
+          <!-- 侧边栏切换按钮 -->
+          <view class="sidebar-toggle btn-ink" @click="toggleSidebar">
+            <TraditionalIcon name="chat" size="36" color="var(--secondary)" />
           </view>
-          <view class="message ai loading-msg">
-            <view class="loading-dots">
-              <view class="dot"></view>
-              <view class="dot"></view>
-              <view class="dot"></view>
+
+          <!-- 搜索模式下的返回按钮 -->
+          <view v-if="showSearch" class="sidebar-toggle btn-ink" @click="closeSearch">
+            <TraditionalIcon name="arrow-left" size="36" color="var(--secondary)" />
+          </view>
+
+          <!-- 标题或搜索框 -->
+          <view v-if="!showSearch" class="header-center">
+            <text class="title ink-pressed">古建AI导览</text>
+            <view class="header-decoration"></view>
+          </view>
+
+          <!-- 搜索输入框 -->
+          <view v-else class="header-search">
+            <input
+              v-model="searchQuery"
+              class="search-input"
+              placeholder="搜索历史消息..."
+              placeholder-class="search-placeholder"
+              confirm-type="search"
+              @confirm="performSearch"
+              @input="onSearchInput"
+              focus
+            />
+            <view v-if="searchQuery" class="search-clear" @click="clearSearch">
+              <TraditionalIcon name="close" size="24" color="var(--text-muted)" />
             </view>
-            <text class="loading-text">{{ loadingTips }}</text>
           </view>
-        </view>
-      </view>
 
-      <!-- 错误重试提示 -->
-      <view v-if="lastError" class="error-retry">
-        <text class="error-text">{{ lastError }}</text>
-        <button class="retry-btn" @click="retryLastQuestion">重新发送</button>
+          <!-- 搜索按钮 / 清空按钮 -->
+          <view v-if="!showSearch && messages.length > 0" class="header-action-icon" @click="openSearch">
+            <TraditionalIcon name="search" size="40" color="var(--secondary)" />
+          </view>
+          <view v-else-if="showSearch" class="search-confirm-text" @click="performSearch">搜索</view>
+        </view>
       </view>
     </view>
 
-    <!-- 输入区域组件 -->
-    <ChatInputArea
-      :inputText="inputText"
-      :isSending="isSending"
-      :loading="loading"
-      :hasPendingAiMessage="hasPendingAiMessage"
-      :keyboardHeight="keyboardHeight"
-      :canSend="canSend"
-      :exampleQuestions="exampleQuestions"
-      @update:inputText="inputText = $event"
-      @quick-question="quickQuestion"
-      @send="handleSend"
-      @focus="onInputFocus"
-      @blur="onInputBlur"
-      @linechange="onLineChange"
-    />
+    <!-- 布局容器 -->
+    <view class="layout-wrapper" :class="{ 'sidebar-open': showSidebar && !isMobile }">
+      <!-- 侧边栏及遮罩组件 -->
+      <ChatSidebar
+        :showSidebar="showSidebar"
+        :sessionList="sessionList"
+        :currentSessionId="currentSessionId"
+        :isMobile="isMobile"
+        @toggle-sidebar="toggleSidebar"
+        @create-new="createNewChat"
+        @switch-session="switchSession"
+        @delete-session="deleteSession"
+      />
+      
+      <!-- 主内容区域 -->
+      <view class="main-content">
+        <!-- 搜索结果面板组件 -->
+        <SearchResults
+          :showSearch="showSearch"
+          :searchResults="searchResults"
+          :searchQuery="searchQuery"
+          @close-search="closeSearch"
+          @jump-to-message="jumpToMessage"
+        />
+
+        <!-- 消息区域 -->
+        <view
+          class="message-area"
+          :class="{ 'with-search-results': showSearch && searchResults.length > 0 }"
+        >
+          <view class="page-container">
+            <!-- 全新欢迎页设计组件 -->
+            <WelcomeHero v-if="messages.length === 0" :welcomeFeatures="welcomeFeatures" />
+
+            <!-- 使用虚拟列表渲染消息 -->
+            <virtual-message-list
+              v-else
+              ref="messageList"
+              :messages="messages"
+              :container-height="messageAreaHeight"
+              :item-height="120"
+              :buffer-size="3"
+              @go-to-detail="goToDetail"
+              @regenerate="regenerateResponse"
+            />
+          </view>
+
+          <!-- 加载状态 -->
+          <view v-if="loading && !hasPendingAiMessage" class="message-wrapper ai loading-wrapper">
+            <view class="avatar ai-avatar rice-paper brush-border-ink">
+              <TraditionalIcon name="palace" size="36" color="var(--primary)" />
+            </view>
+            <view class="message-content">
+              <view class="message-header">
+                <text class="message-sender">古建筑助手</text>
+              </view>
+              <view class="message ai loading-msg">
+                <view class="loading-dots">
+                  <view class="dot"></view>
+                  <view class="dot"></view>
+                  <view class="dot"></view>
+                </view>
+                <text class="loading-text">{{ loadingTips }}</text>
+              </view>
+            </view>
+          </view>
+
+          <!-- 错误重试提示 -->
+          <view v-if="lastError" class="error-retry">
+            <text class="error-text">{{ lastError }}</text>
+            <button class="retry-btn" @click="retryLastQuestion">重新发送</button>
+          </view>
+        </view>
+
+        <!-- 输入区域组件 -->
+        <ChatInputArea
+          :inputText="inputText"
+          :isSending="isSending"
+          :loading="loading"
+          :hasPendingAiMessage="hasPendingAiMessage"
+          :keyboardHeight="keyboardHeight"
+          :canSend="canSend"
+          :exampleQuestions="exampleQuestions"
+          @update:inputText="inputText = $event"
+          @quick-question="quickQuestion"
+          @send="handleSend"
+          @focus="onInputFocus"
+          @blur="onInputBlur"
+          @linechange="onLineChange"
+        />
+      </view>
+    </view>
   </view>
 </template>
 
@@ -696,11 +692,11 @@ export default {
 
     calculateMessageAreaHeight() {
       const headerHeight = 100;
-      const inputAreaHeight = this.keyboardHeight > 0 ? this.keyboardHeight + 60 : 180;
-      const exampleAreaHeight = 120;
-      const padding = 40;
+      const inputAreaHeight = this.keyboardHeight > 0 ? this.keyboardHeight + 60 : 160;
+      const exampleAreaHeight = 0; // Removed example question area if needed, but keeping buffer
+      const padding = 20;
       const rpxToPx = this.windowWidth / 750;
-      const totalRpxHeight = headerHeight + inputAreaHeight + exampleAreaHeight + padding;
+      const totalRpxHeight = headerHeight + inputAreaHeight + padding;
       const totalPxHeight = totalRpxHeight * rpxToPx;
       this.messageAreaHeight = Math.max(300, this.windowHeight - totalPxHeight);
     },
@@ -731,23 +727,6 @@ export default {
       }
     },
 
-    goToDetail(materialId) {
-      uni.navigateTo({
-        url: `/pages/detail/detail?materialId=${materialId}`,
-      });
-    },
-
-    goToMap() {
-      uni.navigateTo({
-        url: "/pages/map/map",
-      });
-    },
-
-    goToDevSettings() {
-      uni.navigateTo({
-        url: "/pages/dev-settings/dev-settings",
-      });
-    }
   }
 };
 </script>
@@ -779,6 +758,35 @@ export default {
   height: 100vh;
   background-color: #faf6ed;
   position: relative;
+  overflow: hidden;
+}
+
+.layout-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  z-index: 5;
+  background: radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
+              linear-gradient(180deg, #faf6ed 0%, #f5f0e1 100%);
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+@media (min-width: 768px) {
+  .layout-wrapper {
+    flex-direction: row;
+  }
 }
 
 .header {
@@ -923,6 +931,7 @@ export default {
   z-index: 1;
   display: flex;
   flex-direction: column;
+  background: transparent;
 }
 
 .message-area.with-search-results {
@@ -952,48 +961,6 @@ export default {
   }
 }
 
-.quick-actions {
-  padding: 30rpx 40rpx;
-  background: var(--bg-card);
-  border-bottom: 2rpx solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  position: relative;
-  z-index: 5;
-}
-
-.quick-btn-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12rpx;
-}
-
-.quick-btn-icon {
-  width: 80rpx;
-  height: 80rpx;
-  background: var(--bg-secondary);
-  border-radius: 20rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--secondary);
-  border: 1rpx solid var(--border);
-}
-
-.quick-btn-text {
-  font-size: 24rpx;
-  color: var(--text-secondary);
-  font-weight: 500;
-}
-
-.quick-divider {
-  width: 1rpx;
-  height: 60rpx;
-  background: var(--border);
-  opacity: 0.5;
-}
 
 .error-retry {
   display: flex;

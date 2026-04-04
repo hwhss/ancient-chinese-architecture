@@ -142,6 +142,7 @@ page {
   mask-image: radial-gradient(circle, white 98%, transparent 100%);
   -webkit-mask-composite: source-over;
   mask-composite: exclude;
+  mask: radial-gradient(circle, white 98%, transparent 100%);
 }
 
 /* ========== 墨迹压印文字效果 ========== */
@@ -677,6 +678,9 @@ scroll-view {
   -webkit-mask: 
     linear-gradient(#fff 0 0) content-box, 
     linear-gradient(#fff 0 0);
+  mask: 
+    linear-gradient(#fff 0 0) content-box, 
+    linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
 }
@@ -816,5 +820,20 @@ scroll-view {
   border: 2rpx solid rgba(196, 30, 58, 0.3);
   border-radius: 12rpx;
   pointer-events: none;
+}
+
+/* ========== 全局布局容器 ========== */
+.page-container {
+  width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  position: relative;
+}
+
+@media (min-width: 1024px) {
+  .page-container {
+    max-width: 1200px;
+    padding: 0 60rpx;
+  }
 }
 </style>

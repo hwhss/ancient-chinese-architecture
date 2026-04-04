@@ -1,14 +1,15 @@
 <template>
   <view>
-    <!-- 侧边栏遮罩 -->
+    <!-- 侧边栏遮罩 (仅限手机端) -->
     <view 
+      v-if="isMobile"
       class="sidebar-mask" 
       :class="{ 'show': showSidebar }"
       @click="$emit('toggle-sidebar')"
     ></view>
     
     <!-- 侧边栏历史会话 -->
-    <view class="sidebar rice-paper" :class="{ 'show': showSidebar }">
+    <view class="sidebar rice-paper" :class="{ 'show': showSidebar, 'desktop-sidebar': !isMobile }">
       <view class="sidebar-header">
         <view class="sidebar-header-left">
           <TraditionalIcon name="chat" size="40" color="var(--secondary)" />
@@ -86,6 +87,10 @@ export default {
     currentSessionId: {
       type: String,
       default: ''
+    },
+    isMobile: {
+      type: Boolean,
+      default: false
     }
   },
   methods: {
@@ -130,19 +135,47 @@ export default {
   position: fixed;
   top: 0;
   left: 0;
-  width: 600rpx;
+  width: 80%;
+  max-width: 600rpx;
   height: 100vh;
-  background: linear-gradient(180deg, #fffef9 0%, #faf6ed 100%);
+  background: rgba(255, 254, 249, 0.95);
+  backdrop-filter: blur(10px);
   transform: translateX(-100%);
-  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
   z-index: 101;
   display: flex;
   flex-direction: column;
-  box-shadow: 4rpx 0 20rpx rgba(0, 0, 0, 0.15);
+  box-shadow: 10rpx 0 30rpx rgba(0, 0, 0, 0.08);
+  border-right: 1rpx solid rgba(139, 69, 19, 0.1);
 }
 
 .sidebar.show {
   transform: translateX(0);
+}
+
+/* 电脑端专用方案：非悬浮，而是占位的分栏布局 */
+.sidebar.desktop-sidebar {
+  position: relative;
+  height: 100%;
+  width: 0;
+  max-width: 0;
+  min-width: 0;
+  transform: none; /* 移除位移，改用宽度控制 */
+  overflow: hidden;
+  box-shadow: none;
+  background: rgba(250, 246, 237, 0.6);
+  border-right: 2rpx solid var(--border);
+  opacity: 0;
+  transition: width 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), 
+              opacity 0.3s ease,
+              min-width 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.sidebar.desktop-sidebar.show {
+  width: 320px;
+  max-width: 400rpx;
+  min-width: 280px;
+  opacity: 1;
 }
 
 .sidebar-header {
@@ -218,6 +251,7 @@ export default {
   background: var(--bg-primary);
   border-style: solid;
   transform: translateY(-2rpx);
+  box-shadow: 0 4rpx 12rpx rgba(139, 69, 19, 0.1);
 }
 
 .new-chat-text {
@@ -346,6 +380,10 @@ export default {
 }
 
 @media (min-width: 768px) {
-  .sidebar { width: 400rpx; }
+  .sidebar { 
+    width: 320px; 
+    max-width: 400rpx;
+    box-shadow: 4rpx 0 20rpx rgba(0, 0, 0, 0.05);
+  }
 }
 </style>

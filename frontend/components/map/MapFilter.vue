@@ -1,47 +1,49 @@
 <template>
   <view class="filter-area">
-    <view class="search-box rice-paper">
-      <TraditionalIcon name="search" size="32" color="var(--secondary)" />
-      <input 
-        class="search-input" 
-        :value="searchKeyword"
-        @input="onSearchInput"
-        placeholder="搜索古建名称或标签..." 
-        placeholder-class="search-placeholder"
-      />
-      <view class="search-clear" v-if="searchKeyword" @click="$emit('update:searchKeyword', '')">
-        <TraditionalIcon name="close" size="24" color="var(--text-muted)" />
-      </view>
-    </view>
-    
-    <view class="filter-tabs-container">
-      <scroll-view class="filter-tabs" scroll-x>
-        <view class="filter-group">
-          <text class="filter-label">分类</text>
-          <view
-            v-for="cat in categories"
-            :key="cat.key"
-            class="filter-tab btn-ink"
-            :class="{ active: currentCategory === cat.key }"
-            @click="$emit('select-category', cat.key)"
-          >
-            <view class="tab-icon-wrapper" v-if="cat.icon">
-              <TraditionalIcon :name="cat.icon" size="24" :color="currentCategory === cat.key ? '#fff' : 'var(--secondary)'" />
-            </view>
-            <text class="tab-text">{{ cat.name }}</text>
-          </view>
+    <view class="page-container">
+      <view class="search-box rice-paper">
+        <TraditionalIcon name="search" size="32" color="var(--secondary)" />
+        <input 
+          class="search-input" 
+          :value="searchKeyword"
+          @input="onSearchInput"
+          placeholder="搜索古建名称或标签..." 
+          placeholder-class="search-placeholder"
+        />
+        <view class="search-clear" v-if="searchKeyword" @click="$emit('update:searchKeyword', '')">
+          <TraditionalIcon name="close" size="24" color="var(--text-muted)" />
         </view>
-      </scroll-view>
-      
-      <view class="sort-btn btn-ink" @click="$emit('toggle-sort')">
-        <TraditionalIcon name="map" size="36" color="var(--secondary)" />
       </view>
-    </view>
-    
-    <view class="active-filters" v-if="currentCategory !== 'all' || searchKeyword">
-      <text class="filter-result-text">筛选结果：{{ filteredCount }} 处古建</text>
-      <view class="clear-filters rice-paper" @click="$emit('clear-filters')" v-if="currentCategory !== 'all'">
-        <text>清空</text>
+      
+      <view class="filter-tabs-container">
+        <scroll-view class="filter-tabs" scroll-x>
+          <view class="filter-group">
+            <text class="filter-label">分类</text>
+            <view
+              v-for="cat in categories"
+              :key="cat.key"
+              class="filter-tab btn-ink"
+              :class="{ active: currentCategory === cat.key }"
+              @click="$emit('select-category', cat.key)"
+            >
+              <view class="tab-icon-wrapper" v-if="cat.icon">
+                <TraditionalIcon :name="cat.icon" size="24" :color="currentCategory === cat.key ? '#fff' : 'var(--secondary)'" />
+              </view>
+              <text class="tab-text">{{ cat.name }}</text>
+            </view>
+          </view>
+        </scroll-view>
+        
+        <view class="sort-btn btn-ink" @click="$emit('toggle-sort')">
+          <TraditionalIcon name="map" size="36" color="var(--secondary)" />
+        </view>
+      </view>
+      
+      <view class="active-filters" v-if="currentCategory !== 'all' || searchKeyword">
+        <text class="filter-result-text">筛选结果：{{ filteredCount }} 处古建</text>
+        <view class="clear-filters rice-paper" @click="$emit('clear-filters')" v-if="currentCategory !== 'all'">
+          <text>清空</text>
+        </view>
       </view>
     </view>
   </view>

@@ -1,15 +1,20 @@
 <template>
   <view>
-    <!-- 示例问题区域（永久显示） -->
-    <view class="example-questions-area">
-      <text class="example-title">常见问题：</text>
+    <!-- 示例问题区域（仅在聚焦或键盘打开时显示） -->
+    <view v-if="isFocused || keyboardHeight > 0" class="example-questions-area" :class="{ 'on-top': keyboardHeight > 0 }">
+      <view class="example-header">
+        <text class="example-title">常见问题</text>
+        <view class="example-close" @click="isFocused = false">
+          <TraditionalIcon name="close" size="24" color="var(--text-muted)" />
+        </view>
+      </view>
       <view class="example-list">
         <text 
           v-for="(q, idx) in exampleQuestions" 
           :key="idx" 
           class="example-tag"
           :class="{ 'disabled': isSending || loading || hasPendingAiMessage }"
-          @click="!isSending && !loading && !hasPendingAiMessage && $emit('quick-question', q)"
+          @click="handleQuickQuestion(q)"
         >{{ q }}</text>
       </view>
     </view>
@@ -26,10 +31,10 @@
           auto-height
           confirm-type="send"
           @input="$emit('update:inputText', $event.detail.value)"
-          @focus="$emit('focus', $event)"
-          @blur="$emit('blur', $event)"
+          @focus="handleFocus"
+          @blur="handleBlur"
           @linechange="$emit('linechange', $event)"
-          @confirm="$emit('send')"
+          @confirm="handleSend"
         />
         <text class="char-count" :class="{ 'near-limit': (inputText || '').length > 450 }">{{ (inputText || '').length }}/500</text>
       </view>
@@ -82,27 +87,81 @@ export default {
       type: Array,
       default: () => []
     }
+  },
+  data() {
+    return {
+      isFocused: false
+    };
+  },
+  methods: {
+    handleFocus(e) {
+      this.isFocused = true;
+      this.$emit('focus', e);
+    },
+    handleBlur(e) {
+      setTimeout(() => {
+        this.isFocused = false;
+        this.$emit('blur', e);
+      }, 100);
+    },
+    handleQuickQuestion(q) {
+      if (!this.isSending && !this.loading && !this.hasPendingAiMessage) {
+        this.$emit('quick-question', q);
+        this.isFocused = false;
+      }
+    },
+    handleSend() {
+      this.$emit('send');
+      this.isFocused = false;
+    }
   }
 }
 </script>
 
 <style scoped>
 .example-questions-area {
-  padding: 24rpx 30rpx;
-  background: var(--bg-card);
-  border-top: 2rpx solid var(--border);
-  border-bottom: 2rpx solid var(--border);
+  padding: 0 30rpx 30rpx;
+  background: transparent;
   position: relative;
   z-index: 10;
+  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.example-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
 }
 
 .example-title {
-  display: block;
-  font-size: 24rpx;
+  font-size: 26rpx;
   color: var(--secondary);
-  margin-bottom: 16rpx;
   font-weight: 600;
   letter-spacing: 2rpx;
+  position: relative;
+  padding-left: 16rpx;
+}
+
+.example-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6rpx;
+  height: 24rpx;
+  background: var(--primary);
+  border-radius: 4rpx;
+}
+
+.example-close {
+  padding: 10rpx;
 }
 
 .example-list {
@@ -144,13 +203,14 @@ export default {
 .input-area {
   display: flex;
   align-items: flex-end;
-  padding: 30rpx;
+  padding: 20rpx 30rpx 40rpx;
   background: var(--bg-card);
-  border-top: 2rpx solid var(--border);
+  border-top: 1rpx solid var(--border);
   transition: all 0.3s;
   position: relative;
   z-index: 10;
   gap: 20rpx;
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.03);
 }
 
 .keyboard-active {

@@ -10,13 +10,15 @@
     {
       "path": "pages/map/map",
       "style": {
-        "navigationBarTitleText": "古建筑名录"
+        "navigationBarTitleText": "古建筑名录",
+        "navigationStyle": "custom"
       }
     },
     {
       "path": "pages/index/index",
       "style": {
-        "navigationBarTitleText": "古建筑AI导览"
+        "navigationBarTitleText": "古建筑AI导览",
+        "navigationStyle": "custom"
       }
     },
     {

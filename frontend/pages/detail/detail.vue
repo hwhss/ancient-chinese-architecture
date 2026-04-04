@@ -18,50 +18,52 @@
 
     <!-- 素材展示区域 -->
     <view class="content">
-      <!-- 加载中 -->
-      <view v-if="loading" class="loading">
-        <text>正在加载...</text>
+      <view class="page-container">
+        <!-- 加载中 -->
+        <view v-if="loading" class="loading">
+          <text>正在加载...</text>
+        </view>
+
+        <!-- 错误提示 -->
+        <view v-else-if="error" class="error">
+          <text>{{ error }}</text>
+        </view>
+
+        <!-- 图片/视频/占位展示 -->
+        <DetailGallery
+          v-else
+          :material="material"
+          :materialTitle="materialTitle"
+          :materialNotice="materialNotice"
+          :materialId="materialId"
+          @image-error="onImageError"
+        />
+
+        <!-- Tab 切换栏 -->
+        <DetailTabs
+          v-if="!loading && !error && visibleTabs.length > 0"
+          :visibleTabs="visibleTabs"
+          :activeTab="activeTab"
+          @switch-tab="switchTab"
+        />
+
+        <!-- Tab 内容区域 -->
+        <DetailContent
+          v-if="!loading && !error"
+          :activeTab="activeTab"
+          :building="building"
+          :materialTitle="materialTitle"
+          :categoryText="categoryText"
+          :isFavorite="isFavorite"
+          :visualizationData="visualizationData"
+          :radarChartData="radarChartData"
+          :radarFeatures="radarFeatures"
+          @toggle-favorite="toggleFavorite"
+          @go-to-viewer="goToViewer"
+          @node-click="onInfographicNodeClick"
+          @chart-click="onChartClick"
+        />
       </view>
-
-      <!-- 错误提示 -->
-      <view v-else-if="error" class="error">
-        <text>{{ error }}</text>
-      </view>
-
-      <!-- 图片/视频/占位展示 -->
-      <DetailGallery
-        v-else
-        :material="material"
-        :materialTitle="materialTitle"
-        :materialNotice="materialNotice"
-        :materialId="materialId"
-        @image-error="onImageError"
-      />
-
-      <!-- Tab 切换栏 -->
-      <DetailTabs
-        v-if="!loading && !error && visibleTabs.length > 0"
-        :visibleTabs="visibleTabs"
-        :activeTab="activeTab"
-        @switch-tab="switchTab"
-      />
-
-      <!-- Tab 内容区域 -->
-      <DetailContent
-        v-if="!loading && !error"
-        :activeTab="activeTab"
-        :building="building"
-        :materialTitle="materialTitle"
-        :categoryText="categoryText"
-        :isFavorite="isFavorite"
-        :visualizationData="visualizationData"
-        :radarChartData="radarChartData"
-        :radarFeatures="radarFeatures"
-        @toggle-favorite="toggleFavorite"
-        @go-to-viewer="goToViewer"
-        @node-click="onInfographicNodeClick"
-        @chart-click="onChartClick"
-      />
     </view>
   </view>
 </template>

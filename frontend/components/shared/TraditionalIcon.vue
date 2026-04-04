@@ -60,6 +60,53 @@
       <circle cx="50" cy="50" r="12" fill="currentColor" opacity="0.4" />
       <circle cx="50" cy="50" r="4" fill="currentColor" />
     </svg>
+
+    <svg v-else-if="name === 'tower'" viewBox="0 0 100 100" class="svg-icon">
+      <path d="M30,90 L70,90 M35,90 L35,70 L65,70 L65,90 M40,70 L40,55 L60,55 L60,70 M45,55 L45,45 L55,45 L55,55 M25,75 Q50,60 75,75 M30,55 Q50,40 70,55 M35,45 Q50,30 65,45" fill="none" stroke="currentColor" stroke-width="4" />
+    </svg>
+
+    <svg v-else-if="name === 'arrow-left'" viewBox="0 0 100 100" class="svg-icon" style="transform: rotate(180deg);">
+      <path d="M30,20 L70,50 L30,80" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+
+    <svg v-else-if="name === 'close'" viewBox="0 0 100 100" class="svg-icon">
+      <path d="M25,25 L75,75 M75,25 L25,75" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" />
+    </svg>
+
+    <svg v-else-if="name === 'search'" viewBox="0 0 100 100" class="svg-icon">
+      <circle cx="40" cy="40" r="30" fill="none" stroke="currentColor" stroke-width="5" />
+      <path d="M62,62 L90,90" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" />
+    </svg>
+
+    <svg v-else-if="name === 'home'" viewBox="0 0 100 100" class="svg-icon">
+      <path d="M10,90 L10,50 L50,15 L90,50 L90,90 Z" fill="none" stroke="currentColor" stroke-width="4" />
+      <path d="M40,90 L40,65 L60,65 L60,90" stroke="currentColor" stroke-width="4" />
+    </svg>
+
+    <svg v-else-if="name === 'trash'" viewBox="0 0 100 100" class="svg-icon">
+      <path d="M20,25 L80,25 M30,25 L35,85 L65,85 L70,25 M40,25 L40,15 L60,15 L60,25" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" />
+      <line x1="42" y1="40" x2="45" y2="70" stroke="currentColor" stroke-width="2" />
+      <line x1="58" y1="40" x2="55" y2="70" stroke="currentColor" stroke-width="2" />
+    </svg>
+
+    <svg v-else-if="name === 'notification'" viewBox="0 0 100 100" class="svg-icon">
+      <path d="M50,15 Q30,15 30,50 L25,75 L75,75 L70,50 Q70,15 50,15 Z" fill="none" stroke="currentColor" stroke-width="4" />
+      <path d="M42,75 Q50,85 58,75" fill="none" stroke="currentColor" stroke-width="4" />
+      <circle cx="50" cy="12" r="3" fill="currentColor" />
+    </svg>
+
+    <svg v-else-if="name === 'privacy'" viewBox="0 0 100 100" class="svg-icon">
+      <rect x="25" y="45" width="50" height="40" rx="4" fill="none" stroke="currentColor" stroke-width="4" />
+      <path d="M35,45 L35,30 Q35,15 50,15 Q65,15 65,30 L65,45" fill="none" stroke="currentColor" stroke-width="4" />
+      <circle cx="50" cy="65" r="5" fill="currentColor" />
+    </svg>
+
+    <svg v-else-if="name === 'agreement'" viewBox="0 0 100 100" class="svg-icon">
+      <rect x="25" y="15" width="50" height="70" rx="4" fill="none" stroke="currentColor" stroke-width="4" />
+      <line x1="35" y1="35" x2="65" y2="35" stroke="currentColor" stroke-width="2" />
+      <line x1="35" y1="50" x2="65" y2="50" stroke="currentColor" stroke-width="2" />
+      <line x1="35" y1="65" x2="55" y2="65" stroke="currentColor" stroke-width="2" />
+    </svg>
   </view>
 </template>
 

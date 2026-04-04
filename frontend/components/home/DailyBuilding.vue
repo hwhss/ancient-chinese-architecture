@@ -1,88 +1,90 @@
 <template>
   <view class="section-daily" :class="{ 'visible': visible }">
-    <view class="section-header">
-      <view class="daily-header-left">
-        <view class="title-with-icon">
-          <TraditionalIcon name="favorites" size="48" style="color: var(--primary)" />
-          <text class="section-title">每日一建</text>
+    <view class="page-container">
+      <view class="section-header">
+        <view class="daily-header-left">
+          <view class="title-with-icon">
+            <TraditionalIcon name="favorites" size="48" style="color: var(--primary)" />
+            <text class="section-title">每日一建</text>
+          </view>
+          <view class="daily-date-tag">
+            <text class="daily-date">{{ todayDate }}</text>
+          </view>
         </view>
-        <view class="daily-date-tag">
-          <text class="daily-date">{{ todayDate }}</text>
+        <view class="window-divider">
+          <view class="window-pattern"></view>
         </view>
       </view>
-      <view class="window-divider">
-        <view class="window-pattern"></view>
-      </view>
-    </view>
 
-    <view v-if="building" class="daily-card-wrapper">
-      <view class="daily-card rice-paper brush-border-ink card-ink" @click="onCardClick">
-        <!-- 整体背景图片 -->
-        <view v-if="hasImage" class="daily-image-bg" :style="{ backgroundImage: 'url(' + building.image + ')' }">
-          <view class="daily-overlay"></view>
-        </view>
-        <view v-else class="daily-image-bg daily-image-empty">
-          <TraditionalIcon name="palace" size="80" style="opacity: 0.5" />
-          <text class="daily-image-empty-text">古迹寻踪中...</text>
-          <view class="daily-overlay"></view>
-        </view>
-        
-        <view class="daily-badge">
-          <text class="badge-text">今日推荐</text>
-        </view>
-        
-        <!-- 装饰性角落 -->
-        <view class="image-corner top-left"></view>
-        <view class="image-corner top-right"></view>
-        <view class="image-corner bottom-left"></view>
-        <view class="image-corner bottom-right"></view>
+      <view v-if="building" class="daily-card-wrapper">
+        <view class="daily-card rice-paper brush-border-ink card-ink" @click="onCardClick">
+          <!-- 整体背景图片 -->
+          <view v-if="hasImage" class="daily-image-bg" :style="{ backgroundImage: 'url(' + building.image + ')' }">
+            <view class="daily-overlay"></view>
+          </view>
+          <view v-else class="daily-image-bg daily-image-empty">
+            <TraditionalIcon name="palace" size="80" style="opacity: 0.5" />
+            <text class="daily-image-empty-text">古迹寻踪中...</text>
+            <view class="daily-overlay"></view>
+          </view>
+          
+          <view class="daily-badge">
+            <text class="badge-text">今日推荐</text>
+          </view>
+          
+          <!-- 装饰性角落 -->
+          <view class="image-corner top-left"></view>
+          <view class="image-corner top-right"></view>
+          <view class="image-corner bottom-left"></view>
+          <view class="image-corner bottom-right"></view>
 
-        <!-- 覆盖内容 -->
-        <view class="daily-content-section">
-          <view class="daily-content">
-            <!-- 标题区 -->
-            <view class="daily-header">
-              <view class="daily-title-wrapper">
-                <text class="daily-name ink-pressed">{{ building.name }}</text>
-                <view class="daily-location">
-                  <TraditionalIcon name="location" size="24" />
-                  <text class="location-text">{{ building.location }}</text>
+          <!-- 覆盖内容 -->
+          <view class="daily-content-section">
+            <view class="daily-content">
+              <!-- 标题区 -->
+              <view class="daily-header">
+                <view class="daily-title-wrapper">
+                  <text class="daily-name ink-pressed">{{ building.name }}</text>
+                  <view class="daily-location">
+                    <TraditionalIcon name="location" size="24" />
+                    <text class="location-text">{{ building.location }}</text>
+                  </view>
+                </view>
+                <view class="daily-dynasty-badge">
+                  <text class="dynasty-text">{{ building.dynasty }}</text>
                 </view>
               </view>
-              <view class="daily-dynasty-badge">
-                <text class="dynasty-text">{{ building.dynasty }}</text>
+
+              <!-- 分隔线 -->
+              <view class="daily-divider"></view>
+
+              <!-- 描述 -->
+              <text class="daily-desc">{{ building.description }}</text>
+
+              <!-- 标签 -->
+              <view class="daily-tags">
+                <text v-for="tag in building.tags" :key="tag" class="daily-tag">{{ tag }}</text>
               </view>
-            </view>
 
-            <!-- 分隔线 -->
-            <view class="daily-divider"></view>
-
-            <!-- 描述 -->
-            <text class="daily-desc">{{ building.description }}</text>
-
-            <!-- 标签 -->
-            <view class="daily-tags">
-              <text v-for="tag in building.tags" :key="tag" class="daily-tag">{{ tag }}</text>
-            </view>
-
-            <!-- 底部操作区 -->
-            <view class="daily-footer">
-              <view class="daily-action-btn ink-ripple">
-                <TraditionalIcon name="view" size="28" />
-                <text class="action-text">查看详情</text>
-              </view>
-              <view class="daily-actions-right">
-                <view class="daily-favorite-btn tap-feedback" @click.stop="onToggleFavorite">
-                  <text class="favorite-icon" :class="{ 'active': isFavorite }">
-                    <TraditionalIcon name="favorites" size="32" :style="{ color: isFavorite ? 'var(--primary)' : 'rgba(255,255,255,0.7)' }" />
-                  </text>
-                  <text class="favorite-text" :class="{ 'active': isFavorite }">
-                    {{ isFavorite ? '已收藏' : '收藏' }}
-                  </text>
+              <!-- 底部操作区 -->
+              <view class="daily-footer">
+                <view class="daily-action-btn ink-ripple">
+                  <TraditionalIcon name="view" size="28" />
+                  <text class="action-text">查看详情</text>
                 </view>
-                <view class="daily-share-btn tap-feedback" @click.stop="onShare">
-                  <TraditionalIcon name="share" size="26" />
-                  <text class="share-text">分享</text>
+                <view class="daily-actions-right">
+                  <view class="daily-favorite-btn tap-feedback" @click.stop="onToggleFavorite">
+                    <text class="favorite-icon" :class="{ 'active': isFavorite }">
+                      <TraditionalIcon name="favorites" size="32" :style="{ color: isFavorite ? 'var(--primary)' : 'rgba(255,255,255,0.7)' }" />
+                    </text>
+                    <text class="favorite-text" :class="{ 'active': isFavorite }">
+                      {{ isFavorite ? '已收藏' : '收藏' }}
+                    </text>
+                  </view>
+                  <view class="daily-share-btn tap-feedback" @click.stop="onShare">
+                    <TraditionalIcon name="share" size="26" />
+                    <text class="share-text">分享</text>
+                  </view>
                 </view>
               </view>
             </view>

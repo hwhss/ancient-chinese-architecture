@@ -1,118 +1,120 @@
 <template>
   <view class="hero-section rice-paper">
-    <!-- 简化的角落装饰 - 修改为中式云纹感 -->
-    <view class="corner-decoration top-left"></view>
-    <view class="corner-decoration top-right"></view>
-    <view class="corner-decoration bottom-left"></view>
-    <view class="corner-decoration bottom-right"></view>
-    
-    <!-- 标题区域 -->
-    <view class="title-area">
-      <view class="title-wrapper">
-        <text class="main-title ink-pressed" :class="{ 'visible': animationState.title }">中华古建筑导览</text>
-        <!-- 精致朱砂印章 -->
-        <view class="seal-decor brush-border-ink" :class="{ 'visible': animationState.seal }" @click="onGoToAbout">古建</view>
+    <view class="page-container">
+      <!-- 简化的角落装饰 - 修改为中式云纹感 -->
+      <view class="corner-decoration top-left"></view>
+      <view class="corner-decoration top-right"></view>
+      <view class="corner-decoration bottom-left"></view>
+      <view class="corner-decoration bottom-right"></view>
+      
+      <!-- 标题区域 -->
+      <view class="title-area">
+        <view class="title-wrapper">
+          <text class="main-title ink-pressed" :class="{ 'visible': animationState.title }">中华古建筑导览</text>
+          <!-- 精致朱砂印章 -->
+          <view class="seal-decor brush-border-ink" :class="{ 'visible': animationState.seal }" @click="onGoToAbout">古建</view>
+        </view>
+        
+        <text class="subtitle" :class="{ 'visible': animationState.subtitle }">探索千年文明，感受建筑之美</text>
+        <text class="description" :class="{ 'visible': animationState.description }">
+          从宫殿庙宇到园林民居，从古城墙到古桥梁，让我们一起穿越时空，领略中国古代建筑的辉煌与魅力
+        </text>
+        
+        <!-- 统计信息 - 重新设计为窗棂风格 -->
+        <view class="hero-stats" :class="{ 'visible': animationState.statCards }">
+          <view class="stat-item window-frame">
+            <text class="stat-number">17</text>
+            <text class="stat-label">处古建</text>
+          </view>
+          <view class="stat-divider"></view>
+          <view class="stat-item window-frame">
+            <text class="stat-number">4</text>
+            <text class="stat-label">大分类</text>
+          </view>
+          <view class="stat-divider"></view>
+          <view class="stat-item window-frame">
+            <text class="stat-number">AI</text>
+            <text class="stat-label">智能导览</text>
+          </view>
+        </view>
+        
+        <!-- 中式分隔线 -->
+        <view class="hero-divider" :class="{ 'visible': animationState.divider }">
+          <view class="window-divider">
+            <view class="window-pattern"></view>
+          </view>
+        </view>
       </view>
       
-      <text class="subtitle" :class="{ 'visible': animationState.subtitle }">探索千年文明，感受建筑之美</text>
-      <text class="description" :class="{ 'visible': animationState.description }">
-        从宫殿庙宇到园林民居，从古城墙到古桥梁，让我们一起穿越时空，领略中国古代建筑的辉煌与魅力
-      </text>
-      
-      <!-- 统计信息 - 重新设计为窗棂风格 -->
-      <view class="hero-stats" :class="{ 'visible': animationState.statCards }">
-        <view class="stat-item window-frame">
-          <text class="stat-number">17</text>
-          <text class="stat-label">处古建</text>
-        </view>
-        <view class="stat-divider"></view>
-        <view class="stat-item window-frame">
-          <text class="stat-number">4</text>
-          <text class="stat-label">大分类</text>
-        </view>
-        <view class="stat-divider"></view>
-        <view class="stat-item window-frame">
-          <text class="stat-number">AI</text>
-          <text class="stat-label">智能导览</text>
-        </view>
-      </view>
-      
-      <!-- 中式分隔线 -->
-      <view class="hero-divider" :class="{ 'visible': animationState.divider }">
-        <view class="window-divider">
-          <view class="window-pattern"></view>
-        </view>
-      </view>
-    </view>
-    
-    <!-- 入口按钮 -->
-    <view class="hero-buttons">
-      <button class="hero-btn primary ink-ripple brush-border-ink" :class="{ 'visible': animationState.btn1 }" @click="onGoToMap">
-        <TraditionalIcon name="map" size="36" />
-        <text class="btn-text">查看古建筑名录</text>
-      </button>
-      <button class="hero-btn secondary ink-ripple" :class="{ 'visible': animationState.btn2 }" @click="onGoToChat">
-        <TraditionalIcon name="chat" size="36" />
-        <text class="btn-text">开始 AI 导览</text>
-      </button>
-      
-      <!-- 按钮下方的分类快捷入口 -->
-      <view class="category-shortcuts" :class="{ 'visible': animationState.categoryShortcuts }">
-        <view class="category-item tap-feedback" @click="onGoToCategory('palace')">
-          <view class="category-icon-wrapper">
-            <TraditionalIcon name="palace" size="48" />
+      <!-- 入口按钮 -->
+      <view class="hero-buttons">
+        <button class="hero-btn primary ink-ripple brush-border-ink" :class="{ 'visible': animationState.btn1 }" @click="onGoToMap">
+          <TraditionalIcon name="map" size="36" />
+          <text class="btn-text">查看古建筑名录</text>
+        </button>
+        <button class="hero-btn secondary ink-ripple" :class="{ 'visible': animationState.btn2 }" @click="onGoToChat">
+          <TraditionalIcon name="chat" size="36" />
+          <text class="btn-text">开始 AI 导览</text>
+        </button>
+        
+        <!-- 按钮下方的分类快捷入口 -->
+        <view class="category-shortcuts" :class="{ 'visible': animationState.categoryShortcuts }">
+          <view class="category-item tap-feedback" @click="onGoToCategory('palace')">
+            <view class="category-icon-wrapper">
+              <TraditionalIcon name="palace" size="48" />
+            </view>
+            <text class="category-text">宫殿</text>
           </view>
-          <text class="category-text">宫殿</text>
-        </view>
-        <view class="category-item tap-feedback" @click="onGoToCategory('garden')">
-          <view class="category-icon-wrapper">
-            <TraditionalIcon name="garden" size="48" />
+          <view class="category-item tap-feedback" @click="onGoToCategory('garden')">
+            <view class="category-icon-wrapper">
+              <TraditionalIcon name="garden" size="48" />
+            </view>
+            <text class="category-text">园林</text>
           </view>
-          <text class="category-text">园林</text>
-        </view>
-        <view class="category-item tap-feedback" @click="onGoToCategory('bridge')">
-          <view class="category-icon-wrapper">
-            <TraditionalIcon name="bridge" size="48" />
+          <view class="category-item tap-feedback" @click="onGoToCategory('bridge')">
+            <view class="category-icon-wrapper">
+              <TraditionalIcon name="bridge" size="48" />
+            </view>
+            <text class="category-text">桥梁</text>
           </view>
-          <text class="category-text">桥梁</text>
-        </view>
-        <view class="category-item tap-feedback" @click="onGoToCategory('defense')">
-          <view class="category-icon-wrapper">
-            <TraditionalIcon name="defense" size="48" />
+          <view class="category-item tap-feedback" @click="onGoToCategory('defense')">
+            <view class="category-icon-wrapper">
+              <TraditionalIcon name="defense" size="48" />
+            </view>
+            <text class="category-text">城防</text>
           </view>
-          <text class="category-text">城防</text>
         </view>
-      </view>
 
-      <!-- 我的收藏快捷入口 -->
-      <view class="favorites-shortcut-wrapper" :class="{ 'visible': animationState.categoryShortcuts }">
-        <view class="favorites-shortcut card-ink" @click="onGoToFavorites">
-          <view class="favorites-icon-wrapper">
-            <TraditionalIcon name="favorites" size="46" />
-            <view v-if="favoriteCount > 0" class="favorites-badge">{{ favoriteCount }}</view>
-          </view>
-          <view class="favorites-info">
-            <text class="favorites-title">我的收藏</text>
-            <text class="favorites-count">{{ favoriteCount }} 处古建</text>
-          </view>
-          <view class="favorites-arrow-wrapper">
-            <TraditionalIcon name="arrow-right" size="24" />
+        <!-- 我的收藏快捷入口 -->
+        <view class="favorites-shortcut-wrapper" :class="{ 'visible': animationState.categoryShortcuts }">
+          <view class="favorites-shortcut card-ink" @click="onGoToFavorites">
+            <view class="favorites-icon-wrapper">
+              <TraditionalIcon name="favorites" size="46" />
+              <view v-if="favoriteCount > 0" class="favorites-badge">{{ favoriteCount }}</view>
+            </view>
+            <view class="favorites-info">
+              <text class="favorites-title">我的收藏</text>
+              <text class="favorites-count">{{ favoriteCount }} 处古建</text>
+            </view>
+            <view class="favorites-arrow-wrapper">
+              <TraditionalIcon name="arrow-right" size="24" />
+            </view>
           </view>
         </view>
-      </view>
 
-      <!-- 设置入口 -->
-      <view class="settings-shortcut-wrapper" :class="{ 'visible': animationState.categoryShortcuts }">
-        <view class="settings-shortcut card-ink" @click="onGoToSettings">
-          <view class="settings-icon-wrapper">
-            <TraditionalIcon name="settings" size="40" />
-          </view>
-          <view class="settings-info">
-            <text class="settings-title">设置</text>
-            <text class="settings-desc">主题、偏好设置</text>
-          </view>
-          <view class="settings-arrow-wrapper">
-            <TraditionalIcon name="arrow-right" size="24" />
+        <!-- 设置入口 -->
+        <view class="settings-shortcut-wrapper" :class="{ 'visible': animationState.categoryShortcuts }">
+          <view class="settings-shortcut card-ink" @click="onGoToSettings">
+            <view class="settings-icon-wrapper">
+              <TraditionalIcon name="settings" size="40" />
+            </view>
+            <view class="settings-info">
+              <text class="settings-title">设置</text>
+              <text class="settings-desc">主题、偏好设置</text>
+            </view>
+            <view class="settings-arrow-wrapper">
+              <TraditionalIcon name="arrow-right" size="24" />
+            </view>
           </view>
         </view>
       </view>
@@ -231,8 +233,8 @@ export default {
 /* 标题区域 */
 .title-area {
   text-align: center;
-  max-width: 600rpx;
-  margin-bottom: 40rpx;
+  max-width: 800rpx;
+  margin: 0 auto 40rpx;
   position: relative;
   z-index: 2;
 }
@@ -387,6 +389,7 @@ export default {
   gap: 24rpx;
   width: 100%;
   max-width: 520rpx;
+  margin: 0 auto;
   position: relative;
   z-index: 2;
 }
@@ -543,7 +546,8 @@ export default {
 
 /* ========== 我的收藏快捷入口 ========== */
 .favorites-shortcut-wrapper {
-  margin-top: 50rpx;
+  margin: 50rpx auto 0;
+  max-width: 520rpx;
   opacity: 0;
   transform: translateY(20px);
   transition: all 0.6s ease;
@@ -632,7 +636,8 @@ export default {
 
 /* ========== 设置快捷入口 ========== */
 .settings-shortcut-wrapper {
-  margin-top: 24rpx;
+  margin: 24rpx auto 0;
+  max-width: 520rpx;
   opacity: 0;
   transform: translateY(20px);
   transition: all 0.6s ease;

@@ -6,101 +6,129 @@
 
     <!-- 顶部导航 -->
     <view class="header">
-      <view class="back-btn" @click="goBack">
-        <text class="back-icon">←</text>
-        <text class="back-text">返回</text>
+      <view class="page-container">
+        <view class="header-inner">
+          <view class="back-btn btn-ink" @click="goBack">
+            <TraditionalIcon name="arrow-left" size="32" color="#fff" />
+            <text class="back-text">返回</text>
+          </view>
+          <text class="header-title">设置</text>
+          <view class="header-right"></view>
+        </view>
       </view>
-      <text class="header-title">设置</text>
-      <view class="header-right"></view>
     </view>
 
     <!-- 设置内容 -->
     <scroll-view class="settings-content" scroll-y>
-      <!-- 通用设置 -->
-      <view class="settings-section">
-        <view class="section-header">
-          <text class="section-title">通用</text>
-        </view>
-
-        <view class="settings-list">
-          <!-- 清除缓存 -->
-          <view class="setting-item" @click="clearCache">
-            <view class="item-left">
-              <text class="item-icon">🗑️</text>
-              <text class="item-label">清除缓存</text>
-            </view>
-            <view class="item-right">
-              <text class="item-value">{{ cacheSize }}</text>
-              <text class="item-arrow">›</text>
-            </view>
+      <view class="page-container">
+        <!-- 通用设置 -->
+        <view class="settings-section">
+          <view class="section-header">
+            <text class="section-title">通用</text>
           </view>
-
-          <!-- 消息通知 -->
-          <view class="setting-item" @click="toggleNotification">
-            <view class="item-left">
-              <text class="item-icon">🔔</text>
-              <text class="item-label">消息通知</text>
+  
+          <view class="settings-list shadow-medium">
+            <!-- 清除缓存 -->
+            <view class="setting-item tap-feedback" @click="clearCache">
+              <view class="item-left">
+                <TraditionalIcon name="trash" size="36" color="var(--primary)" />
+                <text class="item-label">清除缓存</text>
+              </view>
+              <view class="item-right">
+                <text class="item-value">{{ cacheSize }}</text>
+                <text class="item-arrow">›</text>
+              </view>
             </view>
-            <view class="item-right">
-              <view class="custom-switch small" :class="{ 'active': notificationsEnabled }">
-                <view class="switch-thumb"></view>
+  
+            <!-- 消息通知 -->
+            <view class="setting-item tap-feedback" @click="toggleNotification">
+              <view class="item-left">
+                <TraditionalIcon name="notification" size="36" color="var(--secondary)" />
+                <text class="item-label">消息通知</text>
+              </view>
+              <view class="item-right">
+                <view class="custom-switch small" :class="{ 'active': notificationsEnabled }">
+                  <view class="switch-thumb"></view>
+                </view>
               </view>
             </view>
           </view>
         </view>
-      </view>
-
-      <!-- 隐私与安全 -->
-      <view class="settings-section">
-        <view class="section-header">
-          <text class="section-title">隐私与安全</text>
-        </view>
-
-        <view class="settings-list">
-          <!-- 隐私政策 -->
-          <view class="setting-item" @click="openPrivacyPolicy">
-            <view class="item-left">
-              <text class="item-icon">🔒</text>
-              <text class="item-label">隐私政策</text>
+  
+        <!-- 隐私与安全 -->
+        <view class="settings-section">
+          <view class="section-header">
+            <text class="section-title">隐私与安全</text>
+          </view>
+  
+          <view class="settings-list shadow-medium">
+            <!-- 隐私政策 -->
+            <view class="setting-item tap-feedback" @click="openPrivacyPolicy">
+              <view class="item-left">
+                <TraditionalIcon name="privacy" size="36" color="var(--secondary)" />
+                <text class="item-label">隐私政策</text>
+              </view>
+              <view class="item-right">
+                <text class="item-arrow">›</text>
+              </view>
             </view>
-            <view class="item-right">
-              <text class="item-arrow">›</text>
+  
+            <!-- 用户协议 -->
+            <view class="setting-item tap-feedback" @click="openUserAgreement">
+              <view class="item-left">
+                <TraditionalIcon name="agreement" size="36" color="var(--secondary)" />
+                <text class="item-label">用户协议</text>
+              </view>
+              <view class="item-right">
+                <text class="item-arrow">›</text>
+              </view>
             </view>
           </view>
-
-          <!-- 用户协议 -->
-          <view class="setting-item" @click="openUserAgreement">
-            <view class="item-left">
-              <text class="item-icon">📋</text>
-              <text class="item-label">用户协议</text>
+        </view>
+  
+        <!-- 关于 -->
+        <view class="settings-section about-section shadow-medium rice-paper">
+          <view class="about-content">
+            <view class="app-logo-wrapper">
+              <TraditionalIcon name="palace" size="100" color="var(--primary)" />
             </view>
-            <view class="item-right">
-              <text class="item-arrow">›</text>
+            <text class="app-name ink-pressed">中华古建筑导览</text>
+            <text class="app-version">版本 {{ appVersion }}</text>
+            <text class="app-slogan">探索千年文明，感受建筑之美</text>
+          </view>
+  
+          <!-- 检查更新 -->
+          <view class="update-btn btn-ink" @click="checkUpdate">
+            <text class="update-text">检查更新</text>
+            <text v-if="hasUpdate" class="update-badge">NEW</text>
+          </view>
+        </view>
+  
+        <!-- 系统设置 -->
+        <view class="settings-section">
+          <view class="section-header">
+            <text class="section-title">系统</text>
+          </view>
+  
+          <view class="settings-list shadow-medium">
+            <!-- 开发设置 -->
+            <view class="setting-item tap-feedback" @click="goToDevSettings">
+              <view class="item-left">
+                <TraditionalIcon name="defense" size="36" color="var(--primary)" />
+                <text class="item-label">开发设置</text>
+              </view>
+              <view class="item-right">
+                <text class="item-arrow">›</text>
+              </view>
             </view>
           </view>
         </view>
-      </view>
-
-      <!-- 关于 -->
-      <view class="settings-section about-section">
-        <view class="about-content">
-          <view class="app-logo">🏯</view>
-          <text class="app-name">中华古建筑导览</text>
-          <text class="app-version">版本 {{ appVersion }}</text>
-          <text class="app-slogan">探索千年文明，感受建筑之美</text>
-        </view>
-
-        <!-- 检查更新 -->
-        <view class="update-btn" @click="checkUpdate">
-          <text class="update-text">检查更新</text>
-          <text v-if="hasUpdate" class="update-badge">NEW</text>
-        </view>
-      </view>
-
-      <!-- 退出登录 -->
-      <view v-if="isLoggedIn" class="settings-section">
-        <view class="logout-btn" @click="logout">
-          <text class="logout-text">退出登录</text>
+  
+        <!-- 退出登录 -->
+        <view v-if="isLoggedIn" class="settings-section">
+          <view class="logout-btn btn-ink" @click="logout">
+            <text class="logout-text">退出登录</text>
+          </view>
         </view>
       </view>
     </scroll-view>
@@ -108,7 +136,12 @@
 </template>
 
 <script>
+import TraditionalIcon from '../../components/shared/TraditionalIcon.vue';
+
 export default {
+  components: {
+    TraditionalIcon
+  },
   data() {
     return {
       // 通知
@@ -132,6 +165,12 @@ export default {
   methods: {
     goBack() {
       uni.navigateBack()
+    },
+
+    goToDevSettings() {
+      uni.navigateTo({
+        url: '/pages/dev-settings/dev-settings'
+      })
     },
 
     // 加载设置

@@ -1,36 +1,38 @@
 <template>
   <view class="section-preview" :class="{ 'visible': visible }">
-    <view class="section-header">
-      <view class="title-with-icon">
-        <TraditionalIcon name="garden" size="48" style="color: var(--secondary)" />
-        <text class="section-title">精选古建</text>
+    <view class="page-container">
+      <view class="section-header">
+        <view class="title-with-icon">
+          <TraditionalIcon name="garden" size="48" style="color: var(--secondary)" />
+          <text class="section-title">精选古建</text>
+        </view>
+        <view class="window-divider">
+          <view class="window-pattern"></view>
+        </view>
       </view>
-      <view class="window-divider">
-        <view class="window-pattern"></view>
-      </view>
-    </view>
 
-    <view class="preview-cards-grid">
-      <view 
-        v-for="(building, index) in buildings" 
-        :key="building.id"
-        class="preview-card rice-paper brush-border-ink card-ink" 
-        :class="{ 'visible': visibleCards[index] }"
-        @click="onGoToDetail(building)"
-      >
-        <view v-if="hasImage(building)" class="card-image" :style="{ backgroundImage: 'url(' + building.image + ')' }">
-          <view class="card-overlay"></view>
-        </view>
-        <view v-else class="card-image card-image-empty">
-          <TraditionalIcon name="palace" size="48" style="opacity: 0.3" />
-          <text class="card-image-empty-text">寻古中...</text>
-          <view class="card-overlay"></view>
-        </view>
-        <view class="card-info">
-          <text class="card-name ink-pressed">{{ building.name }}</text>
-          <text class="card-desc">{{ building.description }}</text>
-          <view class="card-tags">
-            <text v-for="tag in building.tags.slice(0, 2)" :key="tag" class="card-tag">{{ tag }}</text>
+      <view class="preview-cards-grid">
+        <view 
+          v-for="(building, index) in buildings" 
+          :key="building.id"
+          class="preview-card rice-paper brush-border-ink card-ink" 
+          :class="{ 'visible': visibleCards[index] }"
+          @click="onGoToDetail(building)"
+        >
+          <view v-if="hasImage(building)" class="card-image" :style="{ backgroundImage: 'url(' + building.image + ')' }">
+            <view class="card-overlay"></view>
+          </view>
+          <view v-else class="card-image card-image-empty">
+            <TraditionalIcon name="palace" size="48" style="opacity: 0.3" />
+            <text class="card-image-empty-text">寻古中...</text>
+            <view class="card-overlay"></view>
+          </view>
+          <view class="card-info">
+            <text class="card-name ink-pressed">{{ building.name }}</text>
+            <text class="card-desc">{{ building.description }}</text>
+            <view class="card-tags">
+              <text v-for="tag in building.tags.slice(0, 2)" :key="tag" class="card-tag">{{ tag }}</text>
+            </view>
           </view>
         </view>
       </view>
@@ -131,7 +133,14 @@ export default {
 
 @media (min-width: 768px) {
   .preview-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .preview-cards-grid {
     grid-template-columns: repeat(3, 1fr);
+    gap: 40rpx;
   }
 }
 

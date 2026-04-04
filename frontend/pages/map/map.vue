@@ -45,32 +45,28 @@
           scroll-with-animation
           :scroll-top="scrollTop"
         >
-          <BuildingList
-            :buildings="filteredBuildings"
-            :loading="loading"
-            :error="error"
-            :visibleCards="visibleCards"
-            @go-to-detail="goToDetail"
-          />
+          <view class="page-container">
+            <BuildingList
+              :buildings="filteredBuildings"
+              :loading="loading"
+              :error="error"
+              :visibleCards="visibleCards"
+              @go-to-detail="goToDetail"
+            />
 
-          <MapCharts
-            :hasData="!loading && !error && filteredBuildings.length > 0"
-            :activeChartTab="activeChartTab"
-            :chartTabs="chartTabs"
-            :categoryChartData="categoryChartData"
-            :geoChartData="geoChartData"
-            :dataCount="filteredBuildings.length"
-            @switch-chart-tab="switchChartTab"
-            @category-chart-click="onCategoryChartClick"
-            @chart-click="onChartClick"
-          />
+            <MapCharts
+              :hasData="!loading && !error && filteredBuildings.length > 0"
+              :activeChartTab="activeChartTab"
+              :chartTabs="chartTabs"
+              :categoryChartData="categoryChartData"
+              :geoChartData="geoChartData"
+              :dataCount="filteredBuildings.length"
+              @switch-chart-tab="switchChartTab"
+              @category-chart-click="onCategoryChartClick"
+              @chart-click="onChartClick"
+            />
 
-          <!-- 底部按钮 -->
-          <view class="bottom-actions">
-            <view class="action-btn-antique btn-ink" @click="goToChat">
-              <TraditionalIcon name="chat" size="36" color="#fff" />
-              <text class="btn-text">咨询 AI 助手</text>
-            </view>
+
           </view>
         </scroll-view>
 
@@ -388,11 +384,7 @@ export default {
         url: `/pages/detail/detail?materialId=${building.id}&name=${encodeURIComponent(building.name)}`,
       });
     },
-    goToChat() {
-      uni.navigateTo({
-        url: "/pages/index/index",
-      });
-    },
+
     onScroll(e) {
       const scrollTop = e.detail.scrollTop;
       const windowHeight = uni.getSystemInfoSync().windowHeight;
@@ -701,37 +693,7 @@ export default {
   to { opacity: 1; transform: translateX(0); }
 }
 
-.bottom-actions {
-  background: var(--bg-card);
-  padding: 40rpx 30rpx;
-  border-top: 2rpx solid var(--border);
-  display: flex;
-  justify-content: center;
-  position: relative;
-  z-index: 10;
-  box-shadow: 0 -4rpx 20rpx var(--shadow);
-}
 
-.action-btn-antique {
-  width: 80%;
-  height: 100rpx;
-  background: var(--primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16rpx;
-  border-radius: 50rpx;
-  color: #fff;
-  font-size: 32rpx;
-  font-weight: bold;
-  box-shadow: 0 8rpx 24rpx var(--shadow-primary);
-  transition: all 0.3s;
-}
-
-.action-btn-antique:active {
-  transform: scale(0.96);
-  background: var(--primary-dark);
-}
 
 .back-to-top {
   position: fixed;

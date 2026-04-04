@@ -1,48 +1,50 @@
 <template>
   <view class="section-knowledge" :class="{ 'visible': visible }">
-    <view class="section-header">
-      <view class="title-with-icon">
-        <TraditionalIcon name="palace" size="48" style="color: var(--secondary)" />
-        <text class="section-title">古建小课堂</text>
-      </view>
-      <view class="window-divider">
-        <view class="window-pattern"></view>
-      </view>
-    </view>
-
-    <scroll-view class="knowledge-scroll" scroll-x show-scrollbar="false" @scroll="onKnowledgeScroll">
-      <view class="knowledge-list">
-        <view 
-          v-for="(item, index) in items" 
-          :key="index" 
-          class="knowledge-item rice-paper brush-border-ink card-ink"
-          :class="{ 'active': activeIndex === index }"
-          @click="onItemClick(item)"
-        >
-          <view class="knowledge-icon-wrapper">
-            <TraditionalIcon :name="getIconForTitle(item.title)" size="64" />
-          </view>
-          <view class="knowledge-content">
-            <text class="knowledge-title ink-pressed">{{ item.title }}</text>
-            <text class="knowledge-brief">{{ item.text }}</text>
-          </view>
-          <view class="knowledge-footer">
-            <text class="knowledge-category">{{ getCategoryForTitle(item.title) }}</text>
-            <view class="read-more">
-              <text class="read-text">研读</text>
-              <TraditionalIcon name="arrow-right" size="20" />
-            </view>
-          </view>
-          <!-- 装饰性元素 -->
-          <view class="item-seal">{{ getCategoryForTitle(item.title).substring(0, 1) }}</view>
+    <view class="page-container">
+      <view class="section-header">
+        <view class="title-with-icon">
+          <TraditionalIcon name="palace" size="48" style="color: var(--secondary)" />
+          <text class="section-title">古建小课堂</text>
+        </view>
+        <view class="window-divider">
+          <view class="window-pattern"></view>
         </view>
       </view>
-    </scroll-view>
-    
-    <!-- 滚动指示器 -->
-    <view class="scroll-indicator-wrapper">
-      <view class="scroll-indicator-bg">
-        <view class="scroll-indicator-bar" :style="{ width: knowledgeScrollProgress + '%' }"></view>
+
+      <scroll-view class="knowledge-scroll" scroll-x show-scrollbar="false" @scroll="onKnowledgeScroll">
+        <view class="knowledge-list">
+          <view 
+            v-for="(item, index) in items" 
+            :key="index" 
+            class="knowledge-item rice-paper brush-border-ink card-ink"
+            :class="{ 'active': activeIndex === index }"
+            @click="onItemClick(item)"
+          >
+            <view class="knowledge-icon-wrapper">
+              <TraditionalIcon :name="getIconForTitle(item.title)" size="64" />
+            </view>
+            <view class="knowledge-content">
+              <text class="knowledge-title ink-pressed">{{ item.title }}</text>
+              <text class="knowledge-brief">{{ item.text }}</text>
+            </view>
+            <view class="knowledge-footer">
+              <text class="knowledge-category">{{ getCategoryForTitle(item.title) }}</text>
+              <view class="read-more">
+                <text class="read-text">研读</text>
+                <TraditionalIcon name="arrow-right" size="20" />
+              </view>
+            </view>
+            <!-- 装饰性元素 -->
+            <view class="item-seal">{{ getCategoryForTitle(item.title).substring(0, 1) }}</view>
+          </view>
+        </view>
+      </scroll-view>
+      
+      <!-- 滚动指示器 -->
+      <view class="scroll-indicator-wrapper">
+        <view class="scroll-indicator-bg">
+          <view class="scroll-indicator-bar" :style="{ width: knowledgeScrollProgress + '%' }"></view>
+        </view>
       </view>
     </view>
   </view>

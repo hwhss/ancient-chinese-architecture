@@ -1,30 +1,35 @@
 <template>
   <view class="header">
-    <view class="header-decoration top"></view>
-    <view class="header-content">
-      <text class="title">🏯 中华古建筑名录</text>
-      <text class="subtitle">精选十七处代表性古建筑</text>
-    </view>
-    <!-- 视图切换按钮 -->
-    <view class="view-toggle">
-      <view 
-        class="toggle-btn tap-feedback" 
-        :class="{ active: currentView === 'list' }"
-        @click="switchView('list')"
-      >
-        <text class="toggle-icon">📋</text>
-        <text class="toggle-text">列表</text>
+    <view class="page-container">
+      <view class="header-decoration top"></view>
+      <view class="header-content">
+        <view class="title-row">
+          <TraditionalIcon name="palace" size="48" color="#fff" />
+          <text class="title">中华古建筑名录</text>
+        </view>
+        <text class="subtitle">精选十七处代表性古建筑</text>
       </view>
-      <view 
-        class="toggle-btn tap-feedback" 
-        :class="{ active: currentView === 'map' }"
-        @click="switchView('map')"
-      >
-        <text class="toggle-icon">🗺️</text>
-        <text class="toggle-text">地图</text>
+      <!-- 视图切换按钮 -->
+      <view class="view-toggle">
+        <view 
+          class="toggle-btn tap-feedback" 
+          :class="{ active: currentView === 'list' }"
+          @click="switchView('list')"
+        >
+          <TraditionalIcon :name="'tower'" size="32" :color="currentView === 'list' ? 'var(--secondary)' : 'rgba(255,255,255,0.8)'" />
+          <text class="toggle-text">列表</text>
+        </view>
+        <view 
+          class="toggle-btn tap-feedback" 
+          :class="{ active: currentView === 'map' }"
+          @click="switchView('map')"
+        >
+          <TraditionalIcon :name="'map'" size="32" :color="currentView === 'map' ? 'var(--secondary)' : 'rgba(255,255,255,0.8)'" />
+          <text class="toggle-text">地图</text>
+        </view>
       </view>
+      <view class="header-decoration bottom"></view>
     </view>
-    <view class="header-decoration bottom"></view>
   </view>
 </template>
 
