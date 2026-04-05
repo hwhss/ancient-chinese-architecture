@@ -184,17 +184,23 @@ export default {
 
 /* 图表区域样式 */
 .chart-wrapper {
-  padding: 20rpx;
-  background: #faf6ed;
-  border-radius: 16rpx;
-  border: 1rpx solid var(--bg-tertiary);
+  padding: 24rpx;
+  background: #f9f5e8;
+  border-radius: 20rpx;
+  border: 2rpx solid #e8dec3;
+  box-shadow: 
+    0 4rpx 20rpx rgba(114, 90, 61, 0.08),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.5);
 }
 
 .chart-fallback {
-  padding: 40rpx;
-  background: #faf6ed;
-  border-radius: 16rpx;
-  border: 1rpx solid var(--bg-tertiary);
+  padding: 48rpx;
+  background: #f9f5e8;
+  border-radius: 20rpx;
+  border: 2rpx solid #e8dec3;
+  box-shadow: 
+    0 4rpx 20rpx rgba(114, 90, 61, 0.08),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.5);
 }
 
 .fallback-content {
@@ -369,18 +375,29 @@ export default {
 
 .tag-item {
   padding: 10rpx 22rpx;
-  border-radius: 24rpx;
-  border: 1rpx solid #e0d4c0;
-  background: linear-gradient(145deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+  border-radius: 40rpx;
+  border: 2rpx solid #e8dec3;
+  background: linear-gradient(145deg, #f9f5e8 0%, #f2ead3 100%);
   font-size: 24rpx;
-  color: var(--text-secondary);
+  color: #5a4a3a;
   font-weight: 500;
-  transition: all 0.25s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .tag-item:hover {
-  background: linear-gradient(145deg, #f5e6c8 0%, #f0dcc0 100%);
-  border-color: var(--warning);
+  background: linear-gradient(145deg, #f5efe0 0%, #ebe4d0 100%);
+  border-color: #725a3d;
+  transform: translateY(-1rpx) scale(1.02);
+  box-shadow: 0 4rpx 12rpx rgba(114, 90, 61, 0.15);
+  color: #2c1e13;
+}
+
+.tag-item:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2rpx 6rpx rgba(114, 90, 61, 0.1);
 }
 
 .action-row {
@@ -390,21 +407,89 @@ export default {
 .action-btn {
   width: 100%;
   border: none;
-  background: linear-gradient(145deg, var(--primary) 0%, var(--primary-dark) 100%);
-  color: #fff;
-  border-radius: 16rpx;
+  background: linear-gradient(135deg, #a63131 0%, #7a1d1d 100%);
+  color: #fff8e6;
+  border-radius: 40rpx;
   font-size: 30rpx;
-  padding: 24rpx 0;
+  padding: 28rpx 0;
   font-weight: 600;
   letter-spacing: 6rpx;
   box-shadow:
-    0 8rpx 24rpx rgba(196, 30, 58, 0.35),
+    0 8rpx 24rpx rgba(166, 49, 49, 0.35),
     inset 0 1rpx 0 rgba(255, 255, 255, 0.2);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-btn:hover {
+  background: linear-gradient(135deg, #b73c3c 0%, #8a2626 100%);
+  transform: translateY(-2rpx) scale(1.02);
+  box-shadow:
+    0 12rpx 32rpx rgba(166, 49, 49, 0.45),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.25);
 }
 
 .action-btn:active {
-  transform: translateY(-2rpx) scale(0.98);
-  box-shadow: 0 12rpx 32rpx rgba(196, 30, 58, 0.45);
+  transform: translateY(0) scale(0.98);
+  box-shadow:
+    0 4rpx 12rpx rgba(166, 49, 49, 0.3),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.15);
+}
+
+.action-btn:focus {
+  outline: none;
+  box-shadow:
+    0 0 0 4rpx rgba(166, 49, 49, 0.25),
+    0 8rpx 24rpx rgba(166, 49, 49, 0.35);
+}
+
+.action-btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 4rpx rgba(166, 49, 49, 0.35),
+    0 8rpx 24rpx rgba(166, 49, 49, 0.35);
+}
+
+/* 水墨涟漪效果 */
+.action-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease-out, height 0.6s ease-out, opacity 0.6s ease-out;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.action-btn:active::after {
+  width: 400rpx;
+  height: 400rpx;
+  opacity: 1;
+}
+
+/* 无障碍支持 */
+@media (prefers-reduced-motion: reduce) {
+  .action-btn {
+    transition: none;
+  }
+  
+  .action-btn::after {
+    transition: none;
+  }
+}
+
+@media (hover: hover) {
+  .action-btn:hover {
+    /* 悬停效果已定义 */
+  }
 }
 </style>

@@ -1,0 +1,178 @@
+/* 全局按钮交互效果 - 统一的按钮样式规范 */
+
+/* 基础按钮样式 */
+.ink-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.ink-ripple::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease-out, height 0.6s ease-out, opacity 0.6s ease-out;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ink-ripple:active::after {
+  width: 400rpx;
+  height: 400rpx;
+  opacity: 1;
+}
+
+/* 通用按钮悬停效果 */
+.tap-feedback {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tap-feedback:hover {
+  transform: translateY(-2rpx);
+}
+
+.tap-feedback:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* 按钮阴影增强 */
+.btn-shadow-primary {
+  box-shadow: 0 8rpx 24rpx rgba(166, 49, 49, 0.35);
+}
+
+.btn-shadow-primary:hover {
+  box-shadow: 0 12rpx 32rpx rgba(166, 49, 49, 0.45);
+}
+
+.btn-shadow-primary:active {
+  box-shadow: 0 4rpx 12rpx rgba(166, 49, 49, 0.3);
+}
+
+.btn-shadow-secondary {
+  box-shadow: 0 4rpx 12rpx rgba(114, 90, 61, 0.12);
+}
+
+.btn-shadow-secondary:hover {
+  box-shadow: 0 8rpx 20rpx rgba(114, 90, 61, 0.2);
+}
+
+.btn-shadow-secondary:active {
+  box-shadow: 0 2rpx 8rpx rgba(114, 90, 61, 0.15);
+}
+
+/* 按钮缩放效果 */
+.btn-scale-hover:hover {
+  transform: scale(1.02);
+}
+
+.btn-scale-hover:active {
+  transform: scale(0.98);
+}
+
+/* 按钮上移效果 */
+.btn-lift-hover:hover {
+  transform: translateY(-3rpx);
+}
+
+.btn-lift-hover:active {
+  transform: translateY(0);
+}
+
+/* 焦点样式 */
+.btn-focus:focus {
+  outline: none;
+  box-shadow: 0 0 0 4rpx rgba(166, 49, 49, 0.25);
+}
+
+.btn-focus:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4rpx rgba(166, 49, 49, 0.35);
+}
+
+/* 禁用状态 */
+.btn-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* 加载动画 */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.spinner {
+  width: 32rpx;
+  height: 32rpx;
+  border: 3rpx solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.pulse-dot {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* 进度条动画 */
+@keyframes progressStripes {
+  0% { background-position: 40rpx 0; }
+  100% { background-position: 0 0; }
+}
+
+.progress-bar {
+  background: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.15) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.15) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 40rpx 40rpx;
+  animation: progressStripes 1s linear infinite;
+}
+
+/* 无障碍支持 - 减少动画 */
+@media (prefers-reduced-motion: reduce) {
+  .tap-feedback,
+  .btn-scale-hover,
+  .btn-lift-hover,
+  .ink-ripple {
+    transition: none;
+  }
+  
+  .spinner {
+    animation-duration: 1.5s;
+  }
+  
+  .ink-ripple::after {
+    transition: none;
+  }
+  
+  .progress-bar {
+    animation: none;
+  }
+}
+
+/* 仅在支持悬停的设备上启用悬停效果 */
+@media (hover: hover) {
+  .tap-feedback:hover {
+    /* 悬停效果已定义 */
+  }
+}

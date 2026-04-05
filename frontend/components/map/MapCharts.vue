@@ -111,19 +111,48 @@ export default {
   gap: 6rpx;
   padding: 12rpx 20rpx;
   background: #fff;
-  border-radius: 24rpx;
-  border: 1rpx solid var(--bg-tertiary);
-  transition: all 0.3s ease;
+  border-radius: 40rpx;
+  border: 2rpx solid #e8dec3;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.chart-tab:active {
-  transform: scale(0.96);
+.chart-tab:hover:not(.active) {
+  background: linear-gradient(135deg, #f9f5e8 0%, #f2ead3 100%);
+  border-color: #725a3d;
+  transform: translateY(-1rpx) scale(1.02);
+  box-shadow: 0 4rpx 12rpx rgba(114, 90, 61, 0.15);
+}
+
+.chart-tab:active:not(.active) {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2rpx 6rpx rgba(114, 90, 61, 0.1);
 }
 
 .chart-tab.active {
-  background: var(--primary);
-  border-color: var(--primary-dark);
-  box-shadow: 0 4rpx 12rpx var(--shadow-primary);
+  background: linear-gradient(135deg, #a63131 0%, #7a1d1d 100%);
+  border-color: #7a1d1d;
+  box-shadow: 
+    0 6rpx 18rpx rgba(166, 49, 49, 0.35),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.2);
+  transform: scale(1);
+}
+
+.chart-tab.active:hover {
+  background: linear-gradient(135deg, #b73c3c 0%, #8a2626 100%);
+  transform: translateY(-1rpx) scale(1.01);
+  box-shadow: 
+    0 8rpx 24rpx rgba(166, 49, 49, 0.45),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.25);
+}
+
+.chart-tab.active:active {
+  transform: translateY(0) scale(0.99);
+  box-shadow: 
+    0 4rpx 12rpx rgba(166, 49, 49, 0.3),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.15);
 }
 
 .chart-tab-icon {

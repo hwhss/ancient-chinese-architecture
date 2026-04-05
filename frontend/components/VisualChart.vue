@@ -106,32 +106,40 @@ export default {
     };
   },
   computed: {
-    // 中式主题配色
+    // 中式主题配色 - 使用具体颜色值而非 CSS 变量
     themeColors() {
       return {
         // 主色调
-        primary: '#c82506',
-        primaryLight: '#e84a38',
+        primary: '#a63131',
+        primaryLight: '#c24d4d',
+        primaryDark: '#7a1d1d',
         // 辅助色
-        secondary: 'var(--secondary)',
-        secondaryLight: 'var(--secondary-light)',
+        secondary: '#725a3d',
+        secondaryLight: '#9c7e5a',
+        secondaryDark: '#4d3d29',
         // 背景色
-        background: 'var(--bg-primary)',
+        background: '#f2ead3',
+        bgCard: '#f9f5e8',
         // 文字色
-        text: 'var(--text-primary)',
-        textSecondary: 'var(--text-secondary)',
+        text: '#2c1e13',
+        textSecondary: '#5a4a3a',
+        textTertiary: '#8b7355',
         // 网格线
-        gridLine: 'var(--bg-tertiary)',
-        // 数据色板
+        gridLine: '#decfa8',
+        // 成功/警告/错误色
+        success: '#5a7d5a',
+        warning: '#d49c4d',
+        error: '#b74d4d',
+        // 数据色板 - 中式配色
         colorPalette: [
-          '#c82506', // 主红
-          'var(--secondary)', // 棕色
-          'var(--warning)', // 金色
-          'var(--success)', // 绿色
-          '#b8956a', // 浅棕
-          'var(--primary-light)', // 粉红
-          'var(--secondary-dark)', // 深棕
-          '#f5e6c8'  // 米色
+          '#a63131', // 主红
+          '#725a3d', // 古铜
+          '#d49c4d', // 金色
+          '#5a7d5a', // 青绿
+          '#9c7e5a', // 浅棕
+          '#c24d4d', // 粉红
+          '#4d3d29', // 深棕
+          '#e8dec3'  // 米色
         ]
       };
     }
@@ -255,7 +263,7 @@ export default {
     registerCustomTheme(echarts, colors) {
       const customTheme = {
         color: colors.colorPalette,
-        backgroundColor: colors.background,
+        backgroundColor: colors.bgCard,
         textStyle: {
           fontFamily: '-apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif'
         },
@@ -271,17 +279,18 @@ export default {
         },
         legend: {
           textStyle: {
-            color: colors.text
+            color: colors.text,
+            fontSize: 13
           }
         },
         tooltip: {
-          backgroundColor: 'rgba(248, 244, 233, 0.95)',
+          backgroundColor: 'rgba(249, 245, 232, 0.98)',
           borderColor: colors.secondary,
-          borderWidth: 1,
+          borderWidth: 2,
           textStyle: {
             color: colors.text
           },
-          extraCssText: 'box-shadow: 0 4rpx 16rpx rgba(139, 69, 19, 0.2);'
+          extraCssText: 'box-shadow: 0 4px 20px rgba(114, 90, 61, 0.25); border-radius: 12px;'
         },
         grid: {
           borderColor: colors.gridLine
@@ -289,30 +298,37 @@ export default {
         xAxis: {
           axisLine: {
             lineStyle: {
-              color: colors.secondary
+              color: colors.secondary,
+              width: 2
             }
           },
           axisLabel: {
-            color: colors.text
+            color: colors.text,
+            fontSize: 13,
+            fontWeight: 500
           },
           splitLine: {
             lineStyle: {
-              color: colors.gridLine
+              color: colors.gridLine,
+              type: 'dashed'
             }
           }
         },
         yAxis: {
           axisLine: {
             lineStyle: {
-              color: colors.secondary
+              color: colors.secondary,
+              width: 2
             }
           },
           axisLabel: {
-            color: colors.text
+            color: colors.text,
+            fontSize: 12
           },
           splitLine: {
             lineStyle: {
-              color: colors.gridLine
+              color: colors.gridLine,
+              type: 'dashed'
             }
           }
         }
@@ -324,16 +340,16 @@ export default {
     processOption(option, colors) {
       // 合并默认样式到配置项
       const processedOption = {
-        backgroundColor: colors.background,
+        backgroundColor: colors.bgCard,
         ...option
       };
 
       // 处理 tooltip
       if (processedOption.tooltip) {
         processedOption.tooltip = {
-          backgroundColor: 'rgba(248, 244, 233, 0.95)',
+          backgroundColor: 'rgba(249, 245, 232, 0.98)',
           borderColor: colors.secondary,
-          borderWidth: 1,
+          borderWidth: 2,
           textStyle: {
             color: colors.text
           },
@@ -359,12 +375,12 @@ export default {
 
       // 基础配置
       const baseOption = {
-        backgroundColor: colors.background,
+        backgroundColor: colors.bgCard,
         tooltip: {
           trigger: type === 'pie' ? 'item' : 'axis',
-          backgroundColor: 'rgba(248, 244, 233, 0.95)',
+          backgroundColor: 'rgba(249, 245, 232, 0.98)',
           borderColor: colors.secondary,
-          borderWidth: 1,
+          borderWidth: 2,
           textStyle: {
             color: colors.text
           }
@@ -382,59 +398,68 @@ export default {
         case 'pie':
           return {
             ...baseOption,
+            backgroundColor: colors.bgCard,
             tooltip: {
               trigger: 'item',
-              backgroundColor: 'rgba(248, 244, 233, 0.95)',
+              backgroundColor: 'rgba(249, 245, 232, 0.98)',
               borderColor: colors.secondary,
-              borderWidth: 1,
+              borderWidth: 2,
               textStyle: {
                 color: colors.text
               },
               formatter: function(params) {
-                return `<div style="padding: 8px;">
-                  <b style="color: ${params.color}; font-size: 14px;">${params.name}</b><br/>
-                  <span style="color: var(--text-secondary);">数量: ${params.value}处</span><br/>
-                  <span style="color: #c82506; font-weight: bold;">占比: ${params.percent}%</span>
+                return `<div style="padding: 10px;">
+                  <b style="color: ${params.color}; font-size: 15px; font-weight: bold;">${params.name}</b><br/>
+                  <span style="color: ${colors.textSecondary}; font-size: 13px;">数量: ${params.value}处</span><br/>
+                  <span style="color: ${colors.primary}; font-weight: bold; font-size: 14px;">占比: ${params.percent}%</span>
                 </div>`;
               }
             },
             legend: {
-              top: '3%',
+              top: '2%',
               left: 'center',
               textStyle: {
                 color: colors.text,
                 fontSize: 13,
                 fontWeight: 'bold'
               },
-              itemGap: 20,
-              itemWidth: 16,
-              itemHeight: 16,
+              itemGap: 18,
+              itemWidth: 14,
+              itemHeight: 14,
               icon: 'circle'
+            },
+            grid: {
+              top: '20%',
+              bottom: '5%',
+              containLabel: true
             },
             series: [{
               type: 'pie',
-              radius: ['35%', '60%'],
-              center: ['50%', '55%'],
+              radius: ['35%', '58%'],
+              center: ['50%', '60%'],
               avoidLabelOverlap: true,
               itemStyle: {
-                borderRadius: 10,
-                borderColor: colors.background,
-                borderWidth: 3,
-                shadowBlur: 5,
-                shadowColor: 'rgba(0, 0, 0, 0.1)'
+                borderRadius: 12,
+                borderColor: colors.bgCard,
+                borderWidth: 4,
+                shadowBlur: 8,
+                shadowColor: 'rgba(114, 90, 61, 0.15)'
               },
               label: {
                 show: true,
+                position: 'outside',
                 color: colors.text,
                 fontSize: 12,
                 fontWeight: 'bold',
                 formatter: '{b}\n{d}%',
-                padding: [6, 0]
+                padding: [4, 0],
+                lineHeight: 16
               },
               labelLine: {
                 show: true,
-                length: 12,
-                length2: 8,
+                length: 25,
+                length2: 15,
+                smooth: true,
                 lineStyle: {
                   color: colors.secondary,
                   width: 1.5
@@ -444,10 +469,10 @@ export default {
                 scale: true,
                 scaleSize: 10,
                 itemStyle: {
-                  shadowBlur: 20,
+                  shadowBlur: 25,
                   shadowOffsetX: 0,
-                  shadowColor: 'rgba(0, 0, 0, 0.3)',
-                  borderWidth: 4,
+                  shadowColor: 'rgba(114, 90, 61, 0.35)',
+                  borderWidth: 5,
                   borderColor: '#fff'
                 },
                 label: {
@@ -469,31 +494,41 @@ export default {
         case 'radar':
           return {
             ...baseOption,
+            backgroundColor: colors.bgCard,
             radar: {
               indicator: data.indicator || [],
               shape: 'polygon',
               splitNumber: 5,
-              radius: '65%',
+              radius: '68%',
               center: ['50%', '55%'],
               axisName: {
                 color: colors.text,
-                fontSize: 12,
-                padding: [5, 5]
+                fontSize: 14,
+                fontWeight: 'bold',
+                padding: [8, 8]
               },
               splitLine: {
                 lineStyle: {
-                  color: colors.gridLine
+                  color: colors.gridLine,
+                  width: 2
                 }
               },
               splitArea: {
                 show: true,
                 areaStyle: {
-                  color: ['rgba(248, 244, 233, 0.02)', 'rgba(248, 244, 233, 0.05)', 'rgba(248, 244, 233, 0.08)', 'rgba(248, 244, 233, 0.12)', 'rgba(248, 244, 233, 0.15)']
+                  color: [
+                    'rgba(242, 234, 211, 0.3)',
+                    'rgba(232, 222, 195, 0.3)',
+                    'rgba(222, 207, 168, 0.3)',
+                    'rgba(212, 196, 152, 0.25)',
+                    'rgba(202, 185, 136, 0.2)'
+                  ]
                 }
               },
               axisLine: {
                 lineStyle: {
-                  color: colors.gridLine
+                  color: colors.secondary,
+                  width: 2
                 }
               }
             },
@@ -501,17 +536,49 @@ export default {
               type: 'radar',
               data: data.series || [],
               lineStyle: {
-                width: 2
+                width: 3,
+                color: colors.primary
+              },
+              itemStyle: {
+                color: colors.primary,
+                borderColor: colors.bgCard,
+                borderWidth: 3
               },
               areaStyle: {
-                opacity: 0.3
+                color: {
+                  type: 'radial',
+                  x: 0.5,
+                  y: 0.5,
+                  r: 0.5,
+                  colorStops: [
+                    { offset: 0, color: 'rgba(166, 49, 49, 0.4)' },
+                    { offset: 1, color: 'rgba(166, 49, 49, 0.15)' }
+                  ]
+                }
               },
               emphasis: {
                 lineStyle: {
-                  width: 3
+                  width: 4,
+                  color: colors.primary
+                },
+                itemStyle: {
+                  color: colors.primary,
+                  borderColor: '#fff',
+                  borderWidth: 4,
+                  shadowBlur: 10,
+                  shadowColor: 'rgba(166, 49, 49, 0.5)'
                 },
                 areaStyle: {
-                  opacity: 0.5
+                  color: {
+                    type: 'radial',
+                    x: 0.5,
+                    y: 0.5,
+                    r: 0.5,
+                    colorStops: [
+                      { offset: 0, color: 'rgba(166, 49, 49, 0.5)' },
+                      { offset: 1, color: 'rgba(166, 49, 49, 0.2)' }
+                    ]
+                  }
                 }
               }
             }]
@@ -520,18 +587,19 @@ export default {
         case 'bar':
           return {
             ...baseOption,
+            backgroundColor: colors.bgCard,
             tooltip: {
               trigger: 'axis',
-              backgroundColor: 'rgba(248, 244, 233, 0.95)',
+              backgroundColor: 'rgba(249, 245, 232, 0.98)',
               borderColor: colors.secondary,
-              borderWidth: 1,
+              borderWidth: 2,
               textStyle: {
                 color: colors.text
               },
               axisPointer: {
                 type: 'shadow',
                 shadowStyle: {
-                  color: 'rgba(200, 37, 6, 0.1)'
+                  color: 'rgba(166, 49, 49, 0.12)'
                 }
               }
             },
@@ -569,7 +637,8 @@ export default {
               type: 'value',
               axisLabel: {
                 color: colors.text,
-                fontSize: 11
+                fontSize: 12,
+                fontWeight: 500
               },
               splitLine: {
                 lineStyle: {
@@ -591,18 +660,20 @@ export default {
                     value,
                     itemStyle: {
                       color: data.colors[index] || colors.colorPalette[index % colors.colorPalette.length],
-                      borderRadius: [8, 8, 0, 0]
+                      borderRadius: [10, 10, 0, 0]
                     }
                   }))
                 : (data.series || []).map((value, index) => ({
                     value,
                     itemStyle: {
                       color: colors.colorPalette[index % colors.colorPalette.length],
-                      borderRadius: [8, 8, 0, 0]
+                      borderRadius: [10, 10, 0, 0]
                     }
                   })),
               itemStyle: {
-                borderRadius: [8, 8, 0, 0]
+                borderRadius: [10, 10, 0, 0],
+                shadowBlur: 8,
+                shadowColor: 'rgba(114, 90, 61, 0.1)'
               },
               label: {
                 show: true,
@@ -614,8 +685,8 @@ export default {
               },
               emphasis: {
                 itemStyle: {
-                  shadowBlur: 10,
-                  shadowColor: 'rgba(200, 37, 6, 0.5)'
+                  shadowBlur: 15,
+                  shadowColor: 'rgba(166, 49, 49, 0.4)'
                 },
                 label: {
                   fontSize: 15,
@@ -632,35 +703,37 @@ export default {
         case 'scatter':
           return {
             ...baseOption,
+            backgroundColor: colors.bgCard,
             tooltip: {
               trigger: 'item',
-              backgroundColor: 'rgba(248, 244, 233, 0.95)',
+              backgroundColor: 'rgba(249, 245, 232, 0.98)',
               borderColor: colors.secondary,
-              borderWidth: 1,
+              borderWidth: 2,
               textStyle: {
                 color: colors.text
               },
               formatter: function(params) {
-                return `<div style="padding: 8px;"><b style="color: #c82506;">${params.name}</b><br/>经度: ${params.value[0]}°E<br/>纬度: ${params.value[1]}°N</div>`;
+                return `<div style="padding: 10px;"><b style="color: ${colors.primary}; font-size: 14px; font-weight: bold;">${params.name}</b><br/>经度: ${params.value[0]}°E<br/>纬度: ${params.value[1]}°N</div>`;
               }
             },
             legend: {
               show: data.legend && data.legend.length > 0,
-              top: '3%',
+              top: '2%',
               left: 'center',
               textStyle: {
                 color: colors.text,
-                fontSize: 12
+                fontSize: 12,
+                fontWeight: 500
               },
               itemGap: 20,
               itemWidth: 14,
               itemHeight: 14
             },
             grid: {
-              left: '12%',
-              right: '6%',
-              top: data.legend && data.legend.length > 0 ? '15%' : '10%',
-              bottom: '12%',
+              left: '10%',
+              right: '5%',
+              top: data.legend && data.legend.length > 0 ? '18%' : '12%',
+              bottom: '10%',
               containLabel: true
             },
             xAxis: {
@@ -670,7 +743,8 @@ export default {
               axisLabel: {
                 color: colors.text,
                 formatter: '{value}°E',
-                fontSize: 11
+                fontSize: 11,
+                fontWeight: 500
               },
               splitLine: {
                 lineStyle: {
@@ -692,7 +766,8 @@ export default {
               axisLabel: {
                 color: colors.text,
                 formatter: '{value}°N',
-                fontSize: 11
+                fontSize: 11,
+                fontWeight: 500
               },
               splitLine: {
                 lineStyle: {
@@ -707,17 +782,57 @@ export default {
                 }
               }
             },
-            series: data.series || []
+            series: (data.series || []).map(series => ({
+              ...series,
+              symbolSize: series.symbolSize || 15,
+              itemStyle: {
+                borderColor: '#fff',
+                borderWidth: 2,
+                shadowBlur: 6,
+                shadowColor: 'rgba(114, 90, 61, 0.3)',
+                ...series.itemStyle
+              },
+              label: {
+                show: series.label && series.label.show,
+                position: 'top',
+                distance: 8,
+                color: colors.text,
+                fontSize: 11,
+                fontWeight: 500,
+                backgroundColor: 'rgba(249, 245, 232, 0.9)',
+                padding: [4, 8],
+                borderRadius: 6,
+                borderColor: colors.secondary,
+                borderWidth: 1,
+                ...series.label
+              },
+              emphasis: {
+                scale: true,
+                scaleSize: 1.3,
+                itemStyle: {
+                  shadowBlur: 12,
+                  shadowColor: 'rgba(166, 49, 49, 0.5)',
+                  borderWidth: 3
+                },
+                label: {
+                  show: true,
+                  fontSize: 13,
+                  fontWeight: 'bold',
+                  color: colors.primary
+                }
+              }
+            }))
           };
 
         case 'line':
           return {
             ...baseOption,
+            backgroundColor: colors.bgCard,
             tooltip: {
               trigger: 'axis',
-              backgroundColor: 'rgba(248, 244, 233, 0.95)',
+              backgroundColor: 'rgba(249, 245, 232, 0.98)',
               borderColor: colors.secondary,
-              borderWidth: 1,
+              borderWidth: 2,
               textStyle: {
                 color: colors.text
               }
@@ -752,7 +867,8 @@ export default {
               type: 'value',
               axisLabel: {
                 color: colors.text,
-                fontSize: 11
+                fontSize: 12,
+                fontWeight: 500
               },
               splitLine: {
                 lineStyle: {
@@ -772,23 +888,25 @@ export default {
               data: data.series || [],
               smooth: true,
               symbol: 'circle',
-              symbolSize: 12,
+              symbolSize: 14,
               lineStyle: {
-                width: 3,
-                color: '#c82506'
+                width: 4,
+                color: colors.primary
               },
               itemStyle: {
-                color: '#c82506',
+                color: colors.primary,
                 borderColor: '#fff',
-                borderWidth: 2
+                borderWidth: 3,
+                shadowBlur: 8,
+                shadowColor: 'rgba(166, 49, 49, 0.3)'
               },
               areaStyle: {
                 color: {
                   type: 'linear',
                   x: 0, y: 0, x2: 0, y2: 1,
                   colorStops: [
-                    { offset: 0, color: 'rgba(200, 37, 6, 0.3)' },
-                    { offset: 1, color: 'rgba(200, 37, 6, 0.05)' }
+                    { offset: 0, color: 'rgba(166, 49, 49, 0.35)' },
+                    { offset: 1, color: 'rgba(166, 49, 49, 0.08)' }
                   ]
                 }
               },
@@ -803,8 +921,8 @@ export default {
               emphasis: {
                 scale: 1.5,
                 itemStyle: {
-                  shadowBlur: 10,
-                  shadowColor: 'rgba(200, 37, 6, 0.5)'
+                  shadowBlur: 15,
+                  shadowColor: 'rgba(166, 49, 49, 0.5)'
                 }
               }
             }]
@@ -813,22 +931,40 @@ export default {
         default:
           return {
             ...baseOption,
+            backgroundColor: colors.bgCard,
             xAxis: {
               type: 'category',
               data: data.xAxis || [],
               boundaryGap: false,
               axisLabel: {
-                color: colors.text
+                color: colors.text,
+                fontSize: 13,
+                fontWeight: 500
+              },
+              axisLine: {
+                lineStyle: {
+                  color: colors.secondary,
+                  width: 2
+                }
               }
             },
             yAxis: {
               type: 'value',
               axisLabel: {
-                color: colors.text
+                color: colors.text,
+                fontSize: 12,
+                fontWeight: 500
               },
               splitLine: {
                 lineStyle: {
-                  color: colors.gridLine
+                  color: colors.gridLine,
+                  type: 'dashed'
+                }
+              },
+              axisLine: {
+                lineStyle: {
+                  color: colors.secondary,
+                  width: 2
                 }
               }
             },
@@ -837,7 +973,15 @@ export default {
               data: data.series || [],
               smooth: true,
               areaStyle: {
-                opacity: 0.3
+                opacity: 0.3,
+                color: colors.primary
+              },
+              lineStyle: {
+                color: colors.primary,
+                width: 3
+              },
+              itemStyle: {
+                color: colors.primary
               }
             }]
           };
@@ -917,10 +1061,13 @@ export default {
 <style scoped>
 .visual-chart-container {
   width: 100%;
-  background: var(--bg-primary);
-  border-radius: 16rpx;
+  background: #f9f5e8;
+  border-radius: 20rpx;
   overflow: hidden;
-  border: 2rpx solid var(--bg-tertiary);
+  border: 2rpx solid #e8dec3;
+  box-shadow: 
+    0 4rpx 20rpx rgba(114, 90, 61, 0.08),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.5);
 }
 
 .loading-state,
@@ -934,13 +1081,15 @@ export default {
 
 .loading-text {
   font-size: 28rpx;
-  color: var(--text-tertiary);
+  color: #8b7355;
+  font-weight: 500;
 }
 
 .error-text {
   font-size: 28rpx;
-  color: var(--error);
+  color: #b74d4d;
   text-align: center;
+  font-weight: 500;
 }
 
 .chart-wrapper {

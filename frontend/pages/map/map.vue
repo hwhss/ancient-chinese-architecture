@@ -185,13 +185,13 @@ export default {
     geoChartData() {
       const series = [];
       const categoryColors = {
-        palace: '#c82506',
-        bridge: 'var(--secondary)',
-        garden: 'var(--success)',
-        defense: 'var(--warning)',
-        residence: '#b8956a',
-        tower: 'var(--primary-light)',
-        water: 'var(--secondary-dark)'
+        palace: '#a63131',
+        bridge: '#725a3d',
+        garden: '#5a7d5a',
+        defense: '#d49c4d',
+        residence: '#9c7e5a',
+        tower: '#c24d4d',
+        water: '#4d3d29'
       };
       const categoryNames = {
         palace: '宫殿',
@@ -240,7 +240,7 @@ export default {
           name: categoryNames[cat] || cat,
           type: 'scatter',
           data: data,
-          symbolSize: 20,
+          symbolSize: 18,
           symbol: 'circle',
           itemStyle: {
             borderColor: '#fff',
@@ -249,30 +249,36 @@ export default {
             shadowColor: 'rgba(0,0,0,0.2)'
           },
           label: {
-            show: true,
+            show: false,
             position: 'top',
+            distance: 8,
             formatter: '{b}',
-            color: 'var(--text-primary)',
+            color: '#2c1e13',
             fontSize: 11,
-            backgroundColor: 'rgba(248, 244, 233, 0.95)',
+            fontWeight: 500,
+            backgroundColor: 'rgba(249, 245, 232, 0.95)',
             padding: [4, 8],
-            borderRadius: 4,
+            borderRadius: 6,
             borderWidth: 1,
-            borderColor: 'var(--bg-tertiary)'
+            borderColor: '#725a3d'
           },
           emphasis: {
             focus: 'series',
-            scale: 1.6,
+            scale: 1.4,
             itemStyle: {
               shadowBlur: 15,
-              shadowColor: 'rgba(200, 37, 6, 0.5)'
+              shadowColor: 'rgba(166, 49, 49, 0.5)'
             },
             label: {
               show: true,
-              fontSize: 14,
+              fontSize: 13,
               fontWeight: 'bold',
-              backgroundColor: 'rgba(200, 37, 6, 0.95)',
-              color: '#fff'
+              backgroundColor: 'rgba(249, 245, 232, 0.98)',
+              color: '#a63131',
+              padding: [6, 12],
+              borderRadius: 8,
+              borderWidth: 2,
+              borderColor: '#a63131'
             }
           }
         });

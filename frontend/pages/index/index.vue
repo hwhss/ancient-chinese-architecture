@@ -88,11 +88,9 @@
               v-else
               ref="messageList"
               :messages="messages"
-              :container-height="messageAreaHeight"
-              :item-height="120"
-              :buffer-size="3"
               @go-to-detail="goToDetail"
               @regenerate="regenerateResponse"
+              @skip-typing="skipTypingEffect"
             />
           </view>
 
@@ -117,9 +115,22 @@
           </view>
 
           <!-- 错误重试提示 -->
-          <view v-if="lastError" class="error-retry">
-            <text class="error-text">{{ lastError }}</text>
-            <button class="retry-btn" @click="retryLastQuestion">重新发送</button>
+          <view v-if="lastError" class="error-retry" :class="'error-' + lastErrorType">
+            <view class="error-icon">
+              <TraditionalIcon 
+                :name="getErrorIcon()" 
+                size="48" 
+                :color="getErrorColor()" 
+              />
+            </view>
+            <view class="error-content">
+              <text class="error-text">{{ lastError }}</text>
+              <text class="error-help">{{ getErrorHelp() }}</text>
+            </view>
+            <view class="error-actions">
+              <button class="retry-btn" @click="retryLastQuestion">重新发送</button>
+              <button v-if="showNetworkCheck()" class="help-btn" @click="openNetworkHelp">检查网络</button>
+            </view>
           </view>
         </view>
 
@@ -230,6 +241,7 @@ export default {
       isSending: false,
       keyboardHeight: 0,
       lastError: "",
+      lastErrorType: null,
       lastQuestion: "",
       typingTimer: null,
       exampleQuestions: EXAMPLE_QUESTIONS,
@@ -254,7 +266,15 @@ export default {
       messageAreaHeight: 600,
       windowHeight: 0,
       windowWidth: 0,
-      isMobile: false
+      isMobile: false,
+      // 打字效果配置
+      typingConfig: {
+        baseSpeed: 30,
+        fastSpeed: 15,
+        skipable: true,
+        batchSize: 5
+      },
+      skipTyping: false
     };
   },
 
@@ -369,6 +389,28 @@ export default {
         this.showSidebar = false;
         return;
       }
+      
+      // 如果当前会话有未发送内容，先保存
+      if (this.inputText.trim()) {
+        uni.showModal({
+          title: '保存草稿',
+          content: '当前会话有未发送的内容，是否保存后切换？',
+          confirmText: '保存并切换',
+          cancelText: '不保存',
+          confirmColor: '#c82506',
+          success: (res) => {
+            if (res.confirm) {
+              this.saveCurrentDraft();
+            }
+            this.doSwitchSession(sessionId);
+          }
+        });
+      } else {
+        this.doSwitchSession(sessionId);
+      }
+    },
+
+    doSwitchSession(sessionId) {
       this.saveHistory();
       this.currentSessionId = sessionId;
       this.saveSessionList();
@@ -377,14 +419,79 @@ export default {
         const cached = uni.getStorageSync(cacheKey);
         if (cached && Array.isArray(cached)) {
           this.messages = cached.filter(m => !m.isTyping);
+          // 尝试加载该会话的草稿
+          this.$nextTick(() => {
+            this.loadCurrentDraft();
+          });
         } else {
+          // 显示空会话提示
           this.messages = [];
+          this.inputText = "";
+          uni.showToast({
+            title: '这是一个新会话',
+            icon: 'none',
+            duration: 1500
+          });
         }
       } catch (e) {
         this.messages = [];
+        this.inputText = "";
       }
       this.showSidebar = false;
       this.scrollToBottom();
+    },
+
+    // 保存当前草稿
+    saveCurrentDraft() {
+      if (!this.inputText.trim()) return;
+      
+      const draftKey = 'DRAFT_' + this.currentSessionId;
+      try {
+        uni.setStorageSync(draftKey, {
+          content: this.inputText,
+          time: Date.now()
+        });
+      } catch (e) {
+        console.warn('保存草稿失败:', e);
+      }
+    },
+
+    // 加载草稿
+    loadCurrentDraft() {
+      const draftKey = 'DRAFT_' + this.currentSessionId;
+      try {
+        const draft = uni.getStorageSync(draftKey);
+        if (draft && draft.content) {
+          // 询问是否恢复草稿
+          uni.showModal({
+            title: '恢复草稿',
+            content: '发现未发送的草稿，是否恢复？',
+            confirmText: '恢复',
+            cancelText: '删除',
+            confirmColor: '#c82506',
+            success: (res) => {
+              if (res.confirm) {
+                this.inputText = draft.content;
+              } else {
+                // 删除草稿
+                this.clearCurrentDraft();
+              }
+            }
+          });
+        }
+      } catch (e) {
+        console.warn('加载草稿失败:', e);
+      }
+    },
+
+    // 清除当前草稿
+    clearCurrentDraft() {
+      const draftKey = 'DRAFT_' + this.currentSessionId;
+      try {
+        uni.removeStorageSync(draftKey);
+      } catch (e) {
+        console.warn('删除草稿失败:', e);
+      }
     },
 
     deleteSession(sessionId) {
@@ -396,8 +503,16 @@ export default {
           if (res.confirm) {
             const index = this.sessionList.findIndex(s => s.id === sessionId);
             if (index > -1) {
+              // 删除会话消息缓存
               const cacheKey = this.getSessionCacheKey(sessionId);
               uni.removeStorageSync(cacheKey);
+              // 删除会话草稿
+              const draftKey = 'DRAFT_' + sessionId;
+              try {
+                uni.removeStorageSync(draftKey);
+              } catch (e) {
+                console.warn('删除会话草稿失败:', e);
+              }
               this.sessionList.splice(index, 1);
               if (this.currentSessionId === sessionId) {
                 if (this.sessionList.length > 0) {
@@ -506,6 +621,9 @@ export default {
       const question = this.inputText.trim();
       if (!question) return;
 
+      // 发送前先清除当前会话的草稿
+      this.clearCurrentDraft();
+
       this.inputText = "";
       this.lastError = "";
       this.lastQuestion = question;
@@ -543,8 +661,7 @@ export default {
         this.scrollToBottom();
         this.startTypingEffect(this.messages.length - 1);
       } catch (error) {
-        console.error("请求失败:", error);
-        this.lastError = error.message || "网络异常，请稍后重试";
+        this.handleError(error);
         
         const mockAnswer = this.getMockAnswer(question);
         const materialId = matchMaterialId(question);
@@ -574,34 +691,43 @@ export default {
       
       const fullText = msg.content;
       let index = 0;
-      const speed = 50;
+      const speed = fullText.length > 200 
+        ? this.typingConfig.fastSpeed 
+        : this.typingConfig.baseSpeed;
+      const batchSize = this.typingConfig.batchSize;
 
       this.clearTypingTimer();
+      this.skipTyping = false;
 
       let lastScrollTime = 0;
       const scrollInterval = 300;
       
       const typeNext = () => {
-        if (index < fullText.length) {
-          const batchSize = Math.min(3, fullText.length - index);
-          index += batchSize;
-          this.$set(this.messages[msgIndex], 'displayContent', fullText.slice(0, index));
-          
-          const now = Date.now();
-          if (now - lastScrollTime > scrollInterval) {
-            this.scrollToBottom();
-            lastScrollTime = now;
-          }
-          this.typingTimer = setTimeout(typeNext, speed);
-        } else {
+        if (this.skipTyping || index >= fullText.length) {
           this.$set(this.messages[msgIndex], 'isTyping', false);
           this.$set(this.messages[msgIndex], 'displayContent', fullText);
           this.scrollToBottom();
           this.saveHistory();
+          return;
         }
+        
+        const batch = Math.min(batchSize, fullText.length - index);
+        index += batch;
+        this.$set(this.messages[msgIndex], 'displayContent', fullText.slice(0, index));
+        
+        const now = Date.now();
+        if (now - lastScrollTime > scrollInterval) {
+          this.scrollToBottom();
+          lastScrollTime = now;
+        }
+        this.typingTimer = setTimeout(typeNext, speed);
       };
 
       typeNext();
+    },
+
+    skipTypingEffect() {
+      this.skipTyping = true;
     },
 
     clearTypingTimer() {
@@ -628,9 +754,90 @@ export default {
       this.loadingTips = "正在思考中...";
     },
 
+    // 分类处理错误
+    handleError(error) {
+      console.error("请求失败:", error);
+      
+      let errorType = 'unknown';
+      let errorMessage = '网络异常，请稍后重试';
+      
+      const errorMsg = error.message || '';
+      const errorStr = String(error).toLowerCase();
+      
+      if (errorMsg.includes('timeout') || errorMsg.includes('超时') || errorStr.includes('timeout')) {
+        errorType = 'timeout';
+        errorMessage = '请求超时，请检查网络后重试';
+      } else if (errorMsg.includes('network') || errorMsg.includes('网络') || errorStr.includes('network')) {
+        errorType = 'network';
+        errorMessage = '网络连接异常，请检查网络设置';
+      } else if (errorMsg.includes('500') || errorMsg.includes('服务器') || errorStr.includes('500') || errorStr.includes('server')) {
+        errorType = 'api';
+        errorMessage = '服务器暂时不可用，请稍后再试';
+      } else if (errorMsg.includes('401') || errorMsg.includes('403') || errorStr.includes('401') || errorStr.includes('403') || errorStr.includes('auth')) {
+        errorType = 'auth';
+        errorMessage = '授权异常，请重新进入';
+      }
+      
+      this.lastError = errorMessage;
+      this.lastErrorType = errorType;
+    },
+
+    // 获取错误图标
+    getErrorIcon() {
+      const iconMap = {
+        'timeout': 'arrow-right',
+        'network': 'chat',
+        'api': 'palace',
+        'auth': 'search',
+        'unknown': 'search'
+      };
+      return iconMap[this.lastErrorType] || 'search';
+    },
+
+    // 获取错误颜色
+    getErrorColor() {
+      const colorMap = {
+        'timeout': '#f5a623',
+        'network': '#e74c3c',
+        'api': '#9b59b6',
+        'auth': '#3498db',
+        'unknown': '#8b7355'
+      };
+      return colorMap[this.lastErrorType] || '#8b7355';
+    },
+
+    // 获取错误帮助信息
+    getErrorHelp() {
+      const helpMap = {
+        'timeout': '建议：检查网络连接后重试',
+        'network': '建议：检查WiFi或移动数据',
+        'api': '建议：稍后再试或联系客服',
+        'auth': '建议：重新打开小程序',
+        'unknown': '建议：稍后再试'
+      };
+      return helpMap[this.lastErrorType] || '建议：稍后再试';
+    },
+
+    // 是否显示检查网络按钮
+    showNetworkCheck() {
+      return this.lastErrorType === 'network' || this.lastErrorType === 'timeout';
+    },
+
+    // 打开网络帮助
+    openNetworkHelp() {
+      uni.showModal({
+        title: '网络诊断',
+        content: '请检查您的网络连接：\n\n1. 确认WiFi或移动数据已开启\n2. 尝试切换网络\n3. 检查路由器是否正常\n4. 确认其他应用能正常上网',
+        showCancel: false,
+        confirmText: '知道了',
+        confirmColor: '#c82506'
+      });
+    },
+
     retryLastQuestion() {
       if (this.lastQuestion && !this.isSending) {
         this.lastError = "";
+        this.lastErrorType = null;
         this.inputText = this.lastQuestion;
         this.send();
       }
@@ -646,19 +853,8 @@ export default {
     },
 
     scrollToBottom() {
-      this.$nextTick(() => {
-        if (this.messages.length > 0) {
-          if (this.$refs.messageList) {
-            this.$refs.messageList.scrollToBottom();
-          } else {
-            const lastIndex = this.messages.length - 1;
-            this.scrollId = '';
-            setTimeout(() => {
-              this.scrollId = 'msg-' + lastIndex;
-            }, 50);
-          }
-        }
-      });
+      // VirtualMessageList 内部已通过 watch 自动处理滚动
+      // 保留此方法仅为兼容性
     },
 
     async regenerateResponse(index) {
@@ -783,14 +979,11 @@ export default {
   transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
-@media (min-width: 768px) {
-  .layout-wrapper {
-    flex-direction: row;
-  }
-}
-
 .header {
-  background: var(--bg-card);
+  background: linear-gradient(135deg, 
+    var(--bg-card) 0%, 
+    rgba(255, 248, 230, 0.95) 50%, 
+    var(--bg-card) 100%);
   padding: 40rpx 30rpx;
   display: flex;
   align-items: center;
@@ -799,6 +992,18 @@ export default {
   z-index: 10;
   border-bottom: 4rpx solid var(--border);
   box-shadow: 0 4rpx 20rpx var(--shadow);
+  animation: headerIn 0.6s ease-out;
+}
+
+@keyframes headerIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .header::after {
@@ -810,6 +1015,12 @@ export default {
   height: 2rpx;
   background: linear-gradient(90deg, transparent, var(--secondary), transparent);
   opacity: 0.3;
+}
+
+@media (min-width: 768px) {
+  .layout-wrapper {
+    flex-direction: row;
+  }
 }
 
 .header-search {
@@ -859,7 +1070,17 @@ export default {
   background: var(--bg-card);
   box-shadow: 2rpx 2rpx 10rpx var(--shadow);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-toggle:hover {
+  transform: translateY(-2rpx) scale(1.05);
+  box-shadow: 0 8rpx 24rpx rgba(200, 37, 6, 0.25);
+  border-color: var(--primary);
+}
+
+.sidebar-toggle:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .header-center {
@@ -883,6 +1104,25 @@ export default {
   font-weight: bold;
   font-family: 'TsangerJinKai', serif;
   letter-spacing: 4rpx;
+  position: relative;
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: titleIn 0.8s ease-out 0.2s both;
+}
+
+@keyframes titleIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+    letter-spacing: 12rpx;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+    letter-spacing: 4rpx;
+  }
 }
 
 .header-action-icon {
@@ -891,6 +1131,13 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 12rpx;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.header-action-icon:hover {
+  transform: rotate(15deg) scale(1.1);
 }
 
 .search-confirm-text {
@@ -934,11 +1181,19 @@ export default {
   background: transparent;
 }
 
+.page-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
 .message-area.with-search-results {
   margin-top: 520rpx;
 }
 
-@media (min-width: 768px) {
+@media (min-width: 768px) and (max-width: 1023px) {
   .container {
     max-width: 900px;
     margin: 0 auto;
@@ -946,63 +1201,197 @@ export default {
   .title {
     font-size: 42rpx;
   }
+  .layout-wrapper {
+    flex-direction: row;
+  }
+  .main-content {
+    padding: 0 40rpx;
+  }
+  .message-area {
+    padding: 30rpx 20rpx;
+  }
 }
 
 @media (min-width: 1024px) {
   .container {
     max-width: 1100px;
+    margin: 0 auto;
   }
-}
-
-@media (max-width: 375px) {
+  .layout-wrapper {
+    flex-direction: row;
+  }
+  .main-content {
+    padding: 0 60rpx;
+  }
+  .message-area {
+    padding: 40rpx 30rpx;
+  }
   .title {
-    font-size: 30rpx;
-    letter-spacing: 4rpx;
+    font-size: 46rpx;
+    letter-spacing: 6rpx;
   }
 }
 
+@media (min-width: 1440px) {
+  .container {
+    max-width: 1300px;
+    margin: 0 auto;
+  }
+  .main-content {
+    padding: 0 80rpx;
+  }
+  .message-area {
+    padding: 50rpx 40rpx;
+  }
+  .title {
+    font-size: 50rpx;
+    letter-spacing: 8rpx;
+  }
+}
+
+@media (max-width: 767px) {
+  .header {
+    padding: 24rpx 16rpx;
+  }
+  
+  .title {
+    font-size: 32rpx;
+    letter-spacing: 2rpx;
+  }
+  
+  .sidebar-toggle,
+  .header-action-icon {
+    width: 60rpx;
+    height: 60rpx;
+  }
+}
 
 .error-retry {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: linear-gradient(135deg, #fff0f0 0%, #ffe8e8 100%);
-  border: 1rpx solid #e8a0a0;
-  border-radius: 12rpx;
-  padding: 20rpx 24rpx;
-  margin: 20rpx 10rpx;
+  flex-direction: column;
+  gap: 16rpx;
+  background: linear-gradient(135deg, #fff8f0 0%, #ffe8d8 100%);
+  border: 2rpx solid #e8a060;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin: 20rpx 20rpx;
   position: relative;
   z-index: 1;
+  box-shadow: 0 4rpx 16rpx rgba(200, 160, 100, 0.15);
+  animation: errorShake 0.4s ease-out;
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4rpx); }
+  40% { transform: translateX(4rpx); }
+  60% { transform: translateX(-2rpx); }
+  80% { transform: translateX(2rpx); }
+}
+
+/* 不同错误类型的样式 */
+.error-retry.error-network {
+  background: linear-gradient(135deg, #fff0f0 0%, #ffe8e8 100%);
+  border-color: #e8a0a0;
+}
+
+.error-retry.error-timeout {
+  background: linear-gradient(135deg, #fff8e0 0%, #ffe8b8 100%);
+  border-color: #e8c060;
+}
+
+.error-retry.error-api {
+  background: linear-gradient(135deg, #f8f0ff 0%, #e8d8ff 100%);
+  border-color: #c0a0e8;
+}
+
+.error-retry.error-auth {
+  background: linear-gradient(135deg, #f0f8ff 0%, #d8e8ff 100%);
+  border-color: #a0c0e8;
+}
+
+.error-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 88rpx;
+  height: 88rpx;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  margin: 0 auto 8rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+}
+
+.error-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  text-align: center;
 }
 
 .error-text {
-  flex: 1;
+  font-size: 28rpx;
+  color: #6b4423;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.error-help {
+  font-size: 24rpx;
+  color: #8b6b4b;
+  line-height: 1.4;
+}
+
+.error-actions {
+  display: flex;
+  gap: 16rpx;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.retry-btn,
+.help-btn {
+  padding: 14rpx 32rpx;
   font-size: 26rpx;
-  color: #a81c07;
-  margin-right: 16rpx;
+  border-radius: 40rpx;
+  border: none;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateZ(0) translateY(0);
 }
 
 .retry-btn {
-  padding: 12rpx 24rpx;
   background: linear-gradient(135deg, #e84a38 0%, #c82506 100%);
   color: #fff8e6;
-  font-size: 24rpx;
-  border-radius: 30rpx;
-  border: none;
-  box-shadow: 0 2rpx 8rpx rgba(200, 37, 6, 0.25);
-  transform: translateZ(0) translateY(0);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
+  box-shadow: 0 4rpx 12rpx rgba(200, 37, 6, 0.3);
 }
 
 .retry-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4rpx 12rpx rgba(200, 37, 6, 0.35);
+  transform: translateY(-3rpx);
+  box-shadow: 0 6rpx 16rpx rgba(200, 37, 6, 0.4);
 }
 
 .retry-btn:active {
-  transform: translateY(-1px) scale(0.97);
-  box-shadow: 0 2rpx 8rpx rgba(200, 37, 6, 0.25);
+  transform: translateY(-1rpx) scale(0.98);
+  box-shadow: 0 3rpx 8rpx rgba(200, 37, 6, 0.25);
+}
+
+.help-btn {
+  background: linear-gradient(135deg, #f5f0e1 0%, #e8e0d0 100%);
+  color: #8b6b4b;
+  border: 2rpx solid #d0c0b0;
+  box-shadow: 0 2rpx 8rpx rgba(139, 107, 75, 0.15);
+}
+
+.help-btn:hover {
+  transform: translateY(-2rpx);
+  box-shadow: 0 4rpx 12rpx rgba(139, 107, 75, 0.25);
+  background: linear-gradient(135deg, #fff8e8 0%, #f0e8d8 100%);
+}
+
+.help-btn:active {
+  transform: translateY(0) scale(0.98);
 }
 
 /* 加载动画 - 优化版 */

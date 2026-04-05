@@ -396,7 +396,7 @@ export default {
 
 .hero-btn {
   height: 100rpx;
-  border-radius: 8rpx;
+  border-radius: 40rpx;
   font-size: 30rpx;
   border: none;
   display: flex;
@@ -404,12 +404,14 @@ export default {
   justify-content: center;
   gap: 16rpx;
   transform: translateZ(0) translateY(0);
-  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   opacity: 0;
   position: relative;
   overflow: hidden;
   will-change: transform, box-shadow;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .hero-btn.visible {
@@ -417,25 +419,65 @@ export default {
 }
 
 .hero-btn.primary {
-  background: var(--primary);
-  color: var(--bg-primary);
-  box-shadow: 0 8rpx 24rpx var(--shadow-primary);
+  background: linear-gradient(135deg, #a63131 0%, #7a1d1d 100%);
+  color: #fff8e6;
+  box-shadow: 
+    0 8rpx 24rpx rgba(166, 49, 49, 0.35),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.2);
+}
+
+.hero-btn.primary:hover {
+  background: linear-gradient(135deg, #c24d4d 0%, #922828 100%);
+  transform: translateY(-6rpx) scale(1.08);
+  box-shadow: 
+    0 20rpx 48rpx rgba(166, 49, 49, 0.5),
+    0 12rpx 28rpx rgba(166, 49, 49, 0.3),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.25);
+}
+
+.hero-btn.primary:active {
+  transform: translateY(-3rpx) scale(1.03);
+  box-shadow: 
+    0 12rpx 32rpx rgba(166, 49, 49, 0.35),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.18);
 }
 
 .hero-btn.secondary {
-  background: var(--bg-card);
-  color: var(--secondary);
-  border: 2rpx solid var(--secondary);
-  box-shadow: 0 4rpx 16rpx var(--shadow);
+  background: linear-gradient(135deg, #fffef9 0%, #f9f5e8 100%);
+  color: #725a3d;
+  border: 3rpx solid #725a3d;
+  box-shadow: 
+    0 6rpx 18rpx rgba(114, 90, 61, 0.15),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
 }
 
-.hero-btn:active {
-  transform: translateY(2rpx) scale(0.98);
+.hero-btn.secondary:hover {
+  background: linear-gradient(135deg, #f9f5e8 0%, #f2ead3 100%);
+  border-color: #a63131;
+  color: #a63131;
+  border-width: 4rpx;
+  transform: translateY(-6rpx) scale(1.08);
+  box-shadow: 
+    0 16rpx 40rpx rgba(114, 90, 61, 0.3),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.85);
+}
+
+.hero-btn.secondary:active {
+  transform: translateY(-3rpx) scale(1.03);
+  box-shadow: 
+    0 10rpx 24rpx rgba(114, 90, 61, 0.2),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.75);
 }
 
 .btn-text {
-  font-weight: 600;
+  font-weight: 700;
   letter-spacing: 4rpx;
+  transition: all 0.25s ease;
+}
+
+.hero-btn:hover .btn-text {
+  letter-spacing: 8rpx;
+  font-weight: 800;
 }
 
 /* Hero 统计信息 */
@@ -502,14 +544,14 @@ export default {
   opacity: 0.5;
 }
 
-/* 分类快捷入口 */
+/* 分类快捷入口 - 增强悬停效果 */
 .category-shortcuts {
   display: flex;
   justify-content: space-between;
   margin-top: 32rpx;
   opacity: 0;
   transform: translateY(20px);
-  transition: all 0.6s ease;
+  transition: all 0.25s ease;
 }
 
 .category-shortcuts.visible {
@@ -522,35 +564,73 @@ export default {
   flex-direction: column;
   align-items: center;
   gap: 12rpx;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  padding: 12rpx;
+  border-radius: 28rpx;
+}
+
+.category-item:hover {
+  transform: translateY(-10rpx) scale(1.08);
+}
+
+.category-item:active {
+  transform: translateY(-4rpx) scale(1.03);
 }
 
 .category-icon-wrapper {
-  background: var(--bg-card);
-  padding: 20rpx;
+  background: linear-gradient(135deg, #fffef9 0%, #f9f5e8 100%);
+  padding: 24rpx;
   border-radius: 50%;
-  color: var(--secondary);
-  border: 2rpx solid var(--border);
-  transition: all 0.3s ease;
+  color: #725a3d;
+  border: 3rpx solid #e8dec3;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 
+    0 6rpx 16rpx rgba(114, 90, 61, 0.12),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
+}
+
+.category-item:hover .category-icon-wrapper {
+  background: linear-gradient(135deg, #a63131 0%, #7a1d1d 100%);
+  color: #fff8e6;
+  border-color: #a63131;
+  border-width: 4rpx;
+  box-shadow: 
+    0 12rpx 32rpx rgba(166, 49, 49, 0.35),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.2);
+  transform: scale(1.15);
 }
 
 .category-item:active .category-icon-wrapper {
-  transform: scale(0.9);
-  background: var(--bg-secondary);
+  transform: scale(1.1);
+  box-shadow: 
+    0 8rpx 20rpx rgba(166, 49, 49, 0.25),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.15);
 }
 
 .category-text {
-  font-size: 22rpx;
-  color: var(--text-secondary);
-  font-weight: 500;
+  font-size: 24rpx;
+  color: #725a3d;
+  font-weight: 600;
+  transition: all 0.25s ease;
 }
 
-/* ========== 我的收藏快捷入口 ========== */
+.category-item:hover .category-text {
+  color: #a63131;
+  font-weight: 800;
+  font-size: 26rpx;
+  transform: scale(1.05);
+}
+
+/* ========== 我的收藏快捷入口 - 增强悬停效果 ========== */
 .favorites-shortcut-wrapper {
   margin: 50rpx auto 0;
   max-width: 520rpx;
   opacity: 0;
   transform: translateY(20px);
-  transition: all 0.6s ease;
+  transition: all 0.25s ease;
 }
 
 .favorites-shortcut-wrapper.visible {
@@ -562,15 +642,19 @@ export default {
   display: flex;
   align-items: center;
   gap: 32rpx;
-  padding: 36rpx 44rpx;
-  background: var(--bg-card);
-  border-radius: 12rpx;
-  border: 2rpx solid var(--border);
-  box-shadow: var(--shadow);
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 40rpx 48rpx;
+  background: linear-gradient(135deg, #fffef9 0%, #f9f5e8 100%);
+  border-radius: 28rpx;
+  border: 3rpx solid #e8dec3;
+  box-shadow: 
+    0 8rpx 24rpx rgba(114, 90, 61, 0.15),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   position: relative;
   overflow: hidden;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .favorites-shortcut::before {
@@ -579,68 +663,110 @@ export default {
   top: 0;
   left: 0;
   bottom: 0;
-  width: 6rpx;
-  background: var(--warning);
+  width: 10rpx;
+  background: linear-gradient(180deg, #d49c4d 0%, #a63131 100%);
+  border-radius: 28rpx 0 0 28rpx;
+}
+
+.favorites-shortcut:hover {
+  transform: translateY(-6rpx) scale(1.04);
+  border-color: #a63131;
+  border-width: 4rpx;
+  box-shadow: 
+    0 16rpx 44rpx rgba(114, 90, 61, 0.3),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.85);
 }
 
 .favorites-shortcut:active {
-  transform: scale(0.98);
-  background: var(--bg-secondary);
+  transform: translateY(-3rpx) scale(1.02);
+  box-shadow: 
+    0 10rpx 28rpx rgba(114, 90, 61, 0.2),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.75);
 }
 
 .favorites-icon-wrapper {
   position: relative;
-  color: var(--warning);
+  color: #d49c4d;
+  transition: all 0.25s ease;
+}
+
+.favorites-shortcut:hover .favorites-icon-wrapper {
+  color: #a63131;
+  transform: scale(1.15);
 }
 
 .favorites-badge {
   position: absolute;
-  top: -8rpx;
-  right: -8rpx;
-  min-width: 32rpx;
-  height: 32rpx;
-  background: var(--primary);
-  border-radius: 16rpx;
+  top: -10rpx;
+  right: -10rpx;
+  min-width: 40rpx;
+  height: 40rpx;
+  background: linear-gradient(135deg, #a63131 0%, #7a1d1d 100%);
+  border-radius: 20rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 8rpx;
-  font-size: 18rpx;
-  color: #fff;
-  font-weight: bold;
+  padding: 0 10rpx;
+  font-size: 20rpx;
+  color: #fff8e6;
+  font-weight: 800;
+  border: 3rpx solid #fff8e6;
+  box-shadow: 
+    0 4rpx 12rpx rgba(166, 49, 49, 0.35),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.2);
 }
 
 .favorites-info {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4rpx;
+  gap: 6rpx;
 }
 
 .favorites-title {
-  font-size: 34rpx;
-  font-weight: bold;
-  color: var(--text-primary);
+  font-size: 36rpx;
+  font-weight: 800;
+  color: #2c1e13;
   font-family: 'TsangerJinKai', serif;
+  transition: color 0.25s ease;
+}
+
+.favorites-shortcut:hover .favorites-title {
+  color: #a63131;
+  transform: scale(1.05);
 }
 
 .favorites-count {
-  font-size: 24rpx;
-  color: var(--text-tertiary);
+  font-size: 26rpx;
+  color: #725a3d;
+  transition: color 0.25s ease;
+  font-weight: 600;
+}
+
+.favorites-shortcut:hover .favorites-count {
+  color: #5a4a3a;
+  font-weight: 700;
 }
 
 .favorites-arrow-wrapper {
-  color: var(--text-muted);
-  opacity: 0.5;
+  color: #8b7355;
+  opacity: 0.6;
+  transition: all 0.25s ease;
 }
 
-/* ========== 设置快捷入口 ========== */
+.favorites-shortcut:hover .favorites-arrow-wrapper {
+  color: #a63131;
+  opacity: 1;
+  transform: translateX(8rpx) scale(1.2);
+}
+
+/* ========== 设置快捷入口 - 增强悬停效果 ========== */
 .settings-shortcut-wrapper {
   margin: 24rpx auto 0;
   max-width: 520rpx;
   opacity: 0;
   transform: translateY(20px);
-  transition: all 0.6s ease;
+  transition: all 0.25s ease;
 }
 
 .settings-shortcut-wrapper.visible {
@@ -651,49 +777,93 @@ export default {
 .settings-shortcut {
   display: flex;
   align-items: center;
-  gap: 28rpx;
-  padding: 28rpx 36rpx;
-  background: var(--bg-secondary);
-  border-radius: 12rpx;
-  border: 2rpx solid var(--border);
-  box-shadow: var(--shadow);
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 32rpx;
+  padding: 32rpx 40rpx;
+  background: linear-gradient(135deg, #f2ead3 0%, #ebe4d0 100%);
+  border-radius: 28rpx;
+  border: 3rpx solid #c2b095;
+  box-shadow: 
+    0 6rpx 18rpx rgba(114, 90, 61, 0.12),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.7);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  opacity: 0.8;
+  opacity: 0.92;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.settings-shortcut:hover {
+  opacity: 1;
+  transform: translateY(-5rpx) scale(1.03);
+  border-color: #725a3d;
+  border-width: 4rpx;
+  background: linear-gradient(135deg, #f5efe0 0%, #eee8d4 100%);
+  box-shadow: 
+    0 12rpx 32rpx rgba(114, 90, 61, 0.2),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.75);
 }
 
 .settings-shortcut:active {
-  transform: scale(0.98);
+  transform: translateY(-2rpx) scale(1.01);
+  box-shadow: 
+    0 6rpx 16rpx rgba(114, 90, 61, 0.15),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.7);
 }
 
 .settings-icon-wrapper {
-  color: var(--secondary);
+  color: #725a3d;
+  transition: all 0.25s ease;
+}
+
+.settings-shortcut:hover .settings-icon-wrapper {
+  color: #a63131;
+  transform: rotate(90deg) scale(1.18);
 }
 
 .settings-info {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 2rpx;
+  gap: 4rpx;
 }
 
 .settings-title {
-  font-size: 30rpx;
-  font-weight: bold;
-  color: var(--text-secondary);
+  font-size: 32rpx;
+  font-weight: 800;
+  color: #5a4a3a;
   font-family: 'TsangerJinKai', serif;
+  transition: color 0.25s ease;
+}
+
+.settings-shortcut:hover .settings-title {
+  color: #2c1e13;
+  transform: scale(1.05);
 }
 
 .settings-desc {
-  font-size: 22rpx;
-  color: var(--text-tertiary);
+  font-size: 24rpx;
+  color: #8b7355;
+  transition: color 0.25s ease;
+  font-weight: 500;
+}
+
+.settings-shortcut:hover .settings-desc {
+  color: #725a3d;
+  font-weight: 600;
 }
 
 .settings-arrow-wrapper {
-  color: var(--text-muted);
-  opacity: 0.4;
+  color: #a89070;
+  opacity: 0.55;
+  transition: all 0.25s ease;
+}
+
+.settings-shortcut:hover .settings-arrow-wrapper {
+  color: #725a3d;
+  opacity: 1;
+  transform: translateX(8rpx) scale(1.2);
 }
 
 .brush-border-ink::before {
