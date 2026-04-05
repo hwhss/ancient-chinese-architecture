@@ -52,6 +52,18 @@
                 </view>
               </view>
             </view>
+
+            <!-- 图片来源 -->
+            <view class="setting-item tap-feedback" @click="chooseImageSource">
+              <view class="item-left">
+                <TraditionalIcon name="tower" size="36" color="var(--secondary)" />
+                <text class="item-label">图片来源</text>
+              </view>
+              <view class="item-right">
+                <text class="item-value">{{ imageSourceText }}</text>
+                <text class="item-arrow">›</text>
+              </view>
+            </view>
           </view>
         </view>
   
@@ -137,6 +149,7 @@
 
 <script>
 import TraditionalIcon from '../../components/shared/TraditionalIcon.vue';
+import { getImageSourceSetting, setImageSourceSetting } from '../../services/api';
 
 export default {
   components: {
@@ -146,6 +159,7 @@ export default {
     return {
       // 通知
       notificationsEnabled: true,
+      imageSource: 'object',
 
       // 缓存
       cacheSize: '0 MB',
@@ -178,6 +192,7 @@ export default {
       try {
         const notifications = uni.getStorageSync('NOTIFICATION_SETTING')
         if (notifications !== '') this.notificationsEnabled = notifications
+        this.imageSource = getImageSourceSetting()
       } catch (e) {
         console.warn('加载设置失败:', e)
       }
@@ -187,9 +202,27 @@ export default {
     saveSettings() {
       try {
         uni.setStorageSync('NOTIFICATION_SETTING', this.notificationsEnabled)
+        setImageSourceSetting(this.imageSource)
       } catch (e) {
         console.warn('保存设置失败:', e)
       }
+    },
+
+    chooseImageSource() {
+      const itemList = ['对象存储（七牛）', '本地存储']
+      uni.showActionSheet({
+        itemList,
+        success: (res) => {
+          const next = res.tapIndex === 1 ? 'local' : 'object'
+          this.imageSource = next
+          this.saveSettings()
+          uni.showToast({
+            title: next === 'local' ? '已切换到本地存储' : '已切换到对象存储',
+            icon: 'none',
+            duration: 1500
+          })
+        }
+      })
     },
 
     // 切换通知
@@ -225,11 +258,13 @@ export default {
             try {
               // 清除本地存储（保留设置）
               const notification = uni.getStorageSync('NOTIFICATION_SETTING')
+              const imageSource = this.imageSource
 
               uni.clearStorageSync()
 
               // 恢复设置
               uni.setStorageSync('NOTIFICATION_SETTING', notification)
+              this.imageSource = setImageSourceSetting(imageSource)
 
               this.cacheSize = '0 MB'
               uni.showToast({
@@ -291,6 +326,12 @@ export default {
           }
         }
       })
+    }
+  },
+
+  computed: {
+    imageSourceText() {
+      return this.imageSource === 'local' ? '本地存储' : '对象存储'
     }
   }
 }

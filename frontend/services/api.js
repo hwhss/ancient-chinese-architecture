@@ -1,4 +1,6 @@
 const DEFAULT_API_BASE_URL = "http://39.106.6.53";
+const IMAGE_SOURCE_STORAGE_KEY = "IMAGE_SOURCE_SETTING";
+const DEFAULT_IMAGE_SOURCE = "object";
 
 function normalizeBaseUrl(url) {
   const value = String(url || "").trim();
@@ -34,10 +36,27 @@ function isHttpUrl(url) {
   return /^https?:\/\//i.test(String(url || "").trim());
 }
 
+function normalizeImageSource(value) {
+  const mode = String(value || "").trim().toLowerCase();
+  return mode === "local" ? "local" : "object";
+}
+
+function getRuntimeImageSource() {
+  try {
+    if (typeof uni !== "undefined" && uni.getStorageSync) {
+      return normalizeImageSource(uni.getStorageSync(IMAGE_SOURCE_STORAGE_KEY));
+    }
+  } catch (error) {
+    return DEFAULT_IMAGE_SOURCE;
+  }
+  return DEFAULT_IMAGE_SOURCE;
+}
+
 let apiBaseUrl =
   getRuntimeBaseUrl() ||
   getEnvBaseUrl() ||
   normalizeBaseUrl(DEFAULT_API_BASE_URL);
+let imageSource = getRuntimeImageSource();
 
 function normalizeError(error, fallbackMessage) {
   if (!error) {
@@ -89,6 +108,9 @@ function request(url, method = "GET", data) {
       url: `${apiBaseUrl}${url}`,
       method,
       data,
+      header: {
+        "X-Image-Source": imageSource,
+      },
       timeout: 10000,
       success: (response) => {
         const result = response.data || {};
@@ -155,6 +177,22 @@ export function clearApiBaseUrl() {
   }
 
   return apiBaseUrl;
+}
+
+export function getImageSourceSetting() {
+  return imageSource;
+}
+
+export function setImageSourceSetting(value) {
+  imageSource = normalizeImageSource(value);
+  try {
+    if (typeof uni !== "undefined" && uni.setStorageSync) {
+      uni.setStorageSync(IMAGE_SOURCE_STORAGE_KEY, imageSource);
+    }
+  } catch (error) {
+    // ignore storage failures and keep in-memory override
+  }
+  return imageSource;
 }
 
 export async function healthCheck() {

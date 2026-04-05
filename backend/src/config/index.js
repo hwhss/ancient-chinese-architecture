@@ -55,6 +55,8 @@ const config = {
   qiniuUseHttps: toBoolean(process.env.QINIU_USE_HTTPS, true),
   qiniuPrivateBucket: toBoolean(process.env.QINIU_PRIVATE_BUCKET, true),
   qiniuDownloadExpireSeconds: toNumber(process.env.QINIU_DOWNLOAD_EXPIRE_SECONDS, 600),
+  imageSourceMode: String(process.env.IMAGE_SOURCE_MODE || 'object').trim().toLowerCase(),
+  localAssetBaseUrl: String(process.env.LOCAL_ASSET_BASE_URL || '').trim().replace(/\/$/, ''),
   embeddingProvider: String(process.env.EMBEDDING_PROVIDER || 'dashscope').trim().toLowerCase(),
   embeddingApiUrl: String(process.env.EMBEDDING_API_URL || 'https://dashscope.aliyuncs.com/compatible-mode/v1').trim(),
   embeddingApiKey: String(process.env.EMBEDDING_API_KEY || String(process.env.DASHSCOPE_API_KEY || '')).trim(),

@@ -116,8 +116,8 @@
   "buildings": {
     "palace": {
       "file": "buildings/palace.json",
-      "count": 8,
-      "description": "宫殿建筑数据，包括故宫三大殿、布达拉宫、沈阳故宫、唐代建筑等"
+      "count": 4,
+      "description": "宫殿建筑数据，包括故宫三大殿、沈阳故宫等"
     },
     "garden": {
       "file": "buildings/garden.json",
@@ -131,8 +131,8 @@
     },
     "tower": {
       "file": "buildings/tower.json",
-      "count": 3,
-      "description": "塔楼建筑数据，包括应县木塔、大雁塔、小雁塔等"
+      "count": 0,
+      "description": "塔楼建筑数据"
     },
     "defense": {
       "file": "buildings/defense.json",

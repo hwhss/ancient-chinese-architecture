@@ -8,13 +8,57 @@ const { buildSignedAssetUrl } = require('../utils/signedAsset');
 const { verifyAssetOwnership } = require('./assetVerification');
 const { getOptimizedSignedUrl } = require('./qiniuService');
 
+function normalizeImageSourceMode(mode) {
+  const value = String(mode || '').trim().toLowerCase();
+  return value === 'local' ? 'local' : 'object';
+}
+
+function getImageSourceMode(requester) {
+  const fromRequester = normalizeImageSourceMode(requester && requester.imageSource);
+  if (requester && requester.imageSource) {
+    return fromRequester;
+  }
+  return normalizeImageSourceMode(config.imageSourceMode);
+}
+
+function buildLocalAssetUrl(value) {
+  const localBase = String(config.localAssetBaseUrl || '').trim().replace(/\/$/, '');
+  if (!localBase) {
+    return value;
+  }
+
+  if (/^https?:\/\//i.test(value)) {
+    try {
+      const parsed = new URL(value);
+      const key = String(parsed.pathname || '').replace(/^\/+/, '');
+      if (!key) {
+        return value;
+      }
+      return `${localBase}/${key}`;
+    } catch (error) {
+      return value;
+    }
+  }
+
+  return `${localBase}/${String(value).replace(/^\/+/, '')}`;
+}
+
 /**
  * 确保返回的是可直接访问的签名 URL。
  * 处理逻辑同 materialService。
  */
-function ensureSignedUrl(url, options = {}) {
+function ensureSignedUrl(url, options = {}, requester = null) {
   const value = String(url || '').trim();
-  if (!value || /^https?:\/\//i.test(value)) {
+  if (!value) {
+    return value;
+  }
+
+  const mode = getImageSourceMode(requester);
+  if (mode === 'local') {
+    return buildLocalAssetUrl(value);
+  }
+
+  if (/^https?:\/\//i.test(value)) {
     return value;
   }
   try {
@@ -83,12 +127,12 @@ function buildBuildingAssetVerification(item) {
   });
 }
 
-function buildListThumbnailUrl(resourceUrl) {
+function buildListThumbnailUrl(resourceUrl, requester) {
   // 列表页使用 480 宽度的缩略图
-  return ensureSignedUrl(resourceUrl, { width: 480, quality: 75 });
+  return ensureSignedUrl(resourceUrl, { width: 480, quality: 75 }, requester);
 }
 
-function buildModel3d(profile, fallbackPoster) {
+function buildModel3d(profile, fallbackPoster, requester) {
   const model3d = profile && profile.model3d ? profile.model3d : null;
   if (!model3d) {
     return {
@@ -114,7 +158,7 @@ function buildModel3d(profile, fallbackPoster) {
     canView,
     viewerType: model3d.viewerType || 'model-viewer',
     modelUrl: fallbackModelUrl,
-    poster: ensureSignedUrl(posterUrl, { quality: 85 }),
+    poster: ensureSignedUrl(posterUrl, { quality: 85 }, requester),
     note: model3d.note || ''
   };
 }
@@ -311,14 +355,14 @@ function buildPreloadInfo(model3d, defaultVersion, buildingId, requester) {
   };
 }
 
-function buildBuildingSummary(item) {
+function buildBuildingSummary(item, requester) {
   return getBuildingProfileById(item.id).then((profile) => {
     const safeProfile = profile || {};
     const assetVerification = buildBuildingAssetVerification(item);
     const rawImage = assetVerification.verified ? assetVerification.url : '';
-    const safeImage = ensureSignedUrl(rawImage, { quality: 85 });
-    const listImage = buildListThumbnailUrl(rawImage);
-    const model3d = buildModel3d(safeProfile, listImage);
+    const safeImage = ensureSignedUrl(rawImage, { quality: 85 }, requester);
+    const listImage = buildListThumbnailUrl(rawImage, requester);
+    const model3d = buildModel3d(safeProfile, listImage, requester);
     const visualization = buildVisualizationMeta(item);
 
     return {
@@ -345,13 +389,13 @@ function buildBuildingSummary(item) {
   });
 }
 
-async function buildBuildingDetail(item) {
+async function buildBuildingDetail(item, requester) {
   const profile = await getBuildingProfileById(item.id) || {};
   const assetVerification = buildBuildingAssetVerification(item);
   const rawImage = assetVerification.verified ? assetVerification.url : '';
   // 详情页主图，设置较大尺寸和较好质量
-  const safeImage = ensureSignedUrl(rawImage, { width: 1200, quality: 85 });
-  const model3d = buildModel3d(profile, safeImage);
+  const safeImage = ensureSignedUrl(rawImage, { width: 1200, quality: 85 }, requester);
+  const model3d = buildModel3d(profile, safeImage, requester);
   const visualization = buildVisualizationMeta(item);
 
   return {
@@ -383,7 +427,7 @@ async function buildBuildingDetail(item) {
   };
 }
 
-async function listBuildings(query = {}) {
+async function listBuildings(query = {}, requester = null) {
   const allBuildings = await getBuildings();
   const { category, q } = query;
 
@@ -402,15 +446,15 @@ async function listBuildings(query = {}) {
     return text.includes(String(q).toLowerCase());
   });
 
-  return Promise.all(filtered.map((item) => buildBuildingSummary(item)));
+  return Promise.all(filtered.map((item) => buildBuildingSummary(item, requester)));
 }
 
-async function getBuilding(id) {
+async function getBuilding(id, requester = null) {
   const item = await getBuildingById(id);
   if (!item) {
     return null;
   }
-  return buildBuildingDetail(item);
+  return buildBuildingDetail(item, requester);
 }
 
 async function getBuildingModel3d(id, requester) {
@@ -447,7 +491,7 @@ async function getBuildingModel3dManifest(id, requester) {
   }
 
   const profile = await getBuildingProfileById(id) || {};
-  const model3d = buildModel3d(profile, item.image);
+  const model3d = buildModel3d(profile, item.image, requester);
   const versions = normalizeModelVersions(profile.model3d || null)
     .filter((versionItem) => canRequesterAccessVersion(requester, versionItem))
     .map((versionItem) => buildSignedVersion(versionItem, id, requester));

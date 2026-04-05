@@ -3,17 +3,57 @@ const {
   getMaterialLinks,
   getBuildingById
 } = require('../repositories/dataRepository');
+const config = require('../config');
 const { verifyAssetOwnership } = require('./assetVerification');
 const { getOptimizedSignedUrl } = require('./qiniuService');
+
+function normalizeImageSourceMode(mode) {
+  const value = String(mode || '').trim().toLowerCase();
+  return value === 'local' ? 'local' : 'object';
+}
+
+function getImageSourceMode(requester) {
+  if (requester && requester.imageSource) {
+    return normalizeImageSourceMode(requester.imageSource);
+  }
+  return normalizeImageSourceMode(config.imageSourceMode);
+}
+
+function buildLocalAssetUrl(value) {
+  const localBase = String(config.localAssetBaseUrl || '').trim().replace(/\/$/, '');
+  if (!localBase) {
+    return value;
+  }
+
+  if (/^https?:\/\//i.test(value)) {
+    try {
+      const parsed = new URL(value);
+      const key = String(parsed.pathname || '').replace(/^\/+/, '');
+      if (!key) {
+        return value;
+      }
+      return `${localBase}/${key}`;
+    } catch (error) {
+      return value;
+    }
+  }
+
+  return `${localBase}/${String(value).replace(/^\/+/, '')}`;
+}
 
 /**
  * 确保返回的是可直接访问的签名 URL。
  * 如果输入已经是 http(s) 开头，则原样返回；否则视为七牛 Key 进行签名。
  */
-function ensureSignedUrl(url, options = {}) {
+function ensureSignedUrl(url, options = {}, requester = null) {
   const value = String(url || '').trim();
   if (!value) {
     return '';
+  }
+
+  const mode = getImageSourceMode(requester);
+  if (mode === 'local') {
+    return buildLocalAssetUrl(value);
   }
 
   if (/^https?:\/\//i.test(value)) {
@@ -29,7 +69,7 @@ function ensureSignedUrl(url, options = {}) {
   }
 }
 
-async function getMaterial(materialId) {
+async function getMaterial(materialId, requester = null) {
   if (!materialId) {
     return null;
   }
@@ -59,12 +99,12 @@ async function getMaterial(materialId) {
 
   return {
     ...material,
-    url: ensureSignedUrl(assetVerification.url),
+    url: ensureSignedUrl(assetVerification.url, {}, requester),
     assetVerification
   };
 }
 
-async function listMaterials(query = {}) {
+async function listMaterials(query = {}, requester = null) {
   const list = await getMaterialLinks();
   const { type } = query;
 
@@ -95,7 +135,7 @@ async function listMaterials(query = {}) {
 
         return {
           ...item,
-          url: ensureSignedUrl(assetVerification.url, urlOptions),
+          url: ensureSignedUrl(assetVerification.url, urlOptions, requester),
           assetVerification
         };
       })

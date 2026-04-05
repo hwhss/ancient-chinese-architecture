@@ -13,28 +13,44 @@
       {
         "id": "m1",
         "name": "重檐庑殿顶",
-        "position": [0, 8, 0],
+        "position": [
+          0,
+          8,
+          0
+        ],
         "desc": "太和殿采用重檐庑殿顶，是中国古建筑中等级最高的屋顶形式，仅用于皇宫主殿",
         "linkUrl": "/knowledge/wudian"
       },
       {
         "id": "m2",
         "name": "斗拱",
-        "position": [2, 4, 0],
+        "position": [
+          2,
+          4,
+          0
+        ],
         "desc": "太和殿使用溜金斗拱，出踩数达九踩，体现了最高等级的建筑规格",
         "linkUrl": "/knowledge/dougong"
       },
       {
         "id": "m3",
         "name": "汉白玉台基",
-        "position": [0, 0.5, 0],
+        "position": [
+          0,
+          0.5,
+          0
+        ],
         "desc": "三层汉白玉台基，高8.13米，象征皇权至高无上",
         "linkUrl": "/knowledge/taiji"
       },
       {
         "id": "m4",
         "name": "金龙和玺彩画",
-        "position": [1, 5, 1],
+        "position": [
+          1,
+          5,
+          1
+        ],
         "desc": "最高等级的彩画形式，以金龙为主要图案",
         "linkUrl": "/knowledge/caihua"
       }
@@ -43,53 +59,6 @@
     "category": "palace",
     "sourceUrl": "https://www.dpm.org.cn/explore/building/236465.html",
     "sourceName": "故宫博物院官网",
-    "confidence": "high",
-    "collectedAt": "2026-03-31"
-  },
-  {
-    "modelId": "ancient_tower_01",
-    "modelName": "应县木塔",
-    "modelUrl": "/assets/models/yingxian_tower.glb",
-    "initConfig": {
-      "autoRotate": true,
-      "rotationX": 0,
-      "rotationY": 0.3,
-      "cameraZ": 25
-    },
-    "markers": [
-      {
-        "id": "m1",
-        "name": "塔顶",
-        "position": [0, 30, 0],
-        "desc": "塔高67.31米，是世界上现存最高大的木结构塔式建筑",
-        "linkUrl": "/knowledge/muta"
-      },
-      {
-        "id": "m2",
-        "name": "斗拱层",
-        "position": [3, 15, 0],
-        "desc": "全塔使用54种斗拱，被誉为\"斗拱博物馆\"",
-        "linkUrl": "/knowledge/dougong"
-      },
-      {
-        "id": "m3",
-        "name": "暗层",
-        "position": [2, 10, 1],
-        "desc": "塔内设有四个暗层，用于加固结构",
-        "linkUrl": "/knowledge/muta"
-      },
-      {
-        "id": "m4",
-        "name": "塔基",
-        "position": [0, 1, 0],
-        "desc": "石砌台基，直径30.27米，承受全塔约7400吨重量",
-        "linkUrl": "/knowledge/taiji"
-      }
-    ],
-    "buildingId": "yingxian_wooden_tower",
-    "category": "tower",
-    "sourceUrl": "https://baike.baidu.com/item/应县佛宫寺/15562495",
-    "sourceName": "百度百科",
     "confidence": "high",
     "collectedAt": "2026-03-31"
   },
@@ -107,21 +76,33 @@
       {
         "id": "m1",
         "name": "主拱",
-        "position": [0, 5, 0],
+        "position": [
+          0,
+          5,
+          0
+        ],
         "desc": "单孔敞肩石拱，跨度37.02米，是世界上现存最早的敞肩拱桥",
         "linkUrl": "/knowledge/qiao"
       },
       {
         "id": "m2",
         "name": "小拱",
-        "position": [8, 3, 0],
+        "position": [
+          8,
+          3,
+          0
+        ],
         "desc": "两肩各有两个小拱，减轻自重、增加泄洪能力",
         "linkUrl": "/knowledge/qiao"
       },
       {
         "id": "m3",
         "name": "桥面",
-        "position": [0, 6, 0],
+        "position": [
+          0,
+          6,
+          0
+        ],
         "desc": "桥长64.4米，宽9.6米，可通行车马",
         "linkUrl": "/knowledge/qiao"
       }
@@ -147,21 +128,33 @@
       {
         "id": "m1",
         "name": "水面",
-        "position": [0, 0, 0],
+        "position": [
+          0,
+          0,
+          0
+        ],
         "desc": "水面占比达3/5，体现明代园林自然风格",
         "linkUrl": "/knowledge/yuanlin"
       },
       {
         "id": "m2",
         "name": "远香堂",
-        "position": [5, 2, 3],
+        "position": [
+          5,
+          2,
+          3
+        ],
         "desc": "园中主厅，四面环水，夏季荷花飘香",
         "linkUrl": "/knowledge/yuanlin"
       },
       {
         "id": "m3",
         "name": "小飞虹",
-        "position": [-3, 1, 2],
+        "position": [
+          -3,
+          1,
+          2
+        ],
         "desc": "廊桥式建筑，造型优美",
         "linkUrl": "/knowledge/yuanlin"
       }
