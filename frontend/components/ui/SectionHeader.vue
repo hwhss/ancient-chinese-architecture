@@ -28,22 +28,22 @@ export default {
 <style scoped>
 .section-header {
   text-align: center;
-  margin-bottom: 40rpx;
+  margin-bottom: var(--space-10);
 }
 
 .section-title {
-  font-size: 36rpx;
+  font-size: var(--text-xl);
   font-weight: 700;
   color: var(--text-primary);
-  letter-spacing: 4rpx;
-  margin-bottom: 16rpx;
+  letter-spacing: var(--tracking-wider);
+  margin-bottom: var(--space-4);
   display: block;
 }
 
 .section-subtitle {
   font-size: 26rpx;
   color: var(--text-tertiary);
-  margin-bottom: 20rpx;
+  margin-bottom: var(--space-5);
   display: block;
 }
 
@@ -51,7 +51,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 20rpx;
+  margin-top: var(--space-5);
 }
 
 .window-divider::before,
@@ -69,7 +69,7 @@ export default {
   background: 
     linear-gradient(90deg, transparent 45%, #d4a574 45%, #d4a574 55%, transparent 55%),
     linear-gradient(0deg, transparent 45%, #d4a574 45%, #d4a574 55%, transparent 55%);
-  margin: 0 20rpx;
+  margin: 0 var(--space-5);
   opacity: 0.6;
 }
 </style>

@@ -416,16 +416,17 @@ export default {
               }
             },
             legend: {
-              top: '2%',
+              top: 5,
               left: 'center',
+              bottom: 15,
               textStyle: {
                 color: colors.text,
                 fontSize: 13,
                 fontWeight: 'bold'
               },
               itemGap: 18,
-              itemWidth: 14,
-              itemHeight: 14,
+              itemWidth: 16,
+              itemHeight: 10,
               icon: 'circle'
             },
             grid: {
@@ -496,33 +497,38 @@ export default {
             ...baseOption,
             backgroundColor: colors.bgCard,
             radar: {
-              indicator: data.indicator || [],
+              indicator: data.indicator || [
+                { name: '地域特色', max: 100 },
+                { name: '美观性', max: 100 },
+                { name: '实用性', max: 100 },
+                { name: '工艺水平', max: 100 }
+              ],
               shape: 'polygon',
-              splitNumber: 5,
-              radius: '68%',
-              center: ['50%', '55%'],
+              splitNumber: 4,
+              radius: '55%',
+              center: ['50%', '52%'],
+              startAngle: 90,
               axisName: {
                 color: colors.text,
                 fontSize: 14,
                 fontWeight: 'bold',
-                padding: [8, 8]
-              },
-              splitLine: {
-                lineStyle: {
-                  color: colors.gridLine,
-                  width: 2
-                }
+                padding: [12, 18]
               },
               splitArea: {
                 show: true,
                 areaStyle: {
                   color: [
-                    'rgba(242, 234, 211, 0.3)',
-                    'rgba(232, 222, 195, 0.3)',
-                    'rgba(222, 207, 168, 0.3)',
-                    'rgba(212, 196, 152, 0.25)',
-                    'rgba(202, 185, 136, 0.2)'
+                    'rgba(242, 234, 211, 0.18)',
+                    'rgba(232, 222, 195, 0.12)',
+                    'rgba(222, 207, 168, 0.08)',
+                    'rgba(212, 196, 152, 0.05)'
                   ]
+                }
+              },
+              splitLine: {
+                lineStyle: {
+                  color: colors.gridLine,
+                  width: 1.5
                 }
               },
               axisLine: {
@@ -537,12 +543,16 @@ export default {
               data: data.series || [],
               lineStyle: {
                 width: 3,
-                color: colors.primary
+                color: colors.primary,
+                shadowBlur: 8,
+                shadowColor: 'rgba(200, 37, 6, 0.25)'
               },
               itemStyle: {
                 color: colors.primary,
-                borderColor: colors.bgCard,
-                borderWidth: 3
+                borderColor: '#fff',
+                borderWidth: 2,
+                shadowBlur: 6,
+                shadowColor: 'rgba(200, 37, 6, 0.35)'
               },
               areaStyle: {
                 color: {
@@ -551,8 +561,8 @@ export default {
                   y: 0.5,
                   r: 0.5,
                   colorStops: [
-                    { offset: 0, color: 'rgba(166, 49, 49, 0.4)' },
-                    { offset: 1, color: 'rgba(166, 49, 49, 0.15)' }
+                    { offset: 0, color: 'rgba(166, 49, 49, 0.45)' },
+                    { offset: 1, color: 'rgba(166, 49, 49, 0.12)' }
                   ]
                 }
               },
@@ -1098,6 +1108,32 @@ export default {
 
 .chart-container {
   width: 100%;
-  min-height: 400rpx;
+  min-height: 450rpx;
+}
+
+@media (max-width: 767px) {
+  .chart-container {
+    min-height: 380rpx;
+  }
+  
+  .visual-chart-container {
+    border-radius: 16rpx;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .chart-container {
+    min-height: 420rpx;
+  }
+}
+
+@media (min-width: 1024px) {
+  .chart-container {
+    min-height: 480rpx;
+  }
+  
+  .visual-chart-container {
+    border-radius: 24rpx;
+  }
 }
 </style>

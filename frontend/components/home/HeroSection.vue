@@ -408,10 +408,11 @@ export default {
   cursor: pointer;
   opacity: 0;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   will-change: transform, box-shadow;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  z-index: 1;
 }
 
 .hero-btn.visible {
@@ -433,6 +434,7 @@ export default {
     0 20rpx 48rpx rgba(166, 49, 49, 0.5),
     0 12rpx 28rpx rgba(166, 49, 49, 0.3),
     inset 0 1rpx 0 rgba(255, 255, 255, 0.25);
+  z-index: 100;
 }
 
 .hero-btn.primary:active {
@@ -460,6 +462,7 @@ export default {
   box-shadow: 
     0 16rpx 40rpx rgba(114, 90, 61, 0.3),
     inset 0 1rpx 0 rgba(255, 255, 255, 0.85);
+  z-index: 100;
 }
 
 .hero-btn.secondary:active {
@@ -570,10 +573,13 @@ export default {
   -webkit-tap-highlight-color: transparent;
   padding: 12rpx;
   border-radius: 28rpx;
+  position: relative;
+  z-index: 1;
 }
 
 .category-item:hover {
   transform: translateY(-10rpx) scale(1.08);
+  z-index: 100;
 }
 
 .category-item:active {
@@ -652,9 +658,10 @@ export default {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  z-index: 1;
 }
 
 .favorites-shortcut::before {
@@ -666,6 +673,7 @@ export default {
   width: 10rpx;
   background: linear-gradient(180deg, #d49c4d 0%, #a63131 100%);
   border-radius: 28rpx 0 0 28rpx;
+  z-index: -1;
 }
 
 .favorites-shortcut:hover {
@@ -675,6 +683,7 @@ export default {
   box-shadow: 
     0 16rpx 44rpx rgba(114, 90, 61, 0.3),
     inset 0 1rpx 0 rgba(255, 255, 255, 0.85);
+  z-index: 100;
 }
 
 .favorites-shortcut:active {
@@ -788,10 +797,11 @@ export default {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   opacity: 0.92;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  z-index: 1;
 }
 
 .settings-shortcut:hover {
@@ -803,6 +813,7 @@ export default {
   box-shadow: 
     0 12rpx 32rpx rgba(114, 90, 61, 0.2),
     inset 0 1rpx 0 rgba(255, 255, 255, 0.75);
+  z-index: 100;
 }
 
 .settings-shortcut:active {

@@ -1,6 +1,6 @@
 <template>
-  <view 
-    class="building-card card-ink" 
+  <view
+    class="building-card"
     :class="{ 'visible': visible }"
     @click="handleClick"
   >
@@ -84,20 +84,26 @@ export default {
 
 <style scoped>
 .building-card {
-  background: linear-gradient(135deg, #fffef9 0%, #f9f5e8 100%);
-  border-radius: 24rpx;
-  overflow: hidden;
-  border: 2rpx solid #e8dec3;
-  box-shadow: 
-    0 6rpx 20rpx rgba(114, 90, 61, 0.1),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(145deg, #fffef9 0%, #faf6ed 50%, #f5efe0 100%);
+  border-radius: var(--radius-lg);
+  overflow: visible;
+  border: 2rpx solid rgba(232, 222, 195, 0.8);
+  box-shadow:
+    var(--shadow-md),
+    0 1rpx 4rpx rgba(114, 90, 61, 0.04),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.9);
+  transition:
+    transform var(--duration-slow) var(--ease-out),
+    box-shadow var(--duration-slow) var(--ease-out),
+    border-color var(--duration-slow) ease,
+    background var(--duration-slow) ease;
   opacity: 0;
-  transform: translateY(30rpx);
+  transform: translateY(var(--space-6));
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   position: relative;
+  z-index: 1;
 }
 
 .building-card.visible {
@@ -106,20 +112,25 @@ export default {
 }
 
 .building-card:hover {
-  transform: translateY(-20rpx) scale(1.12);
-  box-shadow: 
-    0 36rpx 72rpx rgba(114, 90, 61, 0.5),
-    0 20rpx 44rpx rgba(166, 49, 49, 0.4),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.98);
-  border-color: #a63131;
-  border-width: 5rpx;
+  transform: var(--hover-lift) scale(1.04);
+  background: linear-gradient(145deg, #fffcf5 0%, #fef9ed 50%, #fdf5e6 100%);
+  box-shadow:
+    var(--shadow-xl),
+    0 8rpx 24rpx rgba(166, 49, 49, 0.12),
+    0 2rpx 8rpx rgba(114, 90, 61, 0.06),
+    inset 0 1rpx 0 rgba(255, 255, 255, 1);
+  border-color: rgba(200, 160, 100, 0.6);
+  border-width: 2rpx;
+  z-index: 100;
 }
 
 .building-card:active {
-  transform: translateY(-6rpx) scale(1.03);
-  box-shadow: 
-    0 12rpx 32rpx rgba(114, 90, 61, 0.2),
+  transform: translateY(-2rpx) scale(1.01);
+  box-shadow:
+    var(--shadow-lg),
+    0 2rpx 8rpx rgba(166, 49, 49, 0.08),
     inset 0 1rpx 0 rgba(255, 255, 255, 0.85);
+  transition-duration: var(--duration-fast);
 }
 
 .card-image-wrapper {
@@ -134,11 +145,14 @@ export default {
   height: 100%;
   background-size: cover;
   background-position: center;
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              filter 0.35s ease;
+  will-change: transform;
 }
 
 .building-card:hover .card-image {
-  transform: scale(1.32);
+  transform: scale(1.08);
+  filter: saturate(1.15) brightness(1.03);
 }
 
 .card-image-overlay {
@@ -146,165 +160,199 @@ export default {
   bottom: 0;
   left: 0;
   right: 0;
-  height: 75%;
-  background: linear-gradient(to top, rgba(44, 30, 19, 0.65), transparent);
+  height: 60%;
+  background: linear-gradient(to top,
+    rgba(44, 30, 19, 0.5) 0%,
+    rgba(44, 30, 19, 0.25) 40%,
+    transparent 100%);
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.25s ease;
+  transition: opacity 0.35s ease, height 0.35s ease;
 }
 
 .building-card:hover .card-image-overlay {
   opacity: 1;
+  height: 70%;
 }
 
 .card-content {
-  padding: 28rpx;
+  padding: var(--space-6) var(--space-6) var(--space-6);
   position: relative;
   z-index: 2;
-  transition: transform 0.25s ease;
+  transition: transform var(--duration-slow) ease;
 }
 
 .building-card:hover .card-content {
-  transform: translateY(-4rpx);
+  transform: translateY(-2rpx);
 }
 
 .card-name {
-  font-size: 32rpx;
+  font-size: var(--text-lg);
   font-weight: 800;
-  color: #2c1e13;
-  margin-bottom: 12rpx;
+  color: var(--text-primary);
+  margin-bottom: var(--space-2);
   display: block;
-  transition: color 0.25s ease;
+  transition:
+    color var(--duration-slow) ease,
+    letter-spacing var(--duration-slow) ease,
+    text-shadow var(--duration-slow) ease;
   letter-spacing: 1.5rpx;
+  line-height: var(--leading-tight);
 }
 
 .building-card:hover .card-name {
-  color: #a63131;
-  transform: scale(1.12);
-  letter-spacing: 4.5rpx;
-  text-shadow: 0 3rpx 12rpx rgba(166, 49, 49, 0.3);
+  color: var(--primary);
+  letter-spacing: 3rpx;
+  text-shadow: 0 2rpx 10rpx rgba(166, 49, 49, 0.18);
 }
 
 .card-desc {
-  font-size: 25rpx;
-  color: #5a4a3a;
-  line-height: 1.65;
-  margin-bottom: 18rpx;
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  line-height: var(--leading-normal);
+  margin-bottom: var(--space-4);
   display: block;
-  transition: color 0.25s ease;
+  transition:
+    color var(--duration-slow) ease,
+    opacity var(--duration-slow) ease;
 }
 
 .building-card:hover .card-desc {
   color: #4a3a2a;
-  font-weight: 500;
 }
 
 .card-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 10rpx;
+  gap: var(--space-2);
 }
 
 .card-tag {
-  font-size: 22rpx;
-  color: #725a3d;
-  background: linear-gradient(135deg, rgba(249, 245, 232, 0.95) 0%, rgba(242, 234, 211, 0.95) 100%);
-  padding: 8rpx 16rpx;
-  border-radius: 24rpx;
-  border: 2rpx solid #e8dec3;
-  transition: all 0.25s ease;
+  font-size: var(--text-xs);
+  color: var(--secondary);
+  background: linear-gradient(135deg, rgba(250, 245, 235, 0.95) 0%, rgba(240, 232, 215, 0.95) 100%);
+  padding: 7rpx 16rpx;
+  border-radius: var(--radius-full);
+  border: 1.5rpx solid rgba(220, 210, 190, 0.7);
+  transition:
+    all var(--duration-slow) var(--ease-out),
+    background var(--duration-slow) ease;
   font-weight: 600;
 }
 
 .building-card:hover .card-tag {
-  background: linear-gradient(135deg, rgba(242, 234, 211, 1) 0%, rgba(232, 222, 195, 1) 100%);
-  border-color: #a63131;
-  color: #a63131;
-  transform: scale(1.18);
-  font-weight: 800;
-  box-shadow: 0 6rpx 16rpx rgba(166, 49, 49, 0.3);
+  background: linear-gradient(135deg, rgba(255, 250, 238, 1) 0%, rgba(248, 240, 224, 1) 100%);
+  border-color: rgba(180, 140, 80, 0.55);
+  color: #8b6914;
+  transform: translateY(-1rpx);
+  box-shadow: 0 3rpx 10rpx rgba(139, 105, 20, 0.12);
 }
 
-/* 卡片水墨效果 */
-.card-ink {
-  position: relative;
-}
-
-.card-ink::before {
+/* 光泽扫过效果 */
+.building-card::before {
   content: '';
   position: absolute;
   top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: 
-    radial-gradient(circle at 20% 30%, rgba(166, 49, 49, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 80% 70%, rgba(114, 90, 61, 0.08) 0%, transparent 50%);
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 45%,
+    rgba(255, 255, 255, 0.35) 50%,
+    rgba(255, 255, 255, 0.15) 55%,
+    transparent 100%
+  );
   pointer-events: none;
-  z-index: 1;
-  opacity: 0;
-  transition: opacity 0.25s ease;
+  z-index: 10;
+  transition: left 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition-delay: 0.1s;
 }
 
-.building-card:hover .card-ink::before {
-  opacity: 1;
+.building-card:hover::before {
+  left: 150%;
 }
 
-/* 卡片高亮边框效果 */
-.card-ink::after {
+/* 底部渐变高光条 */
+.building-card::after {
   content: '';
   position: absolute;
-  top: -3rpx;
-  left: -3rpx;
-  right: -3rpx;
-  bottom: -3rpx;
-  border-radius: 24rpx;
-  background: linear-gradient(135deg, #a63131 0%, #d49c4d 35%, #a63131 70%, #725a3d 100%);
-  opacity: 0;
-  transition: opacity 0.25s ease;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 70%;
+  height: 3rpx;
+  background: linear-gradient(90deg, transparent, #c8a060, #a63131, #c8a060, transparent);
+  border-radius: 0 0 20rpx 20rpx;
   pointer-events: none;
-  z-index: -1;
+  z-index: 5;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  opacity: 0.8;
 }
 
-.building-card:hover .card-ink::after {
-  opacity: 0.9;
+.building-card:hover::after {
+  transform: translateX(-50%) scaleX(1);
 }
 
-/* 无障碍支持 */
+/* 无障碍：减少动画 */
 @media (prefers-reduced-motion: reduce) {
   .building-card,
+  .building-card::before,
+  .building-card::after,
   .card-image,
   .card-content,
   .card-name,
   .card-desc,
   .card-tag,
-  .card-image-overlay,
-  .card-ink::before,
-  .card-ink::after {
-    transition: none;
+  .card-image-overlay {
+    transition: none !important;
   }
-  
+
   .building-card:hover {
-    transform: none;
+    transform: none !important;
   }
-  
+
   .building-card:hover .card-image {
-    transform: none;
+    transform: none !important;
+    filter: none !important;
+  }
+
+  .building-card:hover::before {
+    display: none;
+  }
+
+  .building-card:hover::after {
+    transform: translateX(-50%) scaleX(1) !important;
   }
 }
 
-/* 仅在支持悬停的设备上启用效果 */
-@media (hover: hover) {
+/* 仅在支持悬停的设备上启用完整效果 */
+@media (hover: hover) and (pointer: fine) {
   .building-card:hover {
-    /* 悬停效果已定义 */
+    /* 完整悬停效果 */
   }
 }
 
 /* 触摸设备优化 */
-@media (hover: none) {
+@media (hover: none) and (pointer: coarse) {
+  .building-card {
+    transition:
+      transform 0.2s ease,
+      box-shadow 0.2s ease,
+      background 0.2s ease;
+  }
+
   .building-card:active {
-    transform: scale(0.97);
-    box-shadow: 0 6rpx 16rpx rgba(114, 90, 61, 0.2);
+    transform: scale(0.98);
+    box-shadow:
+      0 4rpx 12rpx rgba(114, 90, 61, 0.12),
+      inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
+  }
+
+  .building-card::before,
+  .building-card::after {
+    display: none;
   }
 }
 </style>

@@ -42,6 +42,9 @@ export default {
 </script>
 
 <style>
+/* 引入设计系统令牌 */
+@import './styles/design-tokens.css';
+
 /* ========== 中式字体引入 ========== */
 /* 
   字体说明：
@@ -85,8 +88,8 @@ page {
   --secondary-light: #9c7e5a;
   --text-primary: #2c1e13;   /* 焦墨 */
   --text-secondary: #5a4a3a; /* 水墨 */
-  --text-tertiary: #8b7355;  /* 赭石 */
-  --text-muted: #a08c70;
+  --text-tertiary: var(--text-tertiary, #6b5a48);  /* 赭石 - 高对比度 */
+  --text-muted: var(--text-muted, #8b7d68);  /* 高对比度 */
   --bg-primary: #f2ead3;     /* 古旧绢本/生宣 */
   --bg-secondary: #e8dec3;
   --bg-tertiary: #decfa8;
@@ -637,12 +640,52 @@ scroll-view {
 
 /* 所有可点击元素的通用反馈 */
 .tap-feedback {
-  transition: transform 0.15s ease, background-color 0.15s ease;
+  transition: transform var(--duration-fast) ease, background-color var(--duration-fast) ease;
 }
 
 .tap-feedback:active {
-  transform: scale(0.96);
+  transform: var(--active-scale);
   background-color: rgba(139, 69, 19, 0.08);
+}
+
+/* ========== 可访问性样式 ========== */
+
+/* 统一焦点样式 */
+:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: var(--focus-offset);
+  border-radius: var(--radius-sm);
+}
+
+/* 跳过链接 */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  padding: var(--space-4) var(--space-8);
+  background: var(--primary);
+  color: white;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  text-decoration: none;
+  font-size: var(--text-sm);
+  transition: top var(--duration-normal) ease;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* 减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* ========== 边框与分割线优化 - 毛笔笔触效果 ========== */

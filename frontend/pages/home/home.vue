@@ -743,7 +743,7 @@ export default {
   bottom: 0;
   background: radial-gradient(ellipse at center, var(--bg-primary) 0%, var(--bg-secondary) 40%, var(--bg-tertiary) 70%, #dcc8b0 100%);
   pointer-events: none;
-  z-index: 0;
+  z-index: -3;
 }
 
 /* 中层：水墨古建远景 */
@@ -758,7 +758,7 @@ export default {
   background-position: bottom;
   opacity: 0.08;
   pointer-events: none;
-  z-index: 1;
+  z-index: -2;
 }
 
 /* 顶层：动态祥云（优化性能） */
@@ -774,7 +774,7 @@ export default {
   opacity: 0.04;
   animation: cloudMove 80s linear infinite;
   pointer-events: none;
-  z-index: 2;
+  z-index: -1;
   will-change: background-position;
 }
 
@@ -799,7 +799,7 @@ export default {
     radial-gradient(ellipse at 80% 60%, rgba(139, 69, 19, 0.03) 0%, transparent 40%),
     radial-gradient(ellipse at 50% 90%, rgba(139, 69, 19, 0.035) 0%, transparent 50%);
   pointer-events: none;
-  z-index: 0;
+  z-index: -4;
 }
 
 .container {
@@ -814,7 +814,7 @@ export default {
   flex: 1;
   height: 100%;
   position: relative;
-  z-index: 1;
+  z-index: 10;
 }
 
 /* 回到顶部按钮 */

@@ -38,11 +38,11 @@ export default {
 <style scoped>
 .feature-card {
   background: linear-gradient(135deg, #fff 0%, #faf6ed 100%);
-  border-radius: 20rpx;
-  padding: 40rpx 32rpx;
+  border-radius: var(--radius-lg);
+  padding: var(--space-10) var(--space-8);
   border: 1rpx solid var(--bg-tertiary);
-  box-shadow: 0 4rpx 16rpx rgba(139, 69, 19, 0.08);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-md);
+  transition: all var(--duration-slow) var(--ease-out);
   opacity: 0;
   transform: translateY(30rpx);
 }
@@ -54,18 +54,18 @@ export default {
 
 .feature-card:active {
   transform: translateY(-4rpx);
-  box-shadow: 0 8rpx 24rpx rgba(139, 69, 19, 0.15);
+  box-shadow: var(--shadow-lg);
 }
 
 .feature-icon {
   width: 80rpx;
   height: 80rpx;
-  margin-bottom: 24rpx;
+  margin-bottom: var(--space-6);
   display: flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, rgba(200, 37, 6, 0.1) 0%, rgba(139, 69, 19, 0.1) 100%);
-  border-radius: 16rpx;
+  border-radius: var(--radius-md);
 }
 
 .feature-icon-text {
@@ -73,17 +73,17 @@ export default {
 }
 
 .feature-title {
-  font-size: 30rpx;
+  font-size: var(--text-lg);
   font-weight: 600;
   color: var(--text-primary);
-  margin-bottom: 16rpx;
+  margin-bottom: var(--space-4);
   display: block;
 }
 
 .feature-desc {
-  font-size: 24rpx;
+  font-size: var(--text-sm);
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--leading-normal);
   display: block;
 }
 
