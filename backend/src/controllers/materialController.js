@@ -20,12 +20,14 @@ async function getMaterialById(req, res, next) {
       return sendError(res, 404, '素材不存在');
     }
 
-    if (!material.assetVerification || !material.assetVerification.verified) {
+    const allowLocalFallback = requester.imageSource === 'local' && Boolean(String(material.url || '').trim());
+    if ((!material.assetVerification || !material.assetVerification.verified) && !allowLocalFallback) {
       return sendError(res, 422, '素材图片未通过后端命名校验', material.assetVerification || null);
     }
 
     return sendSuccess(res, {
       url: material.url,
+      images: Array.isArray(material.images) ? material.images : [],
       type: material.type,
       source: material.source,
       materialId: material.materialId,

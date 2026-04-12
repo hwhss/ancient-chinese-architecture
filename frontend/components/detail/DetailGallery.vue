@@ -2,28 +2,75 @@
   <view>
     <!-- 图片素材 -->
     <view v-if="material.type === 'image'" class="material-wrapper">
-      <swiper
-        v-if="hasImage"
-        class="material-swiper"
-        :style="{ height: swiperHeight + 'px' }"
-        :circular="imageList.length > 1"
-        :indicator-dots="imageList.length > 1"
-        indicator-color="rgba(139, 69, 19, 0.3)"
-        indicator-active-color="#8b4513"
+      <view class="gallery-container">
+        <!-- 主图 Swiper -->
+        <swiper
+          v-if="hasImage"
+          class="material-swiper"
+          :style="{ height: swiperHeight + 'px' }"
+          :current="currentIndex"
+          :circular="imageList.length > 1"
+          @change="onSwiperChange"
+        >
+          <swiper-item v-for="(imgSrc, index) in imageList" :key="index">
+            <view class="swiper-image-box">
+              <image
+                class="material-image"
+                :src="imgSrc"
+                mode="widthFix"
+                lazy-load="true"
+                @load="(e) => onImageLoad(e, index)"
+                @error="$emit('image-error')"
+                @click="previewImage(index)"
+              />
+            </view>
+          </swiper-item>
+        </swiper>
+
+        <!-- 装饰性元素 -->
+        <view class="gallery-decor-top"></view>
+        <view class="gallery-decor-bottom"></view>
+
+        <!-- 分页显示 -->
+        <view v-if="imageList.length > 1" class="gallery-pagination">
+          <text class="pagination-main">{{ currentIndex + 1 }}</text>
+          <text class="pagination-divider">/</text>
+          <text class="pagination-total">{{ imageList.length }}</text>
+        </view>
+
+        <!-- 显式的左右切换按钮 -->
+        <view v-if="imageList.length > 1" class="gallery-nav prev" @click.stop="prevImage">
+          <text class="nav-icon">‹</text>
+        </view>
+        <view v-if="imageList.length > 1" class="gallery-nav next" @click.stop="nextImage">
+          <text class="nav-icon">›</text>
+        </view>
+      </view>
+
+      <!-- 缩略图导航栏 -->
+      <scroll-view 
+        v-if="imageList.length > 1" 
+        class="thumbnail-bar" 
+        scroll-x 
+        :scroll-into-view="'thumb-' + Math.max(0, currentIndex - 2)"
+        scroll-with-animation
       >
-        <swiper-item v-for="(imgSrc, index) in imageList" :key="index">
-          <image
-            class="material-image material-swiper-img"
-            :src="imgSrc"
-            mode="widthFix"
-            lazy-load="true"
-            @load="(e) => onImageLoad(e, index)"
-            @error="$emit('image-error')"
-            @click="previewImage(index)"
-          />
-        </swiper-item>
-      </swiper>
-      <view v-else class="material-empty">
+        <view class="thumbnail-list">
+          <view 
+            v-for="(imgSrc, index) in imageList" 
+            :key="index"
+            :id="'thumb-' + index"
+            class="thumbnail-item"
+            :class="{ active: currentIndex === index }"
+            @click="currentIndex = index"
+          >
+            <image :src="imgSrc" mode="aspectFill" class="thumbnail-image" />
+            <view class="thumbnail-border"></view>
+          </view>
+        </view>
+      </scroll-view>
+
+      <view v-if="!hasImage" class="material-empty">
         <view class="material-empty-icon">🏛️</view>
         <text class="material-empty-title">后端未下发图片</text>
         <text class="material-empty-subtitle">{{ emptyStateText }}</text>
@@ -31,9 +78,13 @@
           校验结果：{{ material.assetVerification.reason || 'asset_name_mismatch' }}
         </text>
       </view>
+
       <view class="material-info">
-        <text class="material-title">{{ materialTitle }}</text>
-        <text class="material-source">参考素材来源：{{ material.source || "未知" }}</text>
+        <view class="title-section">
+          <view class="red-line"></view>
+          <text class="material-title">{{ materialTitle }}</text>
+        </view>
+        <text class="material-source">参考素材来源：{{ material.source || "开发者本地库" }}</text>
         <text v-if="materialNotice" class="material-notice">{{ materialNotice }}</text>
       </view>
     </view>
@@ -85,7 +136,8 @@ export default {
   },
   data() {
     return {
-      swiperHeight: 250 // 默认高度暂定 250px，会在图片加载后重新计算
+      swiperHeight: 250, // 默认高度暂定 250px，会在图片加载后重新计算
+      currentIndex: 0
     };
   },
   computed: {
@@ -109,6 +161,20 @@ export default {
     }
   },
   methods: {
+    onSwiperChange(e) {
+      const next = Number(e && e.detail && e.detail.current);
+      if (Number.isFinite(next) && next >= 0) {
+        this.currentIndex = next;
+      }
+    },
+    prevImage() {
+      if (this.imageList.length <= 1) return;
+      this.currentIndex = (this.currentIndex - 1 + this.imageList.length) % this.imageList.length;
+    },
+    nextImage() {
+      if (this.imageList.length <= 1) return;
+      this.currentIndex = (this.currentIndex + 1) % this.imageList.length;
+    },
     onImageLoad(e, index) {
       if (index === 0) {
         try {
@@ -135,67 +201,62 @@ export default {
         current: index
       });
     }
+  },
+  watch: {
+    imageList: {
+      handler(newVal) {
+        if (newVal && newVal.length > 0) {
+          this.currentIndex = 0;
+        }
+      },
+      immediate: true
+    }
   }
 }
 </script>
 
 <style scoped>
 .material-wrapper {
-  background: #fff;
+  background: var(--bg-card);
   border-radius: 24rpx;
   overflow: hidden;
-  box-shadow:
-    0 8rpx 32rpx rgba(139, 69, 19, 0.12),
-    0 2rpx 8rpx rgba(139, 69, 19, 0.06);
-  border: 2rpx solid var(--bg-tertiary);
-  margin-bottom: 20rpx;
+  box-shadow: 0 12rpx 40rpx rgba(44, 30, 19, 0.08);
+  border: 1rpx solid rgba(139, 115, 85, 0.2);
+  margin-bottom: 30rpx;
 }
 
-.material-empty {
-  min-height: 360rpx;
+.gallery-container {
+  position: relative;
+  background: #000;
+  overflow: hidden;
+}
+
+.gallery-decor-top,
+.gallery-decor-bottom {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 4rpx;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  z-index: 10;
+  opacity: 0.6;
+}
+
+.gallery-decor-top { top: 0; }
+.gallery-decor-bottom { bottom: 0; }
+
+.swiper-image-box {
+  width: 100%;
+  height: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48rpx 32rpx;
-  background: linear-gradient(180deg, #fffaf3 0%, #f7efe2 100%);
-}
-
-.material-empty-icon {
-  font-size: 84rpx;
-  margin-bottom: 20rpx;
-}
-
-.material-empty-title {
-  display: block;
-  font-size: 32rpx;
-  color: var(--text-primary);
-  font-weight: 600;
-  margin-bottom: 12rpx;
-}
-
-.material-empty-subtitle,
-.material-empty-detail {
-  display: block;
-  text-align: center;
-  font-size: 24rpx;
-  color: var(--text-secondary);
-  line-height: 1.7;
-}
-
-.material-empty-detail {
-  margin-top: 10rpx;
-  color: var(--warning);
+  background: #1a1a1a;
 }
 
 .material-swiper {
   width: 100%;
-  background: rgba(139, 69, 19, 0.04);
-}
-
-.material-swiper-img {
-  width: 100%;
-  display: block;
+  transition: height 0.3s ease;
 }
 
 .material-image {
@@ -203,69 +264,196 @@ export default {
   display: block;
 }
 
-.material-video {
+.gallery-pagination {
+  position: absolute;
+  right: 30rpx;
+  bottom: 30rpx;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 8rpx 20rpx;
+  border-radius: 40rpx;
+  backdrop-filter: blur(8rpx);
+  display: flex;
+  align-items: baseline;
+  gap: 4rpx;
+  z-index: 20;
+}
+
+.pagination-main {
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.pagination-divider {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 20rpx;
+}
+
+.pagination-total {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 24rpx;
+}
+
+/* 左右导航按钮 */
+.gallery-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 80rpx;
+  height: 80rpx;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4rpx);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 30;
+  border-radius: 50%;
+  margin: 0 20rpx;
+  transition: all 0.2s ease;
+}
+
+.gallery-nav:active {
+  background: rgba(166, 49, 49, 0.6);
+  transform: translateY(-50%) scale(0.9);
+}
+
+.gallery-nav.prev { left: 0; }
+.gallery-nav.next { right: 0; }
+
+.nav-icon {
+  color: #fff;
+  font-size: 48rpx;
+  font-weight: 300;
+}
+
+/* 缩略图样式 */
+.thumbnail-bar {
+  background: var(--bg-card);
+  padding: 30rpx 0;
+  border-bottom: 1rpx solid rgba(139, 115, 85, 0.1);
+}
+
+.thumbnail-list {
+  display: flex;
+  padding: 0 30rpx;
+  gap: 20rpx;
+}
+
+.thumbnail-item {
+  position: relative;
+  flex-shrink: 0;
+  width: 130rpx;
+  height: 130rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  background: #f0f0f0;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.1);
+}
+
+.thumbnail-image {
   width: 100%;
-  height: 400rpx;
+  height: 100%;
+  filter: grayscale(40%);
+  transition: all 0.3s ease;
+}
+
+.thumbnail-border {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 4rpx solid transparent;
+  border-radius: 12rpx;
+  z-index: 5;
+}
+
+.thumbnail-item.active {
+  transform: scale(1.05);
+}
+
+.thumbnail-item.active .thumbnail-image {
+  filter: grayscale(0%);
+}
+
+.thumbnail-item.active .thumbnail-border {
+  border-color: var(--primary);
+  box-shadow: inset 0 0 10rpx rgba(166, 49, 49, 0.3);
 }
 
 .material-info {
-  padding: 32rpx;
+  padding: 30rpx;
+}
+
+.title-section {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+}
+
+.red-line {
+  width: 8rpx;
+  height: 40rpx;
+  background: var(--primary);
+  border-radius: 4rpx;
 }
 
 .material-title {
-  display: block;
   font-size: 40rpx;
   font-weight: bold;
   color: var(--text-primary);
   font-family: 'ZCOOL XiaoWei', serif;
-  letter-spacing: 4rpx;
-  margin-bottom: 20rpx;
+  letter-spacing: 2rpx;
 }
 
 .material-source {
   display: block;
-  font-size: 26rpx;
+  font-size: 24rpx;
   color: var(--text-tertiary);
-  margin-bottom: 12rpx;
+  margin-bottom: 20rpx;
+  font-style: italic;
 }
 
 .material-notice {
   display: block;
   font-size: 24rpx;
-  color: var(--error);
-  padding: 16rpx 20rpx;
-  background: rgba(184, 84, 80, 0.08);
+  color: var(--primary);
+  padding: 20rpx;
+  background: rgba(166, 49, 49, 0.05);
   border-radius: 12rpx;
-  border-left: 4rpx solid var(--error);
+  border: 1rpx dashed var(--primary);
+}
+
+/* 其他样式保持 */
+.material-empty {
+  min-height: 360rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48rpx 32rpx;
+}
+
+.material-empty-icon { font-size: 80rpx; margin-bottom: 20rpx; }
+.material-empty-title { font-size: 32rpx; color: var(--text-primary); font-weight: 600; }
+.material-empty-subtitle { font-size: 24rpx; color: var(--text-secondary); }
+
+.material-video {
+  width: 100%;
+  height: 450rpx;
+  background: #000;
 }
 
 .placeholder-section {
   text-align: center;
-  padding: 100rpx 40rpx;
-  background: #fff;
+  padding: 80rpx 40rpx;
+  background: var(--bg-card);
   border-radius: 24rpx;
-  border: 2rpx solid var(--bg-tertiary);
-  box-shadow: 0 8rpx 32rpx rgba(139, 69, 19, 0.08);
-  margin-bottom: 20rpx;
+  border: 1rpx solid rgba(139, 115, 85, 0.2);
 }
 
-.placeholder-icon {
-  font-size: 120rpx;
-  margin-bottom: 30rpx;
-  filter: drop-shadow(0 4rpx 8rpx rgba(139, 69, 19, 0.15));
-}
-
-.placeholder-text {
-  display: block;
-  font-size: 32rpx;
-  color: var(--text-primary);
-  margin-bottom: 20rpx;
-  font-weight: 500;
-}
-
-.placeholder-sub {
-  display: block;
-  font-size: 26rpx;
-  color: #8b735c;
-}
+.placeholder-icon { font-size: 100rpx; margin-bottom: 20rpx; }
+.placeholder-text { font-size: 30rpx; color: var(--text-primary); }
 </style>

@@ -67,15 +67,6 @@ export default {
       errorMap: {}
     };
   },
-  watch: {
-    buildings: {
-      handler() {
-        this.loadedMap = {};
-        this.errorMap = {};
-      },
-      deep: false
-    }
-  },
   methods: {
     getImageUrl(building) {
       if (!building) {

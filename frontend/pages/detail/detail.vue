@@ -121,7 +121,7 @@ export default {
         id: "", name: "", category: "", location: "", description: "", tags: [],
       },
       material: {
-        url: "", type: "", source: "",
+        url: "", type: "image", source: "", images: [],
       },
       materialNotice: "",
       loading: false,
@@ -225,9 +225,10 @@ export default {
       this.error = null;
       this.materialNotice = "";
 
+      // 先加载素材（含多图），再加载建筑（含回退逻辑），避免并发时回退逻辑覆盖掉 images
+      await this.loadMaterial();
       await Promise.allSettled([
         this.loadBuilding(),
-        this.loadMaterial(),
         this.loadVisualizationData(),
       ]);
 
@@ -247,6 +248,24 @@ export default {
       const startTime = Date.now();
       try {
         this.building = await getBuildingById(this.materialId);
+        // 仅在 material 完全没有 url 且也没有 images 时，才用建筑封面作为回退
+        // 绝不覆盖已从素材 API 取到的 images 数组
+        const hasImages = Array.isArray(this.material.images) && this.material.images.length > 0;
+        const hasUrl = String(this.material.url || '').trim();
+        if (!hasImages && !hasUrl) {
+          const fallbackImage = String(
+            this.building.image || this.building.coverImage || this.building.originalImage || ''
+          ).trim();
+          if (fallbackImage) {
+            this.material = {
+              ...(this.material || {}),
+              url: fallbackImage,
+              images: [fallbackImage],
+              type: 'image',
+              source: String((this.material && this.material.source) || '建筑详情回退图片').trim() || '建筑详情回退图片'
+            };
+          }
+        }
         const duration = Date.now() - startTime;
         recordApiCall('getBuildingById', duration, true);
       } catch (error) {
@@ -260,7 +279,8 @@ export default {
     async loadMaterial() {
       const startTime = Date.now();
       try {
-        this.material = await getMaterialById(this.materialId);
+        // 强制刷新缓存以确保获取到后端最新的 6 张图片数据结构
+        this.material = await getMaterialById(this.materialId, true);
         const duration = Date.now() - startTime;
         recordApiCall('getMaterialById', duration, true);
       } catch (error) {
@@ -306,10 +326,13 @@ export default {
     },
 
     setFailureData(error) {
+      const fallbackImage = String(
+        (this.building && (this.building.image || this.building.coverImage || this.building.originalImage)) || ""
+      ).trim();
       this.material = {
-        url: "",
+        url: fallbackImage,
         type: "image",
-        source: "后端未下发图片",
+        source: fallbackImage ? "建筑详情回退图片" : "后端未下发图片",
         assetVerification: error && error.detail ? error.detail : null,
       };
     },
@@ -444,21 +467,31 @@ export default {
 .container {
   min-height: 100vh;
   background-color: var(--bg-primary);
+  background-image: url('https://www.transparenttextures.com/patterns/rice-paper.png'); /* 宣纸纹理 */
 }
 
 .content {
-  padding: 30rpx;
+  padding: 20rpx 30rpx 60rpx;
 }
 
 .loading,
 .error {
   text-align: center;
-  padding: 100rpx 40rpx;
-  font-size: 32rpx;
-  color: var(--text-secondary);
+  padding: 120rpx 40rpx;
+  background: var(--bg-card);
+  margin: 40rpx;
+  border-radius: 20rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.05);
 }
 
-.error {
-  color: var(--error);
+.loading-text {
+  font-size: 30rpx;
+  color: var(--text-tertiary);
+  font-style: italic;
+}
+
+.error-text {
+  color: var(--primary);
+  font-weight: bold;
 }
 </style>

@@ -7,6 +7,7 @@ const config = require('../config');
 const { buildSignedAssetUrl } = require('../utils/signedAsset');
 const { verifyAssetOwnership } = require('./assetVerification');
 const { getOptimizedSignedUrl } = require('./qiniuService');
+const { getLocalImageByBuildingId } = require('../config/localImageMap');
 
 function normalizeImageSourceMode(mode) {
   const value = String(mode || '').trim().toLowerCase();
@@ -130,6 +131,24 @@ function buildBuildingAssetVerification(item) {
 function buildListThumbnailUrl(resourceUrl, requester) {
   // 列表页使用 480 宽度的缩略图
   return ensureSignedUrl(resourceUrl, { width: 480, quality: 75 }, requester);
+}
+
+function resolveBuildingImageResource(item, assetVerification, requester) {
+  if (getImageSourceMode(requester) === 'local') {
+    const localMapped = getLocalImageByBuildingId(item && item.id);
+    if (localMapped) {
+      return localMapped;
+    }
+  }
+
+  const verifiedUrl = assetVerification && assetVerification.verified
+    ? String(assetVerification.url || '').trim()
+    : '';
+  if (verifiedUrl) {
+    return verifiedUrl;
+  }
+
+  return '';
 }
 
 function buildModel3d(profile, fallbackPoster, requester) {
@@ -359,7 +378,7 @@ function buildBuildingSummary(item, requester) {
   return getBuildingProfileById(item.id).then((profile) => {
     const safeProfile = profile || {};
     const assetVerification = buildBuildingAssetVerification(item);
-    const rawImage = assetVerification.verified ? assetVerification.url : '';
+    const rawImage = resolveBuildingImageResource(item, assetVerification, requester);
     const safeImage = ensureSignedUrl(rawImage, { quality: 85 }, requester);
     const listImage = buildListThumbnailUrl(rawImage, requester);
     const model3d = buildModel3d(safeProfile, listImage, requester);
@@ -392,7 +411,7 @@ function buildBuildingSummary(item, requester) {
 async function buildBuildingDetail(item, requester) {
   const profile = await getBuildingProfileById(item.id) || {};
   const assetVerification = buildBuildingAssetVerification(item);
-  const rawImage = assetVerification.verified ? assetVerification.url : '';
+  const rawImage = resolveBuildingImageResource(item, assetVerification, requester);
   // 详情页主图，设置较大尺寸和较好质量
   const safeImage = ensureSignedUrl(rawImage, { width: 1200, quality: 85 }, requester);
   const model3d = buildModel3d(profile, safeImage, requester);

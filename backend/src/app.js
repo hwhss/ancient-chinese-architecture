@@ -15,6 +15,13 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json({ limit: '1mb' }));
 
+if (config.localAssetDir) {
+  app.use('/assets', express.static(config.localAssetDir, {
+    fallthrough: true,
+    maxAge: '10m'
+  }));
+}
+
 app.use(routes);
 app.use(notFoundHandler);
 app.use(errorHandler);

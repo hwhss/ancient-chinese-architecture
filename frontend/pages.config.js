@@ -29,7 +29,8 @@ module.exports = {
         {
           path: 'pages/detail/detail',
           style: {
-            navigationBarTitleText: '素材详情'
+            navigationBarTitleText: '素材详情',
+            navigationStyle: 'custom'
           }
         },
         {
