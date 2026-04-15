@@ -105,6 +105,15 @@ const TAB_CONFIG = [
   { key: 'chart', label: '特征分析', required: true },
 ];
 
+const TABBAR_PAGES = [
+  '/pages/home/home',
+  '/pages/map/map',
+  '/pages/index/index',
+  '/pages/favorites/favorites',
+];
+
+const DETAIL_BACK_TARGET_KEY = 'DETAIL_BACK_TARGET';
+
 export default {
   components: {
     ShareCard,
@@ -129,6 +138,7 @@ export default {
       favorites: [],
       showShareCard: false,
       shareBuilding: {},
+      backTarget: '/pages/home/home',
       activeTab: 'basic',
       visualizationData: {
         infographic: null, animationId: null, chartData: null,
@@ -210,6 +220,7 @@ export default {
     this._pageLoadStart = Date.now();
     this.materialId = options.materialId || "";
     this.materialName = options.name ? decodeURIComponent(options.name) : "";
+    this.initBackTarget();
 
     this.loadFavorites();
     if (this.materialId) {
@@ -220,6 +231,50 @@ export default {
   },
 
   methods: {
+    initBackTarget() {
+      const pages = getCurrentPages();
+      const prevPage = pages.length > 1 ? pages[pages.length - 2] : null;
+
+      if (prevPage && prevPage.route) {
+        const sourceRoute = `/${prevPage.route}`;
+        this.backTarget = sourceRoute;
+        uni.setStorageSync(DETAIL_BACK_TARGET_KEY, sourceRoute);
+        return;
+      }
+
+      const cachedTarget = uni.getStorageSync(DETAIL_BACK_TARGET_KEY);
+      this.backTarget = this.normalizeBackTarget(cachedTarget);
+    },
+
+    normalizeBackTarget(target) {
+      const value = typeof target === 'string' ? target.trim() : '';
+      if (!value) {
+        return '/pages/home/home';
+      }
+      return value.startsWith('/') ? value : `/${value}`;
+    },
+
+    goBackWithFallback() {
+      const target = this.normalizeBackTarget(this.backTarget);
+
+      if (TABBAR_PAGES.includes(target)) {
+        uni.switchTab({
+          url: target,
+          fail: () => {
+            uni.switchTab({ url: '/pages/home/home' });
+          },
+        });
+        return;
+      }
+
+      uni.redirectTo({
+        url: target,
+        fail: () => {
+          uni.switchTab({ url: '/pages/home/home' });
+        },
+      });
+    },
+
     async loadDetailData() {
       this.loading = true;
       this.error = null;
@@ -360,7 +415,17 @@ export default {
     },
 
     goBack() {
-      uni.navigateBack();
+      const pages = getCurrentPages();
+      if (pages.length > 1) {
+        uni.navigateBack({
+          fail: () => {
+            this.goBackWithFallback();
+          },
+        });
+        return;
+      }
+
+      this.goBackWithFallback();
     },
 
     goToViewer() {

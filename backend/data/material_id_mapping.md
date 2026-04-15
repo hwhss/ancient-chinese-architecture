@@ -27,7 +27,7 @@
 | beijing_siheyuan    | beijing-siheyuan/beijing-siheyuan-overview.png               |
 | canglang_ting       | canglang-pavilion/canglang-ting-overview.png                 |
 | chengde_resort      | chengde-mountain-resort/chengde-bishushanzhuang-overview.png |
-| dazheng_dian        | dazheng-dian/dazheng-dian-overview.png                       |
+| dazheng_dian        | shenyang-dazheng-dian/shenyang-dazheng-dian-photo (1).jpg    |
 | dujiangyan          | dujiangyan-irrigation/dujiangyan-overview.png                |
 | fujian_tulou        | fujian-tulou/fujian-tulou-overview.png                       |
 | grand_canal         | jinghang-grand-canal/jinghang-grand-canal-overview.png       |

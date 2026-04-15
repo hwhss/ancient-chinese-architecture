@@ -65,6 +65,22 @@
     "strict": true
   },
   {
+    "name": "沈阳故宫大政殿别名",
+    "aliases": [
+      "沈阳故宫大政殿",
+      "大政殿",
+      "八角殿"
+    ],
+    "preferredNames": [
+      "沈阳故宫大政殿"
+    ],
+    "fallbackIds": [
+      "dazheng_dian"
+    ],
+    "confidence": 0.96,
+    "strict": true
+  },
+  {
     "name": "苏州园林泛称",
     "aliases": [
       "苏州园林"
