@@ -47,74 +47,66 @@
       </view>
       
       <!-- 入口按钮 -->
-      <view class="hero-buttons">
-        <button class="hero-btn primary ink-ripple brush-border-ink" :class="{ 'visible': animationState.btn1 }" @click="onGoToMap">
-          <TraditionalIcon name="map" size="36" />
-          <text class="btn-text">查看古建筑名录</text>
-        </button>
-        <button class="hero-btn secondary ink-ripple" :class="{ 'visible': animationState.btn2 }" @click="onGoToChat">
-          <TraditionalIcon name="chat" size="36" />
-          <text class="btn-text">开始 AI 导览</text>
-        </button>
+       <view class="hero-buttons">
+        <!-- 主按钮组 - 统一样式 -->
+        <view class="main-actions">
+          <button class="hero-btn primary ink-ripple" :class="{ 'visible': animationState.btn1 }" @click="onGoToMap">
+            <view class="btn-icon-wrapper">
+              <TraditionalIcon name="map" size="32" />
+            </view>
+            <text class="btn-text">查看古建筑名录</text>
+          </button>
+          <button class="hero-btn secondary ink-ripple" :class="{ 'visible': animationState.btn2 }" @click="onGoToChat">
+            <view class="btn-icon-wrapper">
+              <TraditionalIcon name="chat" size="32" />
+            </view>
+            <text class="btn-text">开始 AI 导览</text>
+          </button>
+        </view>
         
-        <!-- 按钮下方的分类快捷入口 -->
+        <!-- 分类快捷入口 -->
         <view class="category-shortcuts" :class="{ 'visible': animationState.categoryShortcuts }">
           <view class="category-item tap-feedback" @click="onGoToCategory('palace')">
             <view class="category-icon-wrapper">
-              <TraditionalIcon name="palace" size="48" />
+              <TraditionalIcon name="palace" size="40" />
             </view>
             <text class="category-text">宫殿</text>
           </view>
           <view class="category-item tap-feedback" @click="onGoToCategory('garden')">
             <view class="category-icon-wrapper">
-              <TraditionalIcon name="garden" size="48" />
+              <TraditionalIcon name="garden" size="40" />
             </view>
             <text class="category-text">园林</text>
           </view>
           <view class="category-item tap-feedback" @click="onGoToCategory('bridge')">
             <view class="category-icon-wrapper">
-              <TraditionalIcon name="bridge" size="48" />
+              <TraditionalIcon name="bridge" size="40" />
             </view>
             <text class="category-text">桥梁</text>
           </view>
           <view class="category-item tap-feedback" @click="onGoToCategory('defense')">
             <view class="category-icon-wrapper">
-              <TraditionalIcon name="defense" size="48" />
+              <TraditionalIcon name="defense" size="40" />
             </view>
             <text class="category-text">城防</text>
           </view>
         </view>
 
-        <!-- 我的收藏快捷入口 -->
-        <view class="favorites-shortcut-wrapper" :class="{ 'visible': animationState.categoryShortcuts }">
-          <view class="favorites-shortcut card-ink" @click="onGoToFavorites">
-            <view class="favorites-icon-wrapper">
-              <TraditionalIcon name="favorites" size="46" />
-              <view v-if="favoriteCount > 0" class="favorites-badge">{{ favoriteCount }}</view>
+        <!-- 工具栏 - 收藏和设置并排 -->
+        <view class="toolbar" :class="{ 'visible': animationState.categoryShortcuts }">
+          <view class="toolbar-item tap-feedback" @click="onGoToFavorites">
+            <view class="toolbar-icon-wrapper">
+              <TraditionalIcon name="favorites" size="32" />
+              <view v-if="favoriteCount > 0" class="toolbar-badge">{{ favoriteCount }}</view>
             </view>
-            <view class="favorites-info">
-              <text class="favorites-title">我的收藏</text>
-              <text class="favorites-count">{{ favoriteCount }} 处古建</text>
-            </view>
-            <view class="favorites-arrow-wrapper">
-              <TraditionalIcon name="arrow-right" size="24" />
-            </view>
+            <text class="toolbar-text">我的收藏</text>
           </view>
-        </view>
-
-        <!-- 设置入口 -->
-        <view class="settings-shortcut-wrapper" :class="{ 'visible': animationState.categoryShortcuts }">
-          <view class="settings-shortcut card-ink" @click="onGoToSettings">
-            <view class="settings-icon-wrapper">
-              <TraditionalIcon name="settings" size="40" />
+          <view class="toolbar-divider"></view>
+          <view class="toolbar-item tap-feedback" @click="onGoToSettings">
+            <view class="toolbar-icon-wrapper">
+              <TraditionalIcon name="settings" size="32" />
             </view>
-            <view class="settings-info">
-              <text class="settings-title">设置</text>
-              <text class="settings-desc">主题、偏好设置</text>
-            </view>
-            <view class="settings-arrow-wrapper">
-              <TraditionalIcon name="arrow-right" size="24" />
-            </view>
+            <text class="toolbar-text">设置</text>
           </view>
         </view>
       </view>
@@ -181,7 +173,7 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 100rpx 40rpx 80rpx;
+  padding: 80rpx 32rpx 60rpx;
   position: relative;
   overflow: hidden;
   background-color: var(--bg-primary);
@@ -190,51 +182,51 @@ export default {
 /* 简化的角落装饰 - 云纹感 */
 .corner-decoration {
   position: absolute;
-  width: 80rpx;
-  height: 80rpx;
-  opacity: 0.15;
+  width: 60rpx;
+  height: 60rpx;
+  opacity: 0.12;
   pointer-events: none;
   z-index: 0;
-  border: 4rpx solid var(--secondary);
+  border: 3rpx solid var(--secondary);
 }
 
 .corner-decoration.top-left {
-  top: 40rpx;
-  left: 40rpx;
+  top: 32rpx;
+  left: 32rpx;
   border-right: none;
   border-bottom: none;
-  border-radius: 40rpx 0 0 0;
+  border-radius: 30rpx 0 0 0;
 }
 
 .corner-decoration.top-right {
-  top: 40rpx;
-  right: 40rpx;
+  top: 32rpx;
+  right: 32rpx;
   border-left: none;
   border-bottom: none;
-  border-radius: 0 40rpx 0 0;
+  border-radius: 0 30rpx 0 0;
 }
 
 .corner-decoration.bottom-left {
-  bottom: 40rpx;
-  left: 40rpx;
+  bottom: 32rpx;
+  left: 32rpx;
   border-right: none;
   border-top: none;
-  border-radius: 0 0 0 40rpx;
+  border-radius: 0 0 0 30rpx;
 }
 
 .corner-decoration.bottom-right {
-  bottom: 40rpx;
-  right: 40rpx;
+  bottom: 32rpx;
+  right: 32rpx;
   border-left: none;
   border-top: none;
-  border-radius: 0 0 40rpx 0;
+  border-radius: 0 0 30rpx 0;
 }
 
 /* 标题区域 */
 .title-area {
   text-align: center;
-  max-width: 800rpx;
-  margin: 0 auto 40rpx;
+  max-width: 720rpx;
+  margin: 0 auto 32rpx;
   position: relative;
   z-index: 2;
 }
@@ -246,11 +238,11 @@ export default {
 
 .main-title {
   display: block;
-  font-size: 88rpx;
+  font-size: 72rpx;
   font-weight: 900;
   color: var(--text-primary);
-  letter-spacing: 16rpx;
-  margin-bottom: 24rpx;
+  letter-spacing: 12rpx;
+  margin-bottom: 20rpx;
   opacity: 0;
   transform: translateY(20px);
   transition: all 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -274,20 +266,20 @@ export default {
 /* 精致朱砂印章 */
 .seal-decor {
   position: absolute;
-  top: -30rpx;
-  right: -80rpx;
-  width: 100rpx;
-  height: 100rpx;
+  top: -20rpx;
+  right: -70rpx;
+  width: 80rpx;
+  height: 80rpx;
   background: var(--primary);
   color: #fff8e6;
-  font-size: 34rpx;
+  font-size: 28rpx;
   font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 4rpx;
   letter-spacing: 2rpx;
-  box-shadow: 0 6rpx 16rpx rgba(166, 49, 49, 0.3);
+  box-shadow: 0 4rpx 12rpx rgba(166, 49, 49, 0.3);
   transform: rotate(-12deg);
   opacity: 0;
   transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
@@ -300,10 +292,10 @@ export default {
 
 .subtitle {
   display: block;
-  font-size: 40rpx;
+  font-size: 36rpx;
   color: var(--text-secondary);
-  margin-bottom: 28rpx;
-  letter-spacing: 5rpx;
+  margin-bottom: 20rpx;
+  letter-spacing: 4rpx;
   opacity: 0;
   transform: translateY(20px);
   transition: all 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -318,9 +310,9 @@ export default {
 
 .description {
   display: block;
-  font-size: 30rpx;
+  font-size: 28rpx;
   color: var(--text-tertiary);
-  line-height: 1.8;
+  line-height: 1.7;
   opacity: 0;
   transform: translateY(20px);
   transition: all 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -334,7 +326,7 @@ export default {
 
 /* Hero分隔线 */
 .hero-divider {
-  margin-top: 32rpx;
+  margin-top: 24rpx;
   opacity: 0;
   transform: translateY(20px);
   transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
@@ -349,18 +341,19 @@ export default {
 
 .window-divider {
   width: 100%;
-  height: 20rpx;
+  height: 16rpx;
   position: relative;
   display: flex;
   justify-content: center;
 }
 
 .window-pattern {
-  width: 120rpx;
-  height: 6rpx;
+  width: 100rpx;
+  height: 4rpx;
   background: var(--secondary);
-  border-radius: 4rpx;
+  border-radius: 2rpx;
   position: relative;
+  opacity: 0.4;
 }
 
 .window-pattern::after,
@@ -368,47 +361,54 @@ export default {
   content: '';
   position: absolute;
   top: 50%;
-  width: 16rpx;
-  height: 16rpx;
-  border: 3rpx solid var(--secondary);
+  width: 12rpx;
+  height: 12rpx;
+  border: 2rpx solid var(--secondary);
   transform: translateY(-50%) rotate(45deg);
 }
 
 .window-pattern::before {
-  left: -24rpx;
+  left: -20rpx;
 }
 
 .window-pattern::after {
-  right: -24rpx;
+  right: -20rpx;
 }
 
-/* Hero 按钮 */
+/* Hero 按钮区域 */
 .hero-buttons {
   display: flex;
   flex-direction: column;
   gap: 24rpx;
   width: 100%;
-  max-width: 520rpx;
+  max-width: 560rpx;
   margin: 0 auto;
   position: relative;
   z-index: 2;
 }
 
+/* 主按钮组 - 统一尺寸和布局 */
+.main-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
 .hero-btn {
-  height: 100rpx;
-  border-radius: 40rpx;
-  font-size: 30rpx;
+  height: 96rpx;
+  border-radius: 48rpx;
+  font-size: 28rpx;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16rpx;
+  gap: 12rpx;
   transform: translateZ(0) translateY(0);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   opacity: 0;
   position: relative;
-  overflow: visible;
+  overflow: hidden;
   will-change: transform, box-shadow;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -419,68 +419,72 @@ export default {
   opacity: 1;
 }
 
+.btn-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.25s ease;
+}
+
+.btn-text {
+  font-weight: 600;
+  letter-spacing: 2rpx;
+  transition: all 0.25s ease;
+}
+
+/* Primary 按钮 - 故宫红 */
 .hero-btn.primary {
   background: linear-gradient(135deg, #a63131 0%, #7a1d1d 100%);
   color: #fff8e6;
   box-shadow: 
-    0 8rpx 24rpx rgba(166, 49, 49, 0.35),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.2);
+    0 6rpx 20rpx rgba(166, 49, 49, 0.35),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.15);
 }
 
 .hero-btn.primary:hover {
-  background: linear-gradient(135deg, #c24d4d 0%, #922828 100%);
-  transform: translateY(-6rpx) scale(1.08);
+  background: linear-gradient(135deg, #b83a3a 0%, #8a2424 100%);
+  transform: translateY(-3rpx);
   box-shadow: 
-    0 20rpx 48rpx rgba(166, 49, 49, 0.5),
-    0 12rpx 28rpx rgba(166, 49, 49, 0.3),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.25);
-  z-index: 100;
+    0 12rpx 32rpx rgba(166, 49, 49, 0.45),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.2);
 }
 
 .hero-btn.primary:active {
-  transform: translateY(-3rpx) scale(1.03);
+  transform: translateY(-1rpx);
   box-shadow: 
-    0 12rpx 32rpx rgba(166, 49, 49, 0.35),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.18);
+    0 4rpx 12rpx rgba(166, 49, 49, 0.3),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.1);
 }
 
+/* Secondary 按钮 - 统一风格 */
 .hero-btn.secondary {
   background: linear-gradient(135deg, #fffef9 0%, #f9f5e8 100%);
-  color: #725a3d;
-  border: 3rpx solid #725a3d;
+  color: var(--text-primary);
+  border: 2rpx solid var(--secondary);
   box-shadow: 
-    0 6rpx 18rpx rgba(114, 90, 61, 0.15),
+    0 4rpx 16rpx rgba(114, 90, 61, 0.12),
     inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
 }
 
 .hero-btn.secondary:hover {
   background: linear-gradient(135deg, #f9f5e8 0%, #f2ead3 100%);
-  border-color: #a63131;
-  color: #a63131;
-  border-width: 4rpx;
-  transform: translateY(-6rpx) scale(1.08);
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-3rpx);
   box-shadow: 
-    0 16rpx 40rpx rgba(114, 90, 61, 0.3),
+    0 10rpx 28rpx rgba(114, 90, 61, 0.2),
     inset 0 1rpx 0 rgba(255, 255, 255, 0.85);
-  z-index: 100;
 }
 
 .hero-btn.secondary:active {
-  transform: translateY(-3rpx) scale(1.03);
+  transform: translateY(-1rpx);
   box-shadow: 
-    0 10rpx 24rpx rgba(114, 90, 61, 0.2),
+    0 4rpx 12rpx rgba(114, 90, 61, 0.15),
     inset 0 1rpx 0 rgba(255, 255, 255, 0.75);
 }
 
-.btn-text {
-  font-weight: 700;
-  letter-spacing: 4rpx;
-  transition: all 0.25s ease;
-}
-
-.hero-btn:hover .btn-text {
-  letter-spacing: 8rpx;
-  font-weight: 800;
+.hero-btn:hover .btn-icon-wrapper {
+  transform: scale(1.1);
 }
 
 /* Hero 统计信息 */
@@ -488,8 +492,8 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 40rpx;
-  margin-top: 40rpx;
+  gap: 32rpx;
+  margin-top: 32rpx;
   opacity: 0;
   transform: translateY(20px);
   transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
@@ -504,8 +508,8 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6rpx;
-  padding: 12rpx 20rpx;
+  gap: 4rpx;
+  padding: 10rpx 16rpx;
   border: 1rpx solid transparent;
   transition: all 0.4s ease;
 }
@@ -527,7 +531,7 @@ export default {
 }
 
 .stat-number {
-  font-size: 40rpx;
+  font-size: 36rpx;
   font-weight: bold;
   color: var(--primary);
   line-height: 1;
@@ -535,23 +539,24 @@ export default {
 }
 
 .stat-label {
-  font-size: 20rpx;
+  font-size: 18rpx;
   color: var(--text-tertiary);
-  letter-spacing: 2rpx;
+  letter-spacing: 1rpx;
 }
 
 .stat-divider {
   width: 1rpx;
-  height: 48rpx;
+  height: 40rpx;
   background: var(--border);
   opacity: 0.5;
 }
 
-/* 分类快捷入口 - 增强悬停效果 */
+/* 分类快捷入口 - 优化布局 */
 .category-shortcuts {
   display: flex;
   justify-content: space-between;
-  margin-top: 32rpx;
+  margin-top: 24rpx;
+  padding: 0 8rpx;
   opacity: 0;
   transform: translateY(20px);
   transition: all 0.25s ease;
@@ -566,327 +571,177 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12rpx;
+  gap: 8rpx;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  padding: 12rpx;
-  border-radius: 28rpx;
+  padding: 8rpx 12rpx;
+  border-radius: 16rpx;
   position: relative;
   z-index: 1;
 }
 
 .category-item:hover {
-  transform: translateY(-10rpx) scale(1.08);
+  transform: translateY(-4rpx);
   z-index: 100;
 }
 
 .category-item:active {
-  transform: translateY(-4rpx) scale(1.03);
+  transform: translateY(-2rpx);
 }
 
 .category-icon-wrapper {
   background: linear-gradient(135deg, #fffef9 0%, #f9f5e8 100%);
-  padding: 24rpx;
+  padding: 16rpx;
   border-radius: 50%;
-  color: #725a3d;
-  border: 3rpx solid #e8dec3;
+  color: var(--secondary);
+  border: 2rpx solid var(--border);
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 
-    0 6rpx 16rpx rgba(114, 90, 61, 0.12),
+    0 4rpx 12rpx rgba(114, 90, 61, 0.1),
     inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
 }
 
 .category-item:hover .category-icon-wrapper {
-  background: linear-gradient(135deg, #a63131 0%, #7a1d1d 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
   color: #fff8e6;
-  border-color: #a63131;
-  border-width: 4rpx;
+  border-color: var(--primary);
   box-shadow: 
-    0 12rpx 32rpx rgba(166, 49, 49, 0.35),
+    0 8rpx 20rpx rgba(166, 49, 49, 0.3),
     inset 0 1rpx 0 rgba(255, 255, 255, 0.2);
-  transform: scale(1.15);
+  transform: scale(1.1);
 }
 
 .category-item:active .category-icon-wrapper {
-  transform: scale(1.1);
-  box-shadow: 
-    0 8rpx 20rpx rgba(166, 49, 49, 0.25),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.15);
+  transform: scale(1.05);
 }
 
 .category-text {
-  font-size: 24rpx;
-  color: #725a3d;
-  font-weight: 600;
+  font-size: 22rpx;
+  color: var(--text-secondary);
+  font-weight: 500;
   transition: all 0.25s ease;
 }
 
 .category-item:hover .category-text {
-  color: #a63131;
-  font-weight: 800;
-  font-size: 26rpx;
-  transform: scale(1.05);
+  color: var(--primary);
+  font-weight: 600;
 }
 
-/* ========== 我的收藏快捷入口 - 增强悬停效果 ========== */
-.favorites-shortcut-wrapper {
-  margin: 50rpx auto 0;
-  max-width: 520rpx;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: all 0.25s ease;
-}
-
-.favorites-shortcut-wrapper.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.favorites-shortcut {
-  display: flex;
-  align-items: center;
-  gap: 32rpx;
-  padding: 40rpx 48rpx;
-  background: linear-gradient(135deg, #fffef9 0%, #f9f5e8 100%);
-  border-radius: 28rpx;
-  border: 3rpx solid #e8dec3;
-  box-shadow: 
-    0 8rpx 24rpx rgba(114, 90, 61, 0.15),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.8);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  position: relative;
-  overflow: visible;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-  z-index: 1;
-}
-
-.favorites-shortcut::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  width: 10rpx;
-  background: linear-gradient(180deg, #d49c4d 0%, #a63131 100%);
-  border-radius: 28rpx 0 0 28rpx;
-  z-index: -1;
-}
-
-.favorites-shortcut:hover {
-  transform: translateY(-6rpx) scale(1.04);
-  border-color: #a63131;
-  border-width: 4rpx;
-  box-shadow: 
-    0 16rpx 44rpx rgba(114, 90, 61, 0.3),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.85);
-  z-index: 100;
-}
-
-.favorites-shortcut:active {
-  transform: translateY(-3rpx) scale(1.02);
-  box-shadow: 
-    0 10rpx 28rpx rgba(114, 90, 61, 0.2),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.75);
-}
-
-.favorites-icon-wrapper {
-  position: relative;
-  color: #d49c4d;
-  transition: all 0.25s ease;
-}
-
-.favorites-shortcut:hover .favorites-icon-wrapper {
-  color: #a63131;
-  transform: scale(1.15);
-}
-
-.favorites-badge {
-  position: absolute;
-  top: -10rpx;
-  right: -10rpx;
-  min-width: 40rpx;
-  height: 40rpx;
-  background: linear-gradient(135deg, #a63131 0%, #7a1d1d 100%);
-  border-radius: 20rpx;
+/* 工具栏 - 收藏和设置并排 */
+.toolbar {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 10rpx;
-  font-size: 20rpx;
-  color: #fff8e6;
-  font-weight: 800;
-  border: 3rpx solid #fff8e6;
-  box-shadow: 
-    0 4rpx 12rpx rgba(166, 49, 49, 0.35),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.2);
-}
-
-.favorites-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 6rpx;
-}
-
-.favorites-title {
-  font-size: 36rpx;
-  font-weight: 800;
-  color: #2c1e13;
-  font-family: 'TsangerJinKai', serif;
-  transition: color 0.25s ease;
-}
-
-.favorites-shortcut:hover .favorites-title {
-  color: #a63131;
-  transform: scale(1.05);
-}
-
-.favorites-count {
-  font-size: 26rpx;
-  color: #725a3d;
-  transition: color 0.25s ease;
-  font-weight: 600;
-}
-
-.favorites-shortcut:hover .favorites-count {
-  color: #5a4a3a;
-  font-weight: 700;
-}
-
-.favorites-arrow-wrapper {
-  color: #8b7355;
-  opacity: 0.6;
-  transition: all 0.25s ease;
-}
-
-.favorites-shortcut:hover .favorites-arrow-wrapper {
-  color: #a63131;
-  opacity: 1;
-  transform: translateX(8rpx) scale(1.2);
-}
-
-/* ========== 设置快捷入口 - 增强悬停效果 ========== */
-.settings-shortcut-wrapper {
-  margin: 24rpx auto 0;
-  max-width: 520rpx;
+  gap: 16rpx;
+  margin-top: 16rpx;
+  padding: 16rpx 24rpx;
+  background: var(--bg-card);
+  border-radius: 40rpx;
+  border: 1rpx solid var(--border);
   opacity: 0;
   transform: translateY(20px);
   transition: all 0.25s ease;
 }
 
-.settings-shortcut-wrapper.visible {
+.toolbar.visible {
   opacity: 1;
   transform: translateY(0);
 }
 
-.settings-shortcut {
+.toolbar-item {
   display: flex;
   align-items: center;
-  gap: 32rpx;
-  padding: 32rpx 40rpx;
-  background: linear-gradient(135deg, #f2ead3 0%, #ebe4d0 100%);
-  border-radius: 28rpx;
-  border: 3rpx solid #c2b095;
-  box-shadow: 
-    0 6rpx 18rpx rgba(114, 90, 61, 0.12),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.7);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 8rpx;
+  padding: 8rpx 16rpx;
+  border-radius: 24rpx;
+  transition: all 0.2s ease;
   cursor: pointer;
-  position: relative;
-  overflow: visible;
-  opacity: 0.92;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  z-index: 1;
 }
 
-.settings-shortcut:hover {
-  opacity: 1;
-  transform: translateY(-5rpx) scale(1.03);
-  border-color: #725a3d;
-  border-width: 4rpx;
-  background: linear-gradient(135deg, #f5efe0 0%, #eee8d4 100%);
-  box-shadow: 
-    0 12rpx 32rpx rgba(114, 90, 61, 0.2),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.75);
-  z-index: 100;
+.toolbar-item:hover {
+  background: rgba(166, 49, 49, 0.08);
 }
 
-.settings-shortcut:active {
-  transform: translateY(-2rpx) scale(1.01);
-  box-shadow: 
-    0 6rpx 16rpx rgba(114, 90, 61, 0.15),
-    inset 0 1rpx 0 rgba(255, 255, 255, 0.7);
+.toolbar-item:active {
+  background: rgba(166, 49, 49, 0.12);
 }
 
-.settings-icon-wrapper {
-  color: #725a3d;
-  transition: all 0.25s ease;
+.toolbar-icon-wrapper {
+  position: relative;
+  color: var(--secondary);
+  transition: all 0.2s ease;
 }
 
-.settings-shortcut:hover .settings-icon-wrapper {
-  color: #a63131;
-  transform: rotate(90deg) scale(1.18);
+.toolbar-item:hover .toolbar-icon-wrapper {
+  color: var(--primary);
+  transform: scale(1.1);
 }
 
-.settings-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4rpx;
-}
-
-.settings-title {
-  font-size: 32rpx;
-  font-weight: 800;
-  color: #5a4a3a;
-  font-family: 'TsangerJinKai', serif;
-  transition: color 0.25s ease;
-}
-
-.settings-shortcut:hover .settings-title {
-  color: #2c1e13;
-  transform: scale(1.05);
-}
-
-.settings-desc {
-  font-size: 24rpx;
-  color: #8b7355;
-  transition: color 0.25s ease;
-  font-weight: 500;
-}
-
-.settings-shortcut:hover .settings-desc {
-  color: #725a3d;
-  font-weight: 600;
-}
-
-.settings-arrow-wrapper {
-  color: #a89070;
-  opacity: 0.55;
-  transition: all 0.25s ease;
-}
-
-.settings-shortcut:hover .settings-arrow-wrapper {
-  color: #725a3d;
-  opacity: 1;
-  transform: translateX(8rpx) scale(1.2);
-}
-
-.brush-border-ink::before {
-  content: '';
+.toolbar-badge {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  border: 1rpx solid var(--text-primary);
-  opacity: 0.1;
-  mask-image: radial-gradient(circle, black 50%, transparent 100%);
-  -webkit-mask-image: radial-gradient(circle, black 50%, transparent 100%);
+  top: -6rpx;
+  right: -6rpx;
+  min-width: 28rpx;
+  height: 28rpx;
+  background: var(--primary);
+  border-radius: 14rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6rpx;
+  font-size: 16rpx;
+  color: #fff8e6;
+  font-weight: 700;
+  border: 2rpx solid var(--bg-card);
+}
+
+.toolbar-text {
+  font-size: 24rpx;
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.toolbar-item:hover .toolbar-text {
+  color: var(--primary);
+}
+
+.toolbar-divider {
+  width: 1rpx;
+  height: 24rpx;
+  background: var(--border);
+  opacity: 0.6;
+}
+
+/* 响应式适配 */
+@media (min-width: 768px) {
+  .hero-section {
+    padding: 100rpx 40rpx 80rpx;
+  }
+  
+  .main-title {
+    font-size: 88rpx;
+    letter-spacing: 16rpx;
+  }
+  
+  .subtitle {
+    font-size: 40rpx;
+  }
+  
+  .description {
+    font-size: 30rpx;
+  }
+  
+  .hero-buttons {
+    max-width: 480rpx;
+  }
+  
+  .category-shortcuts {
+    padding: 0 16rpx;
+  }
 }
 </style>

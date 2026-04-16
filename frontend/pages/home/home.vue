@@ -104,6 +104,8 @@ import KnowledgeSection from "../../components/home/KnowledgeSection.vue";
 import { throttle } from "../../utils/lazyLoad.js";
 import { recordPageLoad } from "../../utils/performance.js";
 import { goToMap, goToChat, goToFavorites, goToSettings, goToDetail } from "../../utils/navigation.js";
+import { getBuildings } from "../../services/apiWithCache.js";
+import { setImageSourceSetting } from "../../services/api.js";
 
 export default {
   name: 'HomePage',
@@ -140,14 +142,14 @@ export default {
         footer: false
       },
       previewBuildings: [
-        { id: 'taihe_dian', name: '太和殿', category: 'palace', location: '北京故宫', description: '紫禁城，明清皇家宫殿', tags: ['宫殿', '明代'], dynasty: '明代', image: 'https://images.unsplash.com/photo-1508804185872-d7badad00f7d?w=400&h=300&fit=crop' },
-        { id: 'zhuozheng_garden', name: '拙政园', category: 'garden', location: '江苏苏州', description: '咫尺之内再造乾坤', tags: ['园林', '苏州'], dynasty: '明代', image: 'https://images.unsplash.com/photo-1547981609-4b6bfe67ca0b?w=400&h=300&fit=crop' },
-        { id: 'zhaozhou_bridge', name: '赵州桥', category: 'bridge', location: '河北赵县', description: '天下第一桥，千年不朽', tags: ['桥梁', '隋代'], dynasty: '隋代', image: 'https://images.unsplash.com/photo-1537531383496-f4749b8032cf?w=400&h=300&fit=crop' },
-        { id: 'yueyang_tower', name: '岳阳楼', category: 'tower', location: '湖南岳阳', description: '天下绝景，江南名楼', tags: ['楼阁', '宋代'], dynasty: '宋代', image: 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=400&h=300&fit=crop' },
-        { id: 'xian_wall', name: '西安城墙', category: 'defense', location: '陕西西安', description: '中国现存规模最大的古代城垣', tags: ['城防', '明代'], dynasty: '明代', image: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=400&h=300&fit=crop' },
-        { id: 'dazheng_dian', name: '沈阳故宫大政殿', category: 'palace', location: '辽宁沈阳', description: '浓郁满族特色的宫殿建筑', tags: ['宫殿', '清代'], dynasty: '清代', image: 'https://images.unsplash.com/photo-1503220317375-aaad61436b1b?w=400&h=300&fit=crop' },
-        { id: 'qufu_kongmiao', name: '曲阜孔庙', category: 'tower', location: '山东曲阜', description: '祭祀孔子的庙宇建筑群', tags: ['庙宇', '祭祀'], dynasty: '宋代', image: 'https://images.unsplash.com/photo-1528164344705-47542687000d?w=400&h=300&fit=crop' },
-        { id: 'fujian_tulou', name: '福建土楼', category: 'residence', location: '福建龙岩', description: '客家人的东方古城堡', tags: ['民居', '客家'], dynasty: '清代', image: 'https://images.unsplash.com/photo-1528127269322-539801943592?w=400&h=300&fit=crop' }
+        { id: 'taihe_dian', name: '太和殿', category: 'palace', location: '北京故宫', description: '紫禁城，明清皇家宫殿', tags: ['宫殿', '明代'], dynasty: '明代', image: '' },
+        { id: 'zhuozheng_garden', name: '拙政园', category: 'garden', location: '江苏苏州', description: '咫尺之内再造乾坤', tags: ['园林', '苏州'], dynasty: '明代', image: '' },
+        { id: 'zhaozhou_bridge', name: '赵州桥', category: 'bridge', location: '河北赵县', description: '天下第一桥，千年不朽', tags: ['桥梁', '隋代'], dynasty: '隋代', image: '' },
+        { id: 'yueyang_tower', name: '岳阳楼', category: 'tower', location: '湖南岳阳', description: '天下绝景，江南名楼', tags: ['楼阁', '宋代'], dynasty: '宋代', image: '' },
+        { id: 'xian_wall', name: '西安城墙', category: 'defense', location: '陕西西安', description: '中国现存规模最大的古代城垣', tags: ['城防', '明代'], dynasty: '明代', image: '' },
+        { id: 'dazheng_dian', name: '沈阳故宫大政殿', category: 'palace', location: '辽宁沈阳', description: '浓郁满族特色的宫殿建筑', tags: ['宫殿', '清代'], dynasty: '清代', image: '' },
+        { id: 'qufu_kongmiao', name: '曲阜孔庙', category: 'tower', location: '山东曲阜', description: '祭祀孔子的庙宇建筑群', tags: ['庙宇', '祭祀'], dynasty: '宋代', image: '' },
+        { id: 'fujian_tulou', name: '福建土楼', category: 'residence', location: '福建龙岩', description: '客家人的东方古城堡', tags: ['民居', '客家'], dynasty: '清代', image: '' }
       ],
       dailyBuilding: null,
       favorites: [],
@@ -179,8 +181,12 @@ export default {
     // 记录页面加载开始时间
     this._pageLoadStart = Date.now();
 
+    // 首页固定优先使用本地实物图源，避免 object 模式下返回空图
+    setImageSourceSetting('local');
+
     // 获取每日推荐
     this.getDailyBuilding();
+    this.loadHomepageBuildings();
 
     // 立即显示内容，移除延迟
     this.loading = false;
@@ -218,6 +224,113 @@ export default {
   },
   
   methods: {
+    getImagePreferenceScore(url) {
+      const value = String(url || '').trim().toLowerCase();
+      if (!value) return -100;
+
+      let score = 0;
+      if (value.includes('photo')) score += 100;
+      if (value.includes('real')) score += 15;
+      if (value.includes('overview')) score -= 80;
+      if (value.includes('classification')) score -= 15;
+      if (value.includes('structure')) score -= 15;
+      if (value.includes('timeline')) score -= 15;
+      if (value.includes('function')) score -= 15;
+      if (value.includes('infographic')) score -= 20;
+      return score;
+    },
+
+    pickPreferredImage(building) {
+      const candidates = [
+        building && building.originalImage,
+        building && building.coverImage,
+        building && building.image
+      ]
+        .map((item) => String(item || '').trim())
+        .filter(Boolean);
+
+      if (!candidates.length) {
+        return '';
+      }
+
+      const uniqueCandidates = [...new Set(candidates)];
+      uniqueCandidates.sort((a, b) => this.getImagePreferenceScore(b) - this.getImagePreferenceScore(a));
+      return uniqueCandidates[0];
+    },
+
+    inferDynasty(building) {
+      const tags = Array.isArray(building && building.tags) ? building.tags : [];
+      const tagDynasty = tags.find((tag) => /代/.test(String(tag)));
+      if (tagDynasty) return String(tagDynasty);
+
+      const eraStart = Number(building && building.mainEra && building.mainEra.start);
+      if (!Number.isFinite(eraStart)) {
+        return '古代';
+      }
+
+      if (eraStart >= 1644) return '清代';
+      if (eraStart >= 1368) return '明代';
+      if (eraStart >= 1271) return '元代';
+      if (eraStart >= 960) return '宋代';
+      if (eraStart >= 618) return '唐代';
+      if (eraStart >= 581) return '隋代';
+      if (eraStart >= 220) return '魏晋南北朝';
+      if (eraStart >= -221) return '秦汉';
+      return '先秦';
+    },
+
+    normalizeHomepageBuilding(building) {
+      const image = this.pickPreferredImage(building);
+      const tags = Array.isArray(building && building.tags) ? building.tags : [];
+      return {
+        ...building,
+        image,
+        dynasty: this.inferDynasty(building),
+        tags
+      };
+    },
+
+    async loadHomepageBuildings() {
+      try {
+        const list = await getBuildings({}, true);
+        if (!Array.isArray(list) || list.length === 0) {
+          return;
+        }
+
+        const fallbackList = Array.isArray(this.previewBuildings)
+          ? this.previewBuildings.map((item) => ({ ...item }))
+          : [];
+
+        const normalized = list
+          .map((item) => this.normalizeHomepageBuilding(item))
+          .filter((item) => Boolean(String(item.image || '').trim()));
+
+        if (!normalized.length) {
+          return;
+        }
+
+        const ranked = [...normalized].sort((a, b) => {
+          const diff = this.getImagePreferenceScore(b.image) - this.getImagePreferenceScore(a.image);
+          return diff !== 0 ? diff : String(a.name || '').localeCompare(String(b.name || ''), 'zh-Hans-CN');
+        });
+
+        const selected = ranked.slice(0, 8);
+
+        if (selected.length < 8 && fallbackList.length) {
+          const usedIds = new Set(selected.map((item) => item.id));
+          const fillers = fallbackList.filter((item) => !usedIds.has(item.id)).slice(0, 8 - selected.length);
+          selected.push(...fillers);
+        }
+
+        if (selected.length) {
+          this.previewBuildings = selected.slice(0, 8);
+          this.getDailyBuilding();
+        }
+      } catch (error) {
+        console.warn('首页建筑数据加载失败，保留本地兜底数据:', error && error.message ? error.message : error);
+      }
+    },
+
     shuffleKnowledgeItems() {
       const array = [...this.knowledgeItems];
       for (let i = array.length - 1; i > 0; i--) {
@@ -229,6 +342,11 @@ export default {
 
     // 获取每日推荐建筑
     getDailyBuilding() {
+      if (!Array.isArray(this.previewBuildings) || this.previewBuildings.length === 0) {
+        this.dailyBuilding = null;
+        return;
+      }
+
       // 获取今天的日期字符串作为种子
       const today = new Date();
       const dateStr = `${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`;

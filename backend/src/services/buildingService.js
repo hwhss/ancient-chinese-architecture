@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const {
   getBuildings,
   getBuildingById,
@@ -133,9 +135,62 @@ function buildListThumbnailUrl(resourceUrl, requester) {
   return ensureSignedUrl(resourceUrl, { width: 480, quality: 75 }, requester);
 }
 
+function isImageFile(fileName) {
+  return /\.(png|jpg|jpeg|webp|gif)$/i.test(String(fileName || ''));
+}
+
+function getLocalImageSortWeight(fileName) {
+  const value = String(fileName || '').toLowerCase();
+  if (value.includes('photo')) return 0;
+  if (value.includes('full-view')) return 1;
+  if (value.includes('fullview')) return 1;
+  if (value.includes('plaque')) return 2;
+  if (value.includes('reflection')) return 2;
+  if (value.includes('deck')) return 2;
+  if (value.includes('real')) return 2;
+  if (value.includes('overview')) return 8;
+  if (value.includes('classification')) return 10;
+  if (value.includes('structure')) return 11;
+  if (value.includes('timeline')) return 12;
+  if (value.includes('function')) return 13;
+  if (value.includes('infographic')) return 14;
+  return 6;
+}
+
+function getPreferredLocalBuildingImage(buildingId) {
+  const mapped = String(getLocalImageByBuildingId(buildingId) || '').trim().replace(/\\/g, '/');
+  if (!mapped) {
+    return '';
+  }
+
+  const relDir = path.posix.dirname(mapped);
+  const localDir = String(config.localAssetDir || '').trim();
+  if (!localDir || !relDir || relDir === '.') {
+    return mapped;
+  }
+
+  const absDir = path.join(localDir, ...relDir.split('/'));
+  if (!fs.existsSync(absDir)) {
+    return mapped;
+  }
+
+  const files = fs.readdirSync(absDir)
+    .filter((name) => isImageFile(name))
+    .sort((a, b) => {
+      const diff = getLocalImageSortWeight(a) - getLocalImageSortWeight(b);
+      return diff !== 0 ? diff : a.localeCompare(b, 'en');
+    });
+
+  if (!files.length) {
+    return mapped;
+  }
+
+  return `${relDir}/${files[0]}`.replace(/\\/g, '/');
+}
+
 function resolveBuildingImageResource(item, assetVerification, requester) {
   if (getImageSourceMode(requester) === 'local') {
-    const localMapped = getLocalImageByBuildingId(item && item.id);
+    const localMapped = getPreferredLocalBuildingImage(item && item.id);
     if (localMapped) {
       return localMapped;
     }

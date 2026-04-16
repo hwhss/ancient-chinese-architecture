@@ -1,6 +1,6 @@
 const DEFAULT_API_BASE_URL = "http://39.106.6.53";
 const IMAGE_SOURCE_STORAGE_KEY = "IMAGE_SOURCE_SETTING";
-const DEFAULT_IMAGE_SOURCE = "object";
+const DEFAULT_IMAGE_SOURCE = "local";
 
 function normalizeBaseUrl(url) {
   const value = String(url || "").trim();

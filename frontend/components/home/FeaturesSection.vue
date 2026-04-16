@@ -3,7 +3,7 @@
     <view class="page-container">
       <view class="section-header">
         <view class="title-with-icon">
-          <TraditionalIcon name="defense" size="48" style="color: var(--secondary)" />
+          <TraditionalIcon name="defense" size="44" style="color: var(--secondary)" />
           <text class="section-title">古建特色</text>
         </view>
         <view class="window-divider">
@@ -12,9 +12,9 @@
       </view>
       
       <view class="features-grid">
-        <view v-for="(feature, index) in localFeatures" :key="index" class="feature-card rice-paper brush-border-ink">
+        <view v-for="(feature, index) in localFeatures" :key="index" class="feature-card rice-paper card-ink">
           <view class="feature-icon-wrapper">
-            <TraditionalIcon :name="feature.icon" size="64" />
+            <TraditionalIcon :name="feature.icon" size="56" />
           </view>
           <view class="feature-info">
             <text class="feature-title ink-pressed">{{ feature.title }}</text>
@@ -71,7 +71,7 @@ export default {
 
 <style scoped>
 .section-features {
-  padding: 80rpx 40rpx;
+  padding: 60rpx 32rpx;
   opacity: 0;
   transform: translateY(30px);
   transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -87,79 +87,113 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 60rpx;
+  margin-bottom: 40rpx;
 }
 
 .title-with-icon {
   display: flex;
   align-items: center;
-  gap: 16rpx;
-  margin-bottom: 16rpx;
+  gap: 12rpx;
+  margin-bottom: 12rpx;
 }
 
 .section-title {
-  font-size: 48rpx;
+  font-size: 40rpx;
   font-weight: bold;
   color: var(--text-primary);
   font-family: 'TsangerJinKai', serif;
-  letter-spacing: 6rpx;
+  letter-spacing: 4rpx;
 }
 
 .window-divider {
   width: 100%;
-  height: 20rpx;
+  height: 16rpx;
   position: relative;
   display: flex;
   justify-content: center;
 }
 
 .window-pattern {
-  width: 180rpx;
-  height: 4rpx;
+  width: 120rpx;
+  height: 3rpx;
   background: var(--secondary);
   opacity: 0.3;
+  position: relative;
+}
+
+.window-pattern::before,
+.window-pattern::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 8rpx;
+  height: 8rpx;
+  border: 2rpx solid var(--secondary);
+  transform: translateY(-50%) rotate(45deg);
+  opacity: 0.5;
+}
+
+.window-pattern::before {
+  left: -16rpx;
+}
+
+.window-pattern::after {
+  right: -16rpx;
 }
 
 /* 项目亮点 */
 .features-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 32rpx;
+  gap: 20rpx;
+}
+
+@media (min-width: 768px) {
+  .features-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24rpx;
+  }
 }
 
 .feature-card {
   background: var(--bg-card);
-  border-radius: 8rpx;
-  padding: 48rpx 32rpx;
+  border-radius: 12rpx;
+  padding: 32rpx 24rpx;
   text-align: center;
-  box-shadow: 0 10rpx 30rpx rgba(44, 30, 19, 0.08);
+  box-shadow: 0 8rpx 24rpx rgba(44, 30, 19, 0.06);
   border: 1rpx solid var(--border);
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
 .feature-card:hover {
-  transform: translateY(-8rpx);
-  box-shadow: 0 20rpx 50rpx rgba(44, 30, 19, 0.15);
+  transform: translateY(-4rpx);
+  box-shadow: 0 16rpx 40rpx rgba(44, 30, 19, 0.12);
   border-color: var(--secondary);
 }
 
 .feature-icon-wrapper {
   color: var(--primary);
-  margin-bottom: 24rpx;
-  opacity: 0.8;
+  margin-bottom: 16rpx;
+  opacity: 0.85;
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover .feature-icon-wrapper {
+  transform: scale(1.1);
+  opacity: 1;
 }
 
 .feature-info {
   display: flex;
   flex-direction: column;
-  gap: 12rpx;
+  gap: 8rpx;
 }
 
 .feature-title {
-  font-size: 34rpx;
+  font-size: 30rpx;
   font-weight: bold;
   color: var(--text-primary);
   font-family: 'TsangerJinKai', serif;
@@ -167,13 +201,28 @@ export default {
 }
 
 .ink-pressed {
-  text-shadow: 0.5rpx 0.5rpx 0px rgba(255,255,255,1), 0 2rpx 4rpx rgba(0,0,0,0.1);
+  text-shadow: 0.5rpx 0.5rpx 0px rgba(255,255,255,1), 0 2rpx 4rpx rgba(0,0,0,0.08);
 }
 
 .feature-desc {
-  font-size: 24rpx;
+  font-size: 22rpx;
   color: var(--text-tertiary);
-  line-height: 1.6;
+  line-height: 1.5;
   letter-spacing: 1rpx;
+}
+
+/* 响应式适配 */
+@media (min-width: 768px) {
+  .section-features {
+    padding: 80rpx 40rpx;
+  }
+  
+  .section-title {
+    font-size: 48rpx;
+  }
+  
+  .feature-title {
+    font-size: 32rpx;
+  }
 }
 </style>

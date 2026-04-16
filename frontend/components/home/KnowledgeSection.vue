@@ -3,7 +3,7 @@
     <view class="page-container">
       <view class="section-header">
         <view class="title-with-icon">
-          <TraditionalIcon name="palace" size="48" style="color: var(--secondary)" />
+          <TraditionalIcon name="palace" size="44" style="color: var(--secondary)" />
           <text class="section-title">古建小课堂</text>
         </view>
         <view class="window-divider">
@@ -16,12 +16,12 @@
           <view 
             v-for="(item, index) in items" 
             :key="index" 
-            class="knowledge-item rice-paper brush-border-ink card-ink"
+            class="knowledge-item rice-paper card-ink"
             :class="{ 'active': activeIndex === index }"
             @click="onItemClick(item)"
           >
             <view class="knowledge-icon-wrapper">
-              <TraditionalIcon :name="getIconForTitle(item.title)" size="64" />
+              <TraditionalIcon :name="getIconForTitle(item.title)" size="52" />
             </view>
             <view class="knowledge-content">
               <text class="knowledge-title ink-pressed">{{ item.title }}</text>
@@ -31,11 +31,9 @@
               <text class="knowledge-category">{{ getCategoryForTitle(item.title) }}</text>
               <view class="read-more">
                 <text class="read-text">研读</text>
-                <TraditionalIcon name="arrow-right" size="20" />
+                <TraditionalIcon name="arrow-right" size="18" />
               </view>
             </view>
-            <!-- 装饰性元素 -->
-            <view class="item-seal">{{ getCategoryForTitle(item.title).substring(0, 1) }}</view>
           </view>
         </view>
       </scroll-view>
@@ -88,7 +86,7 @@ export default {
         if (this.knowledgeScrollProgress < 10) this.knowledgeScrollProgress = 10;
         
         // 更新激活索引
-        const itemWidth = uni.upx2px(320 + 32); 
+        const itemWidth = uni.upx2px(280 + 24); 
         this.activeIndex = Math.round(scrollLeft / itemWidth);
       }
     },
@@ -121,7 +119,7 @@ export default {
 
 <style scoped>
 .section-knowledge {
-  padding: 80rpx 0;
+  padding: 60rpx 0;
   opacity: 0;
   transform: translateY(30px);
   transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -138,38 +136,59 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 60rpx;
-  padding: 0 40rpx;
+  margin-bottom: 40rpx;
+  padding: 0 32rpx;
 }
 
 .title-with-icon {
   display: flex;
   align-items: center;
-  gap: 16rpx;
-  margin-bottom: 16rpx;
+  gap: 12rpx;
+  margin-bottom: 12rpx;
 }
 
 .section-title {
-  font-size: 48rpx;
+  font-size: 40rpx;
   font-weight: bold;
   color: var(--text-primary);
   font-family: 'TsangerJinKai', serif;
-  letter-spacing: 6rpx;
+  letter-spacing: 4rpx;
 }
 
 .window-divider {
   width: 100%;
-  height: 20rpx;
+  height: 16rpx;
   position: relative;
   display: flex;
   justify-content: center;
 }
 
 .window-pattern {
-  width: 140rpx;
-  height: 4rpx;
+  width: 120rpx;
+  height: 3rpx;
   background: var(--secondary);
   opacity: 0.3;
+  position: relative;
+}
+
+.window-pattern::before,
+.window-pattern::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 8rpx;
+  height: 8rpx;
+  border: 2rpx solid var(--secondary);
+  transform: translateY(-50%) rotate(45deg);
+  opacity: 0.5;
+}
+
+.window-pattern::before {
+  left: -16rpx;
+}
+
+.window-pattern::after {
+  right: -16rpx;
 }
 
 .knowledge-scroll {
@@ -179,51 +198,59 @@ export default {
 
 .knowledge-list {
   display: inline-flex;
-  padding: 20rpx 40rpx 60rpx;
-  gap: 32rpx;
+  padding: 16rpx 32rpx 40rpx;
+  gap: 24rpx;
 }
 
 .knowledge-item {
-  width: 320rpx;
+  width: 280rpx;
   background: var(--bg-card);
-  border-radius: 8rpx;
-  padding: 40rpx 32rpx;
+  border-radius: 12rpx;
+  padding: 32rpx 24rpx;
   display: flex;
   flex-direction: column;
   position: relative;
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 10rpx 30rpx rgba(44, 30, 19, 0.08);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8rpx 24rpx rgba(44, 30, 19, 0.06);
   border: 1rpx solid var(--border);
 }
 
 .knowledge-item.active {
-  transform: translateY(-10rpx) scale(1.02);
-  box-shadow: 0 20rpx 50rpx rgba(44, 30, 19, 0.15);
+  transform: translateY(-6rpx);
+  box-shadow: 0 16rpx 40rpx rgba(44, 30, 19, 0.12);
   border-color: var(--secondary);
 }
 
 .knowledge-icon-wrapper {
   color: var(--secondary);
-  margin-bottom: 24rpx;
+  margin-bottom: 20rpx;
   opacity: 0.8;
+  transition: all 0.3s ease;
+}
+
+.knowledge-item:hover .knowledge-icon-wrapper {
+  transform: scale(1.1);
+  opacity: 1;
+  color: var(--primary);
 }
 
 .knowledge-title {
-  font-size: 34rpx;
+  font-size: 30rpx;
   font-weight: bold;
   color: var(--text-primary);
-  margin-bottom: 16rpx;
+  margin-bottom: 12rpx;
   display: block;
   font-family: 'TsangerJinKai', serif;
   white-space: normal;
+  letter-spacing: 1rpx;
 }
 
 .ink-pressed {
-  text-shadow: 0.5rpx 0.5rpx 0px rgba(255,255,255,1), 0 2rpx 4rpx rgba(0,0,0,0.1);
+  text-shadow: 0.5rpx 0.5rpx 0px rgba(255,255,255,1), 0 2rpx 4rpx rgba(0,0,0,0.08);
 }
 
 .knowledge-brief {
-  font-size: 24rpx;
+  font-size: 22rpx;
   color: var(--text-tertiary);
   line-height: 1.6;
   white-space: normal;
@@ -232,8 +259,8 @@ export default {
   line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  margin-bottom: 32rpx;
-  height: 115rpx;
+  margin-bottom: 24rpx;
+  height: 100rpx;
 }
 
 .knowledge-footer {
@@ -244,12 +271,13 @@ export default {
 }
 
 .knowledge-category {
-  font-size: 20rpx;
+  font-size: 18rpx;
   color: var(--secondary);
   background: var(--bg-secondary);
-  padding: 4rpx 16rpx;
+  padding: 4rpx 12rpx;
   border-radius: 4rpx;
   font-weight: 500;
+  border: 1rpx solid var(--border);
 }
 
 .read-more {
@@ -257,38 +285,26 @@ export default {
   align-items: center;
   gap: 4rpx;
   color: var(--primary);
+  transition: all 0.2s ease;
+}
+
+.read-more:hover {
+  transform: translateX(4rpx);
 }
 
 .read-text {
-  font-size: 24rpx;
-  font-weight: bold;
-}
-
-.item-seal {
-  position: absolute;
-  top: 20rpx;
-  right: 20rpx;
-  font-size: 18rpx;
-  color: var(--primary);
-  border: 1rpx solid var(--primary);
-  width: 32rpx;
-  height: 32rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.3;
-  border-radius: 2rpx;
-  transform: rotate(15deg);
+  font-size: 22rpx;
+  font-weight: 600;
 }
 
 /* 进度条 */
 .scroll-indicator-wrapper {
-  padding: 0 100rpx;
-  margin-top: 20rpx;
+  padding: 0 80rpx;
+  margin-top: 16rpx;
 }
 
 .scroll-indicator-bg {
-  height: 4rpx;
+  height: 3rpx;
   background: var(--border);
   border-radius: 2rpx;
   overflow: hidden;
@@ -298,5 +314,34 @@ export default {
   height: 100%;
   background: var(--secondary);
   transition: width 0.3s ease;
+}
+
+/* 响应式适配 */
+@media (min-width: 768px) {
+  .section-knowledge {
+    padding: 80rpx 0;
+  }
+  
+  .section-header {
+    padding: 0 40rpx;
+  }
+  
+  .section-title {
+    font-size: 48rpx;
+  }
+  
+  .knowledge-list {
+    padding: 20rpx 40rpx 48rpx;
+    gap: 28rpx;
+  }
+  
+  .knowledge-item {
+    width: 300rpx;
+    padding: 36rpx 28rpx;
+  }
+  
+  .knowledge-title {
+    font-size: 32rpx;
+  }
 }
 </style>
