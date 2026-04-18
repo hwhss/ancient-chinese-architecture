@@ -87,8 +87,17 @@ import {
   healthCheck,
 } from "../../services/api";
 
-const DEFAULT_API_BASE_URL = "http://39.106.6.53";
-const REMOTE_SERVER_URL = "http://39.106.6.53";
+// 从环境变量读取默认地址，未配置时使用本地开发地址
+const DEFAULT_API_BASE_URL =
+  (typeof process !== "undefined" && process.env &&
+    (process.env.UNI_APP_API_BASE_URL || process.env.VUE_APP_API_BASE_URL)) ||
+  "http://localhost:9527";
+
+// 远程服务器地址，从环境变量读取
+const REMOTE_SERVER_URL =
+  (typeof process !== "undefined" && process.env &&
+    (process.env.UNI_APP_REMOTE_SERVER_URL || process.env.VUE_APP_REMOTE_SERVER_URL)) ||
+  DEFAULT_API_BASE_URL;
 const PRESET_TEST_KEY = "API_PRESET_TEST";
 const PRESET_PROD_KEY = "API_PRESET_PROD";
 

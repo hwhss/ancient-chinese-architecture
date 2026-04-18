@@ -28,28 +28,27 @@
 .
 ├── agent.md                    # Agent开发规范
 ├── docs/                       # 开发文档
-│   ├── 古建筑AI导览项目_每日任务清单-09edf513b1.md
-│   └── 2026-03-26_项目初始化与雏形搭建.md
+│   ├── THEME_DOCUMENTATION.md  # 视觉主题系统文档
+│   ├── 后端接口总览与对接手册.md
+│   └── ...
 ├── frontend/                   # UniApp前端
-│   ├── manifest.json
-│   ├── pages.json
-│   ├── App.vue
-│   ├── main.js
-│   ├── pages/
-│   │   ├── index/index.vue     # 首页-聊天界面
-│   │   └── detail/detail.vue   # 详情页-素材展示
+│   ├── pages/                  # 页面
+│   │   ├── index/index.vue     # AI聊天页
+│   │   ├── home/home.vue       # 首页
+│   │   ├── map/map.vue         # 地图浏览
+│   │   ├── detail/detail.vue   # 建筑详情
+│   │   ├── viewer/viewer.vue   # 3D模型查看器
+│   │   └── favorites/          # 收藏夹
+│   ├── components/             # 组件
 │   └── static/                 # 静态资源
 ├── backend/                    # Node.js后端
-│   ├── package.json
-│   ├── app.js                  # 服务入口
-│   ├── services/
-│   │   └── aiService.js        # AI服务封装
-│   ├── data-jsondb/            # 主数据源（分文件JSON数据库）
-│   │   ├── index.json
-│   │   ├── buildings/
-│   │   ├── knowledge/
-│   │   └── visualization/
-│   └── data/                   # 兼容回退数据目录（legacy）
+│   ├── src/                    # 源码
+│   │   ├── controllers/        # 控制器
+│   │   ├── services/           # 服务层
+│   │   └── routes/             # 路由
+│   ├── data-jsondb/            # JSON数据源
+│   └── migrations/             # 数据库迁移
+├── deploy/                     # 部署文档与脚本
 └── README.md                   # 项目说明
 ```
 

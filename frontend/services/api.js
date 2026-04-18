@@ -1,4 +1,8 @@
-const DEFAULT_API_BASE_URL = "http://39.106.6.53";
+// 默认 API 地址，优先从环境变量读取，否则使用本地开发地址
+const DEFAULT_API_BASE_URL =
+  (typeof process !== "undefined" && process.env &&
+    (process.env.UNI_APP_API_BASE_URL || process.env.VUE_APP_API_BASE_URL)) ||
+  "http://localhost:9527";
 const IMAGE_SOURCE_STORAGE_KEY = "IMAGE_SOURCE_SETTING";
 const DEFAULT_IMAGE_SOURCE = "server";
 

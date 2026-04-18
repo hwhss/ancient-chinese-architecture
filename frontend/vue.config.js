@@ -76,7 +76,7 @@ module.exports = {
   devServer: {
     proxy: {
       '/api': {
-        target: 'http://39.106.6.53',
+        target: process.env.UNI_APP_API_BASE_URL || process.env.VUE_APP_API_BASE_URL || 'http://localhost:9527',
         changeOrigin: true,
         pathRewrite: {
           '^/api': '/api'

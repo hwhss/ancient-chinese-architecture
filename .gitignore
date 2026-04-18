@@ -28,6 +28,8 @@ pids/
 # Local environment files (keep template only)
 backend/.env*
 !backend/.env.example
+frontend/.env
+!frontend/.env.example
 
 # Build outputs
 dist/

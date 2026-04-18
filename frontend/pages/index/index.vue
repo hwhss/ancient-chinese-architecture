@@ -158,6 +158,7 @@
 <script>
 import { chat } from "../../services/api";
 import { parseMarkdown, renderToHtml, containsMarkdown } from "../../utils/markdown.js";
+import { goToDetail } from "../../utils/navigation.js";
 import VirtualMessageList from "../../components/VirtualMessageList.vue";
 import ChatSidebar from "../../components/chat/ChatSidebar.vue";
 import WelcomeHero from "../../components/chat/WelcomeHero.vue";
@@ -645,7 +646,18 @@ export default {
 
       try {
         const data = await chat(question);
-        const materialId = data.materialId || (data.matchedEntity && data.matchedEntity.id) || matchMaterialId(question);
+        // 只有后端明确返回匹配的建筑信息，且是从用户问题中匹配到的，才显示"查看实景资料"按钮
+        // 避免从AI回答内容中误匹配建筑
+        let materialId = data.materialId || (data.matchedEntity && data.matchedEntity.id);
+        
+        // 检查matchedEntity，如果是从answer中匹配到的（而非question），则不显示按钮
+        if (materialId && data.matchedEntity && data.matchedEntity.matchedText) {
+          const matchedText = String(data.matchedEntity.matchedText);
+          // 如果matchedText以"answer:"开头，说明是从AI回答中匹配到的，不是用户明确询问的
+          if (matchedText.startsWith('answer:')) {
+            materialId = null;
+          }
+        }
         
         const aiMsg = {
           id: Date.now() + 1,
@@ -664,13 +676,13 @@ export default {
         this.handleError(error);
         
         const mockAnswer = this.getMockAnswer(question);
-        const materialId = matchMaterialId(question);
+        // 错误降级时也不使用前端关键词匹配，避免误匹配
         const aiMsg = {
           id: Date.now() + 1,
           role: "ai",
           content: mockAnswer,
           displayContent: "",
-          materialId,
+          materialId: null,
           entities: [],
           entityDecision: null,
           isTyping: true
@@ -921,6 +933,17 @@ export default {
           this.calculateMessageAreaHeight();
         });
       }
+    },
+
+    goToDetail(materialId) {
+      if (!materialId) {
+        uni.showToast({
+          title: '无法获取建筑信息',
+          icon: 'none'
+        });
+        return;
+      }
+      goToDetail(materialId);
     },
 
   }

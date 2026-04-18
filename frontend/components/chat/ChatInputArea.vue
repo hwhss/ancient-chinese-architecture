@@ -1,7 +1,7 @@
 <template>
   <view>
     <!-- 示例问题区域（仅在聚焦或键盘打开时显示） -->
-    <view v-if="isFocused || keyboardHeight > 0" class="example-questions-area" :class="{ 'on-top': keyboardHeight > 0 }">
+    <view v-if="isFocused || keyboardHeight > 0" class="example-questions-area">
       <view class="example-header">
         <text class="example-title">常见问题</text>
         <view class="example-close" @click="isFocused = false">
@@ -19,7 +19,7 @@
       </view>
     </view>
 
-    <!-- 输入区域 - 升级为多行文本域 -->
+    <!-- 输入区域 -->
     <view class="input-area" :class="{ 'keyboard-active': keyboardHeight > 0 }">
       <view class="input-wrapper">
         <textarea
@@ -39,7 +39,7 @@
         <text class="char-count" :class="{ 'near-limit': (inputText || '').length > 450 }">{{ (inputText || '').length }}/500</text>
       </view>
       <button
-        class="send-btn btn-ink"
+        class="send-btn"
         :disabled="!canSend || isSending"
         :class="{ 'sending': isSending, 'has-content': canSend }"
         @click="$emit('send')"
@@ -120,15 +120,14 @@ export default {
 
 <style scoped>
 .example-questions-area {
-  padding: 0 30rpx 30rpx;
-  background: transparent;
-  position: relative;
-  z-index: 10;
-  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 20rpx 30rpx;
+  background: var(--bg-primary, #f2ead3);
+  border-top: 1rpx solid rgba(114, 90, 61, 0.1);
+  animation: slideUp 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20rpx); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -136,199 +135,151 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20rpx;
+  margin-bottom: 16rpx;
 }
 
 .example-title {
   font-size: 26rpx;
-  color: var(--secondary);
+  color: var(--secondary, #725a3d);
   font-weight: 600;
-  letter-spacing: 2rpx;
-  position: relative;
-  padding-left: 16rpx;
+  display: flex;
+  align-items: center;
 }
 
 .example-title::before {
   content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
+  display: inline-block;
   width: 6rpx;
   height: 24rpx;
-  background: var(--primary);
+  background: var(--primary, #a63131);
+  margin-right: 12rpx;
   border-radius: 4rpx;
 }
 
 .example-close {
   padding: 10rpx;
+  cursor: pointer;
 }
 
 .example-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 12rpx;
+  gap: 16rpx;
 }
 
 .example-tag {
   display: inline-block;
-  padding: 12rpx 24rpx;
-  background: var(--bg-primary);
-  border: 1rpx solid var(--border);
-  border-radius: 40rpx;
-  font-size: 24rpx;
-  color: var(--text-secondary);
+  padding: 14rpx 28rpx;
+  background: var(--bg-card, #f9f5e8);
+  border: 1rpx solid rgba(114, 90, 61, 0.15);
+  border-radius: 8rpx;
+  font-size: 26rpx;
+  color: var(--secondary, #725a3d);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  white-space: nowrap;
-}
-
-.example-tag:hover {
-  background: var(--bg-tertiary);
-  color: var(--primary);
-  border-color: var(--secondary);
+  transition: all 0.2s ease;
 }
 
 .example-tag:active {
-  transform: scale(0.95);
-  background: var(--bg-tertiary);
+  background: var(--primary, #a63131);
+  color: #fff;
+  border-color: var(--primary, #a63131);
 }
 
 .example-tag.disabled {
   opacity: 0.5;
-  cursor: not-allowed;
   pointer-events: none;
 }
 
 .input-area {
   display: flex;
   align-items: flex-end;
-  padding: 20rpx 30rpx 40rpx;
-  background: var(--bg-card);
-  border-top: 1rpx solid var(--border);
-  transition: all 0.3s;
+  padding: 24rpx 30rpx calc(24rpx + env(safe-area-inset-bottom));
+  background: var(--bg-primary, #f2ead3);
+  border-top: 1rpx solid rgba(114, 90, 61, 0.1);
   position: relative;
   z-index: 10;
   gap: 20rpx;
-  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.03);
 }
 
-.keyboard-active {
-  padding-bottom: calc(30rpx + env(safe-area-inset-bottom));
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  background: var(--bg-card);
-  box-shadow: 0 -10rpx 40rpx var(--shadow);
+.input-area.keyboard-active {
+  padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
 }
 
 .input-wrapper {
   flex: 1;
   position: relative;
-  background: var(--bg-primary);
-  border-radius: 20rpx;
-  border: 1rpx solid var(--border);
+  background: #fff;
+  border-radius: 12rpx;
+  border: 1rpx solid rgba(114, 90, 61, 0.2);
   padding: 20rpx 24rpx;
   padding-bottom: 48rpx;
-  transition: all 0.3s;
-  max-height: 240rpx;
-  overflow: hidden;
-  box-shadow: inset 0 2rpx 8rpx rgba(0,0,0,0.03);
+  transition: all 0.3s ease;
 }
 
 .input-wrapper:focus-within {
-  border-color: var(--secondary);
-  background: var(--bg-card);
-  box-shadow: 0 4rpx 16rpx var(--shadow);
+  border-color: var(--primary, #a63131);
+  box-shadow: 0 0 0 2rpx rgba(166, 49, 49, 0.1);
 }
 
 .textarea {
   width: 100%;
   min-height: 48rpx;
-  max-height: 160rpx;
+  max-height: 200rpx;
   font-size: 30rpx;
-  line-height: 1.6;
-  color: #2d2d2d;
+  line-height: 1.5;
+  color: var(--text-primary, #2c1e13);
   background: transparent;
   border: none;
   outline: none;
   resize: none;
-  overflow-y: auto;
 }
 
 .textarea::placeholder {
-  color: var(--text-muted);
+  color: var(--text-tertiary, #8b7355);
+  opacity: 0.6;
 }
 
 .char-count {
   position: absolute;
-  right: 16rpx;
-  bottom: 8rpx;
-  font-size: 20rpx;
-  color: #999;
-  transition: color 0.2s;
+  right: 20rpx;
+  bottom: 12rpx;
+  font-size: 22rpx;
+  color: var(--text-tertiary, #8b7355);
+  background: #fff;
 }
 
 .char-count.near-limit {
-  color: #c82506;
+  color: var(--primary, #a63131);
   font-weight: 600;
 }
 
 .send-btn {
-  width: 96rpx;
-  height: 96rpx;
+  width: 88rpx;
+  height: 88rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-tertiary);
-  border-radius: 24rpx;
-  border: 1rpx solid var(--border);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: var(--bg-card, #f9f5e8);
+  border-radius: 12rpx;
+  border: 1rpx solid rgba(114, 90, 61, 0.2);
+  transition: all 0.3s ease;
   cursor: pointer;
   flex-shrink: 0;
 }
 
 .send-btn.has-content {
-  background: var(--primary);
-  border-color: var(--primary-dark);
-  box-shadow: 0 6rpx 20rpx var(--shadow-primary);
+  background: var(--primary, #a63131);
+  border-color: var(--primary, #a63131);
+  box-shadow: 0 6rpx 16rpx rgba(166, 49, 49, 0.2);
 }
 
-.send-icon {
-  font-size: 32rpx;
-  color: #fff;
-  transform: translateX(-2rpx);
-}
-
-.send-btn:hover:not([disabled]) {
-  transform: translateY(-3px);
-  box-shadow: 0 4rpx 12rpx rgba(200, 37, 6, 0.45);
-}
-
-.send-btn:active:not([disabled]) {
-  transform: translateY(-1px) scale(0.97);
-  box-shadow: 0 2rpx 8rpx rgba(200, 37, 6, 0.3);
+.send-btn.has-content:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 2rpx 8rpx rgba(166, 49, 49, 0.2);
 }
 
 .send-btn[disabled] {
-  background: linear-gradient(135deg, #c8c8c8 0%, #b0b0b0 100%);
-  color: #e8e8e8;
-  box-shadow: none;
+  opacity: 0.6;
   cursor: not-allowed;
-}
-
-.send-btn.sending {
-  opacity: 0.9;
-}
-
-@media (min-width: 1024px) {
-  .input-area {
-    padding: 30rpx 60rpx;
-  }
-  .example-questions-area {
-    padding: 30rpx 60rpx;
-  }
 }
 </style>
