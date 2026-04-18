@@ -12,7 +12,7 @@
       </view>
       
       <view class="features-grid">
-        <view v-for="(feature, index) in localFeatures" :key="index" class="feature-card rice-paper card-ink">
+        <view v-for="(feature, index) in localFeatures" :key="index" class="feature-card card-ink">
           <view class="feature-icon-wrapper">
             <TraditionalIcon :name="feature.icon" size="56" />
           </view>

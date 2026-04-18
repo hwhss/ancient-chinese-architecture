@@ -9,6 +9,10 @@
     <!-- 顶层：动态祥云 -->
     <view class="cloud-background"></view>
 
+    <!-- 左右两侧装饰元素 - 画外之境 -->
+    <view class="side-decoration-left" aria-hidden="true"></view>
+    <view class="side-decoration-right" aria-hidden="true"></view>
+
     <!-- 骨架屏 - 加载时显示 -->
     <SkeletonScreen
       v-if="loading"
@@ -76,7 +80,7 @@
       />
       
       <!-- 底部 Footer -->
-      <view class="footer" :class="{ 'visible': sections.footer }">
+      <view class="footer">
         <text class="footer-slogan">以数字之眼，窥千年古建之美</text>
         <text class="footer-copyright">© 2026 中华古建筑导览</text>
       </view>
@@ -138,8 +142,7 @@ export default {
         preview: false,
         previewCards: [false, false, false, false, false, false, false, false],
         features: false,
-        knowledge: false,
-        footer: false
+        knowledge: false
       },
       previewBuildings: [
         { id: 'taihe_dian', name: '太和殿', category: 'palace', location: '北京故宫', description: '紫禁城，明清皇家宫殿', tags: ['宫殿', '明代'], dynasty: '明代', image: '' },
@@ -161,16 +164,8 @@ export default {
         { title: '台基', text: '台基，建筑的底座，不仅承重防潮，更体现等级尊卑，须弥座更是皇家建筑的专属标志。' },
         { title: '歇山顶', text: '歇山顶，中国古建筑中最优美的屋顶形式之一，既有庑殿顶的庄重，又有攒尖顶的灵动，故宫太和殿就是典型代表。' },
         { title: '庑殿顶', text: '庑殿顶，中国古建筑中等级最高的屋顶形式，四面斜坡一条正脊，庄重威严，是皇家建筑的首选。' },
-        { title: '悬山顶', text: '悬山顶，屋顶两端伸出山墙之外，既保护墙体免受雨淋，又增添了建筑的层次感，是民居常用的屋顶形式。' },
-        { title: '硬山顶', text: '硬山顶，屋顶与山墙齐平，构造简单防火性好，是民间建筑中最常见的屋顶形式之一。' },
-        { title: '攒尖顶', text: '攒尖顶，屋顶呈锥形汇聚于一点，没有正脊，多用于亭、塔、阁等建筑，天坛祈年殿就是经典之作。' },
-        { title: '雀替', text: '雀替，梁枋与柱交接处的装饰构件，既加固结构又增添美感，形如展翅的云雀，故名雀替。' },
-        { title: '藻井', text: '藻井，室内天花板上的高级装饰，形如凹井绘有藻纹，不仅美观更有象征吉祥的寓意，故宫太和殿的蟠龙藻井最为精美。' },
-        { title: '开间', text: '开间，古建筑的平面计量单位，两根柱子之间为一开间，开间越多等级越高，故宫太和殿有十一开间。' },
-        { title: '须弥座', text: '须弥座，源于佛教的台基形式，由多层组成，雕刻精美，是皇家建筑和重要寺庙的专用基座。' },
-        { title: '影壁', text: '影壁，又称照壁，大门内外的屏障建筑，既有风水讲究，又有装饰作用，九龙壁就是最著名的影壁。' }
+        { title: '悬山顶', text: '悬山顶，屋顶两端伸出山墙之外，既保护墙体免受雨淋，又增添了建筑的层次感，是民居常用的屋顶形式。' }
       ],
-      knowledgeScrollProgress: 0,
       showBackToTop: false,
       showShareCard: false,
       shareBuilding: {}
@@ -191,7 +186,6 @@ export default {
     // 立即显示内容，移除延迟
     this.loading = false;
     this.startHeroAnimation();
-    this.shuffleKnowledgeItems();
 
     // 记录页面加载完成时间
     if (this._pageLoadStart) {
@@ -200,7 +194,7 @@ export default {
     }
 
     // 初始化节流滚动处理
-    this.throttledOnScroll = throttle(this.onScroll.bind(this), 100);
+    this.throttledOnScroll = throttle(this.onScroll.bind(this), 80);
   },
 
   onShow() {
@@ -217,10 +211,6 @@ export default {
     favoriteCount() {
       return this.favorites?.length || 0;
     }
-  },
-  
-  beforeDestroy() {
-    // 清理工作
   },
   
   methods: {
@@ -331,14 +321,7 @@ export default {
       }
     },
 
-    shuffleKnowledgeItems() {
-      const array = [...this.knowledgeItems];
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-      this.knowledgeItems = array;
-    },
+
 
     // 获取每日推荐建筑
     getDailyBuilding() {
@@ -517,9 +500,11 @@ export default {
         });
       }
 
+      // 项目亮点区显示
       this.sections.features = scrollTop > windowHeight * 0.8;
+      
+      // 古建小知识区显示
       this.sections.knowledge = scrollTop > windowHeight * 1.4;
-      this.sections.footer = scrollTop > windowHeight * 1.8;
     },
 
     // 使用节流优化的滚动事件处理
@@ -591,7 +576,7 @@ export default {
 </script>
 
 <style scoped>
-/* 霞鹜文楷书法字体 */
+/* 霞鹜文楷书法字体 - 使用display:swap避免阻塞渲染 */
 @import url('https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&display=swap');
 
 /* ============================================
@@ -832,100 +817,277 @@ export default {
   animation: breathe 2s ease-in-out infinite;
 }
 
-/* 底层：径向渐变打底 */
-.scroll-view::-webkit-scrollbar {
-  width: 12rpx;
-}
-
-.scroll-view::-webkit-scrollbar-track {
-  background: var(--bg-primary);
-  border-radius: 6rpx;
-}
-
-.scroll-view::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%);
-  border-radius: 6rpx;
-  border: 2rpx solid var(--bg-primary);
-}
-
-.scroll-view::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #a01830 0%, #6b0000 100%);
-}
-
-/* 底层：径向渐变打底 */
+/* 底层：动态径向渐变打底 */
 .radial-gradient-bg {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: -50%;
+  left: -50%;
+  right: -50%;
+  bottom: -50%;
   background: radial-gradient(ellipse at center, var(--bg-primary) 0%, var(--bg-secondary) 40%, var(--bg-tertiary) 70%, #dcc8b0 100%);
   pointer-events: none;
-  z-index: -3;
+  z-index: -4;
+  animation: gradientShift 30s ease-in-out infinite;
+  will-change: background;
+  transform: translateZ(0);
+}
+
+@keyframes gradientShift {
+  0% {
+    background: radial-gradient(ellipse at center, var(--bg-primary) 0%, var(--bg-secondary) 40%, var(--bg-tertiary) 70%, #dcc8b0 100%);
+  }
+  33% {
+    background: radial-gradient(ellipse at 30% 20%, var(--bg-primary) 0%, var(--bg-secondary) 45%, var(--bg-tertiary) 75%, #dcc8b0 100%);
+  }
+  66% {
+    background: radial-gradient(ellipse at 70% 80%, var(--bg-primary) 0%, var(--bg-secondary) 42%, var(--bg-tertiary) 72%, #dcc8b0 100%);
+  }
+  100% {
+    background: radial-gradient(ellipse at center, var(--bg-primary) 0%, var(--bg-secondary) 40%, var(--bg-tertiary) 70%, #dcc8b0 100%);
+  }
 }
 
 /* 中层：水墨古建远景 */
 .ink-architecture-bg {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: -50%;
+  left: -50%;
+  right: -50%;
+  bottom: -50%;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800'%3E%3Cpath fill='%235c3d2e' d='M0,700 Q200,600 400,650 Q600,550 800,600 Q1000,500 1200,550 L1200,800 L0,800 Z' opacity='0.05'/%3E%3Cpath fill='%238b4513' d='M100,700 L150,500 L200,550 L250,450 L300,500 L350,600 L400,550 L450,400 L500,500 L550,450 L600,550 L650,400 L700,500 L750,450 L800,550 L850,500 L900,600 L950,550 L1000,650 L1000,700 Z' opacity='0.06'/%3E%3Cpath fill='%238b4513' d='M300,700 L350,550 L400,600 L450,450 L500,500 L550,400 L600,480 L650,550 L700,600 L700,700 Z' opacity='0.08'/%3E%3C/svg%3E");
   background-size: cover;
-  background-position: bottom;
+  background-position: center;
   opacity: 0.08;
   pointer-events: none;
-  z-index: -2;
+  z-index: -3;
+  will-change: transform;
+  transform: translateZ(0);
+  mix-blend-mode: multiply;
 }
 
-/* 顶层：动态祥云（优化性能） */
-.cloud-background {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800'%3E%3Cpath fill='%238b4513' d='M400,100 Q300,50 200,100 Q100,150 200,200 Q300,250 400,200 Q500,150 600,200 Q700,250 600,100 Q500,50 400,100'/%3E%3C/svg%3E");
-  background-size: 400rpx 400rpx;
-  background-repeat: repeat;
-  opacity: 0.04;
-  animation: cloudMove 80s linear infinite;
-  pointer-events: none;
-  z-index: -1;
-  will-change: background-position;
-}
-
-@keyframes cloudMove {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: 800rpx 400rpx;
-  }
-}
-
-/* 水墨山水纹理背景层（保留但z-index调整） */
+/* 水墨山水纹理背景层 */
 .ink-background {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: 
+  top: -50%;
+  left: -50%;
+  right: -50%;
+  bottom: -50%;
+  background:
     radial-gradient(ellipse at 20% 80%, rgba(139, 69, 19, 0.04) 0%, transparent 50%),
     radial-gradient(ellipse at 80% 60%, rgba(139, 69, 19, 0.03) 0%, transparent 40%),
     radial-gradient(ellipse at 50% 90%, rgba(139, 69, 19, 0.035) 0%, transparent 50%);
   pointer-events: none;
-  z-index: -4;
+  z-index: -2;
+  animation: glowShift 20s ease-in-out infinite;
+  will-change: background;
+  transform: translateZ(0);
+}
+
+@keyframes glowShift {
+  0%, 100% {
+    background:
+      radial-gradient(ellipse at 20% 80%, rgba(139, 69, 19, 0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 60%, rgba(139, 69, 19, 0.03) 0%, transparent 40%),
+      radial-gradient(ellipse at 50% 90%, rgba(139, 69, 19, 0.035) 0%, transparent 50%);
+  }
+  50% {
+    background:
+      radial-gradient(ellipse at 40% 60%, rgba(139, 69, 19, 0.05) 0%, transparent 50%),
+      radial-gradient(ellipse at 70% 30%, rgba(139, 69, 19, 0.04) 0%, transparent 40%),
+      radial-gradient(ellipse at 60% 70%, rgba(139, 69, 19, 0.03) 0%, transparent 50%);
+  }
+}
+
+/* 顶层：动态祥云 - 自然飘动 */
+.cloud-background {
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  right: -50%;
+  bottom: -50%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Cellipse cx='100' cy='80' rx='60' ry='25' fill='%23f5e6d3' opacity='0.04'/%3E%3Cellipse cx='280' cy='150' rx='70' ry='28' fill='%23f5e6d3' opacity='0.03'/%3E%3Cellipse cx='180' cy='280' rx='55' ry='22' fill='%23f5e6d3' opacity='0.035'/%3E%3Cellipse cx='320' cy='350' rx='45' ry='18' fill='%23f5e6d3' opacity='0.025'/%3E%3C/svg%3E");
+  background-size: 600px 600px;
+  background-position: center;
+  pointer-events: none;
+  z-index: -1;
+  animation: cloudFloat 60s linear infinite;
+  will-change: background-position;
+  transform: translateZ(0);
+  mix-blend-mode: soft-light;
+}
+
+@keyframes cloudFloat {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 600px 300px;
+  }
 }
 
 .container {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, var(--bg-tertiary) 100%);
+  background: transparent;
   position: relative;
+  overflow: hidden;
+}
+
+/* ============================================
+   板块间自然过渡 - 消除割裂感
+   ============================================ */
+
+/* 全局板块过渡基础 */
+.scroll-view > view {
+  position: relative;
+}
+
+/* Hero区底部柔和过渡 */
+.scroll-view > view:first-child::after {
+  content: '';
+  position: absolute;
+  bottom: -40rpx;
+  left: 10%;
+  right: 10%;
+  height: 80rpx;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(139, 69, 19, 0.03) 50%,
+    transparent 100%
+  );
+  filter: blur(8px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* 各section间的微弱连接线 */
+.section-daily,
+.section-preview,
+.section-features,
+.section-knowledge {
+  position: relative;
+}
+
+/* 每日推荐区的顶部光晕 */
+.section-daily::before {
+  content: '';
+  position: absolute;
+  top: -20rpx;
+  left: 5%;
+  right: 5%;
+  height: 60rpx;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(166, 49, 49, 0.04) 0%,
+    transparent 70%
+  );
+  filter: blur(12px);
+  pointer-events: none;
+}
+
+/* ============================================
+   左右两侧装饰元素 - 画外之境（自然融合版）
+   ============================================ */
+
+/* 左侧装饰 - 水墨远山 + 竹枝 */
+.side-decoration-left {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: min(15vw, 250px);
+  height: 100vh;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 250 1000'%3E%3Cdefs%3E%3ClinearGradient id='mountainGrad' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%235c3d2e;stop-opacity:0.08' /%3E%3Cstop offset='100%25' style='stop-color:%235c3d2e;stop-opacity:0.18' /%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M-50,1000 L-50,650 Q30,580 90,620 Q160,550 230,600 Q300,560 360,620 L360,1000 Z' fill='url(%23mountainGrad)'/%3E%3Cpath d='M-50,1000 L-50,720 Q20,670 70,700 Q140,640 200,680 Q260,650 320,700 L320,1000 Z' fill='%235c3d2e' opacity='0.12'/%3E%3Cpath d='M-50,1000 L-50,800 Q10,760 50,790 Q110,740 170,780 Q220,750 280,790 L280,1000 Z' fill='%235c3d2e' opacity='0.15'/%3E%3Cg stroke='%234a6b4a' fill='none' stroke-linecap='round'%3E%3Cpath d='M40,850 Q50,750 35,650' stroke-width='3' opacity='0.15'/%3E%3Cpath d='M70,820 Q80,730 65,630' stroke-width='2.5' opacity='0.12'/%3E%3Cpath d='M35,720 Q20,700 10,680 M35,720 Q45,700 55,685 M35,720 Q30,740 25,755' stroke-width='1.5' opacity='0.12'/%3E%3Cpath d='M65,680 Q50,660 40,642 M65,680 Q75,660 85,645 M65,680 Q60,700 55,715' stroke-width='1.5' opacity='0.10'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: contain;
+  background-position: bottom left;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: multiply;
+  animation: sideFadeInLeft 3s ease-out 0.5s forwards,
+             mountainBreathe 35s ease-in-out infinite;
+}
+
+/* 左侧装饰 - 内侧渐变遮罩（自然融入背景） */
+.side-decoration-left::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right,
+    transparent 0%,
+    rgba(242, 234, 211, 0.15) 30%,
+    rgba(242, 234, 211, 0.5) 60%,
+    rgba(242, 234, 211, 0.8) 80%,
+    var(--bg-primary) 100%
+  );
+  pointer-events: none;
+  filter: blur(2px);
+}
+
+/* 右侧装饰 - 云纹流带 + 飞鸟 */
+.side-decoration-right {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: min(14vw, 240px);
+  height: 100vh;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 1000'%3E%3Cellipse cx='120' cy='150' rx='80' ry='35' fill='%238b6914' opacity='0.08'/%3E%3Cellipse cx='100' cy='320' rx='95' ry='42' fill='%238b6914' opacity='0.10'/%3E%3Cellipse cx='130' cy='500' rx='105' ry='48' fill='%238b6914' opacity='0.12'/%3E%3Cellipse cx='110' cy='680' rx='90' ry='38' fill='%238b6914' opacity='0.09'/%3E%3Cellipse cx='125' cy='840' rx='75' ry='32' fill='%238b6914' opacity='0.07'/%3E%3Cpath d='M180,200 Q190,195 200,202 Q210,198 220,205' stroke='%235c3d2e' stroke-width='2' fill='none' opacity='0.12'/%3E%3Cpath d='M200,380 Q212,372 225,382 Q238,375 248,385' stroke='%235c3d2e' stroke-width='2.5' fill='none' opacity='0.14'/%3E%3Cpath d='M175,560 Q188,550 202,562 Q215,555 228,565' stroke='%235c3d2e' stroke-width='2' fill='none' opacity='0.11'/%3E%3Cpath d='M190,740 Q202,732 215,742' stroke='%235c3d2e' stroke-width='1.8' fill='none' opacity='0.10'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-position: center right;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: multiply;
+  animation: sideFadeInRight 3s ease-out 0.8s forwards,
+             cloudDrift 45s ease-in-out infinite;
+}
+
+/* 右侧装饰 - 内侧渐变遮罩（自然融入背景） */
+.side-decoration-right::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to left,
+    transparent 0%,
+    rgba(242, 234, 211, 0.15) 30%,
+    rgba(242, 234, 211, 0.5) 60%,
+    rgba(242, 234, 211, 0.8) 80%,
+    var(--bg-primary) 100%
+  );
+  pointer-events: none;
+  filter: blur(2px);
+}
+
+/* 左侧装饰动画 - 山体呼吸 */
+@keyframes mountainBreathe {
+  0%, 100% { opacity: 1; transform: translateY(0); }
+  50% { opacity: 0.7; transform: translateY(-8px); }
+}
+
+/* 右侧装饰动画 - 云纹漂流 */
+@keyframes cloudDrift {
+  0%, 100% { opacity: 1; transform: translateY(0) translateX(0); }
+  33% { opacity: 0.85; transform: translateY(-12px) translateX(3px); }
+  66% { opacity: 0.9; transform: translateY(6px) translateX(-2px); }
+}
+
+/* 左侧入场动画 */
+@keyframes sideFadeInLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* 右侧入场动画 */
+@keyframes sideFadeInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 .scroll-view {
@@ -933,6 +1095,86 @@ export default {
   height: 100%;
   position: relative;
   z-index: 10;
+  padding-top: 20rpx;
+  padding-bottom: 60rpx;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(242, 234, 211, 0.02) 15%,
+    rgba(242, 234, 211, 0.03) 50%,
+    rgba(222, 200, 176, 0.04) 85%,
+    rgba(222, 200, 176, 0.06) 100%
+  );
+}
+
+/* ============================================
+   自定义滚动条 - 中式古风设计
+   ============================================ */
+
+/* 滚动容器基础设置 */
+.scroll-view {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Webkit 浏览器滚动条轨道 */
+.scroll-view::-webkit-scrollbar {
+  width: 8rpx;
+  height: 8rpx;
+}
+
+.scroll-view::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4rpx;
+  margin: 10rpx 0;
+}
+
+/* Webkit 浏览器滚动条滑块 - 朱砂红渐变 */
+.scroll-view::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    var(--primary) 0%,
+    var(--primary-dark) 50%,
+    #6b0000 100%
+  );
+  border-radius: 4rpx;
+  border: 2rpx solid rgba(255, 248, 230, 0.3);
+  min-height: 60rpx;
+  transition: all 0.3s ease;
+  box-shadow: 
+    inset 0 1rpx 2rpx rgba(255, 255, 255, 0.2),
+    0 2rpx 4rpx rgba(139, 0, 0, 0.2);
+}
+
+/* 滚动条悬停效果 */
+.scroll-view::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    #c41e3a 0%,
+    #a01830 50%,
+    #8b0000 100%
+  );
+  box-shadow: 
+    inset 0 1rpx 2rpx rgba(255, 255, 255, 0.3),
+    0 4rpx 8rpx rgba(139, 0, 0, 0.35);
+  transform: scaleX(1.05);
+}
+
+/* 滚动条按下效果 */
+.scroll-view::-webkit-scrollbar-thumb:active {
+  background: var(--primary-dark);
+  transform: scaleX(0.95);
+}
+
+/* Firefox 滚动条样式 */
+.scroll-view {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) transparent;
+}
+
+/* IE/Edge 滚动条样式 */
+.scroll-view {
+  -ms-overflow-style: auto;
 }
 
 /* 回到顶部按钮 */
@@ -953,7 +1195,7 @@ export default {
   opacity: 0;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
-  z-index: 100;
+  z-index: 999;
 }
 
 .back-to-top.visible {
@@ -985,77 +1227,6 @@ export default {
   letter-spacing: 1rpx;
 }
 
-/* Footer */
-.footer {
-  text-align: center;
-  padding-bottom: 100rpx;
-}
-
-.footer-slogan {
-  display: block;
-  font-size: 28rpx;
-  color: var(--secondary);
-  letter-spacing: 4rpx;
-  margin-bottom: 16rpx;
-  font-family: 'ZCOOL XiaoWei', serif;
-}
-
-.footer-copyright {
-  display: block;
-  font-size: 22rpx;
-  color: var(--text-tertiary);
-}
-
-/* 按钮下方的分类快捷入口 */
-.category-shortcuts {
-  display: flex;
-  justify-content: center;
-  gap: 32rpx;
-  margin-top: 32rpx;
-  opacity: 0;
-  transform: translateY(20rpx);
-  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 2;
-}
-
-.category-shortcuts.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.category-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6rpx;
-  padding: 16rpx 12rpx;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: 12rpx;
-}
-
-.category-item:hover {
-  transform: translateY(-4rpx);
-  background: rgba(196, 30, 58, 0.08);
-}
-
-.category-item:active {
-  transform: translateY(-2rpx) scale(0.98);
-}
-
-.category-icon {
-  font-size: 32rpx;
-  line-height: 1;
-}
-
-.category-text {
-  font-size: 20rpx;
-  color: var(--secondary);
-  font-weight: 500;
-  letter-spacing: 1rpx;
-  line-height: 1;
-}
-
 /* 印章可点击样式调整 */
 .seal-decor {
   cursor: pointer;
@@ -1069,6 +1240,53 @@ export default {
 
 .seal-decor:active {
   transform: rotate(-12deg) scale(0.98);
+}
+
+/* Footer - 自然融入整体 */
+.footer {
+  text-align: center;
+  padding: 80rpx 32rpx 60rpx;
+  position: relative;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(222, 200, 176, 0.08) 50%,
+    rgba(222, 200, 176, 0.12) 100%
+  );
+}
+
+.footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 15%;
+  right: 15%;
+  height: 1rpx;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--secondary) 30%,
+    var(--secondary) 70%,
+    transparent 100%
+  );
+  opacity: 0.2;
+}
+
+.footer-slogan {
+  display: block;
+  font-size: 28rpx;
+  color: var(--secondary);
+  letter-spacing: 4rpx;
+  margin-bottom: 16rpx;
+  font-family: 'ZCOOL XiaoWei', serif;
+  opacity: 0.9;
+}
+
+.footer-copyright {
+  display: block;
+  font-size: 22rpx;
+  color: var(--text-tertiary);
+  opacity: 0.7;
 }
 
 /* 响应式：手机端适配 */
@@ -1095,17 +1313,135 @@ export default {
     font-size: 32rpx;
   }
   
-  .category-shortcuts {
-    flex-wrap: wrap;
-    gap: 16rpx;
-  }
-  
   .seal-decor {
     width: 70rpx;
     height: 70rpx;
     font-size: 24rpx;
     right: -60rpx;
     top: -20rpx;
+  }
+
+  .back-to-top {
+    bottom: 120rpx;
+    right: 30rpx;
+    width: 90rpx;
+    height: 90rpx;
+  }
+
+  /* 手机端：隐藏侧边装饰元素 */
+  .side-decoration-left,
+  .side-decoration-right {
+    display: none;
+  }
+
+  /* 手机端：细滚动条，触摸友好 */
+  .scroll-view::-webkit-scrollbar {
+    width: 4rpx;
+  }
+
+  .scroll-view::-webkit-scrollbar-thumb {
+    min-height: 40rpx;
+  }
+
+  /* Firefox */
+  .scroll-view {
+    scrollbar-width: thin;
+  }
+}
+
+/* 响应式：平板适配 */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .container {
+    max-width: 768px;
+    margin: 0 auto;
+  }
+
+  .scroll-view {
+    padding-left: 40rpx;
+    padding-right: 40rpx;
+  }
+
+  .back-to-top {
+    bottom: 100rpx;
+    right: 50rpx;
+  }
+
+  /* 平板端：缩小侧边装饰 */
+  .side-decoration-left {
+    width: min(15vw, 140px);
+    opacity: 0.6;
+    animation-duration: 2.5s, 40s;
+  }
+
+  .side-decoration-right {
+    width: min(14vw, 130px);
+    opacity: 0.6;
+    animation-duration: 2.5s, 50s;
+  }
+
+  /* 平板端：中等宽度滚动条 */
+  .scroll-view::-webkit-scrollbar {
+    width: 6rpx;
+  }
+
+  .scroll-view::-webkit-scrollbar-thumb {
+    min-height: 50rpx;
+  }
+}
+
+/* 响应式：桌面端适配 */
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .scroll-view {
+    padding-left: 60rpx;
+    padding-right: 60rpx;
+  }
+
+  .back-to-top {
+    bottom: 80rpx;
+    right: 60rpx;
+    width: 110rpx;
+    height: 110rpx;
+  }
+
+  .back-to-top-text {
+    font-size: 42rpx;
+  }
+
+  .back-to-top-seal {
+    font-size: 24rpx;
+  }
+
+  /* 桌面端：完整精美滚动条 */
+  .scroll-view::-webkit-scrollbar {
+    width: 10rpx;
+  }
+
+  .scroll-view::-webkit-scrollbar-thumb {
+    min-height: 80rpx;
+    border-radius: 6rpx;
+  }
+
+  /* Firefox */
+  .scroll-view {
+    scrollbar-width: auto;
+  }
+
+  /* 桌面端：完整显示侧边装饰 */
+  .side-decoration-left {
+    width: min(15vw, 250px);
+    opacity: 1;
+    animation-duration: 2s, 30s;
+  }
+
+  .side-decoration-right {
+    width: min(14vw, 240px);
+    opacity: 1;
+    animation-duration: 2s, 40s;
   }
 }
 </style>

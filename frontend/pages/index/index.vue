@@ -1196,6 +1196,7 @@ export default {
 .message-area {
   flex: 1;
   padding: 20rpx;
+  padding-bottom: 40rpx;
   overflow: hidden;
   position: relative;
   z-index: 1;

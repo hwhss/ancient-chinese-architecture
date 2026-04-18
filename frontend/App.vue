@@ -116,6 +116,82 @@ page {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch' /%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
 }
 
+/* H5 端全局样式 */
+/* #ifdef H5 */
+html, body, #app, uni-page-body {
+  background-color: var(--bg-primary);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch' /%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  margin: 0;
+  padding: 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 隐藏浏览器原生页面滚动条（避免双滚动条问题） */
+html, body, uni-page-body {
+  overflow: hidden;
+  height: 100%;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+uni-page-body::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* scroll-view 组件滚动条 - 唯一可见的滚动条 */
+scroll-view {
+  -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) transparent;
+}
+
+scroll-view::-webkit-scrollbar {
+  width: 8rpx;
+  height: 8rpx;
+}
+
+scroll-view::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4rpx;
+  margin: 10rpx 0;
+}
+
+scroll-view::-webkit-scrollbar-thumb {
+  background: linear-gradient(
+    180deg,
+    var(--primary) 0%,
+    var(--primary-dark) 50%,
+    #6b0000 100%
+  );
+  border-radius: 4rpx;
+  border: 2rpx solid rgba(255, 248, 230, 0.3);
+  min-height: 60rpx;
+  transition: all 0.3s ease;
+  box-shadow:
+    inset 0 1rpx 2rpx rgba(255, 255, 255, 0.2),
+    0 2rpx 4rpx rgba(139, 0, 0, 0.2);
+}
+
+scroll-view::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(
+    180deg,
+    #c41e3a 0%,
+    #a01830 50%,
+    #8b0000 100%
+  );
+  transform: scaleX(1.05);
+}
+
+uni-page {
+  background-color: var(--bg-primary);
+}
+/* #endif */
+
 /* ========== 宣纸/绢本纹理 ========== */
 .rice-paper {
   position: relative;

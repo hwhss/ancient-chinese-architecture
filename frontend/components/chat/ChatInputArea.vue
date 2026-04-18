@@ -211,8 +211,8 @@ export default {
   background: #fff;
   border-radius: 12rpx;
   border: 1rpx solid rgba(114, 90, 61, 0.2);
-  padding: 20rpx 24rpx;
-  padding-bottom: 48rpx;
+  padding: 16rpx 20rpx;
+  padding-bottom: 44rpx;
   transition: all 0.3s ease;
 }
 
@@ -223,7 +223,7 @@ export default {
 
 .textarea {
   width: 100%;
-  min-height: 48rpx;
+  min-height: 56rpx;
   max-height: 200rpx;
   font-size: 30rpx;
   line-height: 1.5;
@@ -232,6 +232,10 @@ export default {
   border: none;
   outline: none;
   resize: none;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
 
 .textarea::placeholder {

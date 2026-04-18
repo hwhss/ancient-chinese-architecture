@@ -16,7 +16,7 @@
           <view 
             v-for="(item, index) in items" 
             :key="index" 
-            class="knowledge-item rice-paper card-ink"
+            class="knowledge-item card-ink"
             :class="{ 'active': activeIndex === index }"
             @click="onItemClick(item)"
           >
@@ -119,12 +119,11 @@ export default {
 
 <style scoped>
 .section-knowledge {
-  padding: 60rpx 0;
-  opacity: 0;
-  transform: translateY(30px);
+  padding: 60rpx 0 40rpx;
+  opacity: 1;
+  transform: translateY(0);
   transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   will-change: transform, opacity;
-  overflow: hidden;
 }
 
 .section-knowledge.visible {
@@ -198,7 +197,7 @@ export default {
 
 .knowledge-list {
   display: inline-flex;
-  padding: 16rpx 32rpx 40rpx;
+  padding: 16rpx 32rpx 20rpx;
   gap: 24rpx;
 }
 

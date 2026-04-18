@@ -1,5 +1,5 @@
 <template>
-  <view class="hero-section rice-paper">
+  <view class="hero-section">
     <view class="page-container">
       <!-- 简化的角落装饰 - 修改为中式云纹感 -->
       <view class="corner-decoration top-left"></view>
@@ -175,8 +175,8 @@ export default {
   justify-content: center;
   padding: 80rpx 32rpx 60rpx;
   position: relative;
-  overflow: hidden;
-  background-color: var(--bg-primary);
+  overflow: visible;
+  background: transparent;
 }
 
 /* 简化的角落装饰 - 云纹感 */
