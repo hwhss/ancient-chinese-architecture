@@ -980,6 +980,18 @@ export default {
   overflow: hidden;
 }
 
+/* Z-index层级规范
+   0: 背景装饰 (cloud-background)
+   1: 消息内容区 (message-area)
+   5: 主内容区 (main-content)
+   10: 顶部导航 (header)
+   15: 输入区域 (input-area)
+   20: 加载/错误提示
+   50: 搜索结果面板
+   100: 侧边栏遮罩
+   101: 侧边栏本体
+*/
+
 .layout-wrapper {
   flex: 1;
   display: flex;
@@ -1197,12 +1209,14 @@ export default {
   flex: 1;
   padding: 20rpx;
   padding-bottom: 40rpx;
-  overflow: hidden;
+  overflow-y: auto;  /* 改为auto，允许内容滚动 */
+  overflow-x: hidden; /* 防止横向滚动 */
   position: relative;
   z-index: 1;
   display: flex;
   flex-direction: column;
   background: transparent;
+  -webkit-overflow-scrolling: touch; /* iOS平滑滚动 */
 }
 
 .page-container {
@@ -1214,7 +1228,20 @@ export default {
 }
 
 .message-area.with-search-results {
-  margin-top: 520rpx;
+  margin-top: 400rpx; /* 减小固定值 */
+}
+
+/* 移动端搜索面板优化 */
+@media (max-width: 767px) {
+  .message-area.with-search-results {
+    margin-top: 300rpx; /* 移动端进一步减小 */
+  }
+}
+
+@media (max-width: 480px) {
+  .message-area.with-search-results {
+    margin-top: 250rpx; /* 超小屏最小值 */
+  }
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
@@ -1275,18 +1302,63 @@ export default {
 
 @media (max-width: 767px) {
   .header {
-    padding: 24rpx 16rpx;
+    padding: 20rpx 12rpx;
+    border-bottom-width: 2rpx; /* 减小边框 */
   }
   
   .title {
-    font-size: 32rpx;
-    letter-spacing: 2rpx;
+    font-size: 30rpx;
+    letter-spacing: 2px;
   }
   
   .sidebar-toggle,
   .header-action-icon {
-    width: 60rpx;
-    height: 60rpx;
+    width: 56rpx;
+    height: 56rpx;
+  }
+  
+  /* 移动端消息区域优化 */
+  .message-area {
+    padding: 16rpx 12rpx;
+    padding-bottom: 32rpx;
+  }
+  
+  /* 移动端错误提示优化 */
+  .error-retry {
+    margin: 16rpx 12rpx;
+    padding: 20rpx 16rpx;
+  }
+  
+  /* 移动端加载状态优化 */
+  .loading-wrapper {
+    margin-top: 16rpx;
+    padding: 0 12rpx;
+  }
+  
+  /* 移动端消息内容宽度调整 */
+  .message-content {
+    max-width: 85%; /* 移动端增加宽度利用率 */
+  }
+}
+
+/* 超小屏设备（iPhone SE等）*/
+@media (max-width: 400px) {
+  .header {
+    padding: 16rpx 8px;
+  }
+  
+  .title {
+    font-size: 28rpx;
+  }
+  
+  .sidebar-toggle,
+  .header-action-icon {
+    width: 52rpx;
+    height: 52rpx;
+  }
+  
+  .message-area {
+    padding: 12rpx 8rpx;
   }
 }
 

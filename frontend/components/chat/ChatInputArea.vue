@@ -120,10 +120,26 @@ export default {
 
 <style scoped>
 .example-questions-area {
-  padding: 20rpx 30rpx;
+  padding: 16rpx 24rpx;
   background: var(--bg-primary, #f2ead3);
   border-top: 1rpx solid rgba(114, 90, 61, 0.1);
   animation: slideUp 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+  max-height: 200rpx; /* 限制最大高度 */
+  overflow-y: auto; /* 允许滚动 */
+  z-index: 14; /* 层级低于input-area */
+}
+
+/* 移动端示例问题区域优化 */
+@media (max-width: 767px) {
+  .example-questions-area {
+    padding: 12rpx 16rpx;
+    max-height: 150rpx; /* 移动端减小高度 */
+  }
+  
+  .example-tag {
+    padding: 10rpx 20rpx;
+    font-size: 24rpx;
+  }
 }
 
 @keyframes slideUp {
@@ -193,16 +209,16 @@ export default {
 .input-area {
   display: flex;
   align-items: flex-end;
-  padding: 24rpx 30rpx calc(24rpx + env(safe-area-inset-bottom));
+  padding: 20rpx 24rpx calc(20rpx + env(safe-area-inset-bottom, 34px));
   background: var(--bg-primary, #f2ead3);
   border-top: 1rpx solid rgba(114, 90, 61, 0.1);
   position: relative;
-  z-index: 10;
-  gap: 20rpx;
+  z-index: 15;
+  gap: 20rpx; /* 增加间距，避免按钮与输入框重叠 */
 }
 
 .input-area.keyboard-active {
-  padding-bottom: calc(16rpx + env(safe-area-inset-bottom));
+  padding-bottom: calc(12rpx + env(safe-area-inset-bottom, 34px));
 }
 
 .input-wrapper {
@@ -212,8 +228,11 @@ export default {
   border-radius: 12rpx;
   border: 1rpx solid rgba(114, 90, 61, 0.2);
   padding: 16rpx 20rpx;
-  padding-bottom: 44rpx;
+  padding-bottom: 48rpx; /* 增加底部padding，为char-count留足空间 */
   transition: all 0.3s ease;
+  min-height: 88rpx; /* 确保最小高度 */
+  display: flex;
+  flex-direction: column;
 }
 
 .input-wrapper:focus-within {
@@ -235,7 +254,17 @@ export default {
   padding: 0;
   margin: 0;
   box-sizing: border-box;
-  overflow-y: auto;
+  overflow-y: auto !important; /* 覆盖UniApp的内联样式 */
+  position: relative; /* 确保定位上下文 */
+  z-index: 1; /* 基础层级 */
+}
+
+/* 深度选择器覆盖UniApp的textarea内联样式 */
+.textarea textarea,
+.input-wrapper textarea,
+.uni-textarea-textarea {
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch;
 }
 
 .textarea::placeholder {
@@ -246,10 +275,13 @@ export default {
 .char-count {
   position: absolute;
   right: 20rpx;
-  bottom: 12rpx;
+  bottom: 14rpx; /* 微调位置 */
   font-size: 22rpx;
   color: var(--text-tertiary, #8b7355);
   background: #fff;
+  z-index: 10; /* 确保在textarea之上 */
+  padding: 2rpx 6rpx; /* 增加可点击区域 */
+  pointer-events: none; /* 不影响交互 */
 }
 
 .char-count.near-limit {
@@ -268,7 +300,9 @@ export default {
   border: 1rpx solid rgba(114, 90, 61, 0.2);
   transition: all 0.3s ease;
   cursor: pointer;
-  flex-shrink: 0;
+  flex-shrink: 0; /* 防止被压缩 */
+  position: relative; /* 确保定位上下文 */
+  z-index: 5; /* 层级高于input-wrapper */
 }
 
 .send-btn.has-content {
@@ -285,5 +319,73 @@ export default {
 .send-btn[disabled] {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* ============================================
+   UniApp内部元素遮挡修复
+   解决textarea、uni-textarea-wrapper等内部元素的显示问题
+   ============================================ */
+
+/* 修复UniApp的uni-textarea-wrapper高度问题 */
+.input-wrapper .uni-textarea-wrapper {
+  width: 100% !important;
+  min-height: 56rpx !important;
+  position: relative;
+  z-index: 1;
+}
+
+/* 确保实际的textarea元素可滚动 */
+.input-wrapper .uni-textarea-textarea {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  resize: none;
+}
+
+/* 修复placeholder显示 */
+.input-wrapper .input-placeholder {
+  color: var(--text-tertiary, #8b7355) !important;
+  opacity: 0.6;
+  position: absolute;
+  top: 16rpx;
+  left: 20rpx;
+  z-index: 0; /* 在textarea之下 */
+}
+
+/* 确保计算层不影响布局 */
+.input-wrapper .uni-textarea-compute {
+  visibility: hidden;
+  height: 0 !important;
+  overflow: hidden;
+}
+
+/* 修复resize-sensor导致的布局问题 */
+.input-wrapper uni-resize-sensor {
+  display: none !important;
+}
+
+/* 移动端额外优化 */
+@media (max-width: 767px) {
+  .input-area {
+    padding: 16rpx 16rpx calc(16rpx + env(safe-area-inset-bottom, 34px));
+    gap: 16rpx;
+  }
+  
+  .input-wrapper {
+    padding: 12rpx 16rpx;
+    padding-bottom: 44rpx;
+    min-height: 80rpx;
+  }
+  
+  .send-btn {
+    width: 80rpx;
+    height: 80rpx;
+  }
+  
+  .char-count {
+    font-size: 20rpx;
+    bottom: 10rpx;
+    right: 14rpx;
+  }
 }
 </style>

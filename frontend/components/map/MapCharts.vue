@@ -90,12 +90,37 @@ export default {
 
 <style scoped>
 .charts-section {
-  padding: 24rpx 20rpx;
-  margin: 20rpx;
-  background: linear-gradient(135deg, #fffef9 0%, #faf6ed 100%);
-  border-radius: 20rpx;
-  border: 2rpx solid var(--bg-tertiary);
-  box-shadow: 0 4rpx 16rpx rgba(139, 69, 19, 0.08);
+  padding: var(--space-6) var(--space-5);
+  margin: var(--space-5);
+  background: linear-gradient(
+    135deg,
+    rgba(249, 245, 232, 0.95) 0%,
+    rgba(242, 234, 211, 0.92) 100%
+  );
+  border-radius: var(--radius-xl);
+  border: 2rpx solid var(--border);
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  overflow: visible;
+}
+
+.charts-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4rpx;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--secondary) 20%,
+    var(--primary) 50%,
+    var(--secondary) 80%,
+    transparent 100%
+  );
+  opacity: 0.25;
+  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
 }
 
 .charts-tabs {
@@ -108,49 +133,65 @@ export default {
 .chart-tab {
   display: flex;
   align-items: center;
-  gap: 6rpx;
-  padding: 12rpx 20rpx;
-  background: #fff;
-  border-radius: 40rpx;
-  border: 2rpx solid #e8dec3;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(249, 245, 232, 0.95) 100%
+  );
+  border-radius: var(--radius-full);
+  border: 2rpx solid var(--border-light);
+  transition: all var(--duration-normal) var(--ease-out);
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
 
 .chart-tab:hover:not(.active) {
-  background: linear-gradient(135deg, #f9f5e8 0%, #f2ead3 100%);
-  border-color: #725a3d;
-  transform: translateY(-1rpx) scale(1.02);
-  box-shadow: 0 4rpx 12rpx rgba(114, 90, 61, 0.15);
+  background: linear-gradient(
+    135deg,
+    var(--bg-card) 0%,
+    var(--bg-primary) 100%
+  );
+  border-color: var(--secondary);
+  transform: translateY(-2rpx) scale(1.02);
+  box-shadow: var(--shadow-md);
 }
 
 .chart-tab:active:not(.active) {
   transform: translateY(0) scale(0.98);
-  box-shadow: 0 2rpx 6rpx rgba(114, 90, 61, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .chart-tab.active {
-  background: linear-gradient(135deg, #a63131 0%, #7a1d1d 100%);
-  border-color: #7a1d1d;
-  box-shadow: 
-    0 6rpx 18rpx rgba(166, 49, 49, 0.35),
+  background: linear-gradient(
+    135deg,
+    var(--primary) 0%,
+    var(--primary-dark) 100%
+  );
+  border-color: var(--primary-dark);
+  box-shadow:
+    var(--shadow-primary),
     inset 0 1rpx 0 rgba(255, 255, 255, 0.2);
   transform: scale(1);
 }
 
 .chart-tab.active:hover {
-  background: linear-gradient(135deg, #b73c3c 0%, #8a2626 100%);
-  transform: translateY(-1rpx) scale(1.01);
-  box-shadow: 
+  background: linear-gradient(
+    135deg,
+    var(--primary-light) 0%,
+    #8a2626 100%
+  );
+  transform: translateY(-2rpx) scale(1.01);
+  box-shadow:
     0 8rpx 24rpx rgba(166, 49, 49, 0.45),
     inset 0 1rpx 0 rgba(255, 255, 255, 0.25);
 }
 
 .chart-tab.active:active {
   transform: translateY(0) scale(0.99);
-  box-shadow: 
+  box-shadow:
     0 4rpx 12rpx rgba(166, 49, 49, 0.3),
     inset 0 1rpx 0 rgba(255, 255, 255, 0.15);
 }
@@ -172,9 +213,13 @@ export default {
 }
 
 .chart-display-area {
-  background: #fff;
-  border-radius: 16rpx;
-  border: 1rpx solid var(--bg-tertiary);
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    var(--bg-card) 100%
+  );
+  border-radius: var(--radius-lg);
+  border: 1rpx solid var(--border);
   overflow: hidden;
 }
 
@@ -183,9 +228,13 @@ export default {
 }
 
 .chart-title-bar {
-  padding: 16rpx 20rpx;
-  background: linear-gradient(135deg, #faf6ed 0%, #f5efe0 100%);
-  border-bottom: 1rpx solid var(--bg-tertiary);
+  padding: var(--space-4) var(--space-5);
+  background: linear-gradient(
+    135deg,
+    rgba(250, 246, 237, 0.98) 0%,
+    rgba(245, 239, 224, 0.95) 100%
+  );
+  border-bottom: 1rpx solid var(--border-light);
   display: flex;
   align-items: center;
   justify-content: space-between;
