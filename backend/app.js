@@ -7,7 +7,7 @@ const config = require('./src/config');
 const { testConnection } = require('./src/config/database');
 const { getKnowledgeBase, getMaterialLinks, getBuildings } = require('./src/repositories/dataRepository');
 
-const dataSource = String(process.env.DATA_SOURCE || 'json').trim().toLowerCase();
+const dataSource = config.dataSource;
 
 async function printBootstrapInfo() {
   const [knowledgeList, materialList, buildingList] = await Promise.all([
@@ -31,8 +31,19 @@ async function printDatabaseStatus() {
   if (db.success) {
     console.log(`✅ PostgreSQL 连接正常: ${db.time}`);
   } else {
+    if (config.forcePostgres) {
+      throw new Error(`PostgreSQL 连接失败（FORCE_POSTGRES=true）：${db.error}`);
+    }
+
     console.warn(`⚠️ PostgreSQL 连接失败: ${db.error}`);
-    console.warn('⚠️ 当前仓储层默认仍为 JSON，建议先修复 DATABASE_URL 后再切换 DATA_SOURCE=postgres。');
+  }
+}
+
+function assertDataSourcePolicy() {
+  if (config.forcePostgres && dataSource !== 'postgres') {
+    throw new Error(
+      `当前 DATA_SOURCE=${dataSource}，但 FORCE_POSTGRES=true 要求必须使用 postgres。`
+    );
   }
 }
 
@@ -59,6 +70,7 @@ function startServer() {
 }
 
 async function bootstrap() {
+  assertDataSourcePolicy();
   await printBootstrapInfo();
   await printDatabaseStatus();
   startServer();

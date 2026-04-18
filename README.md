@@ -107,12 +107,13 @@ npm run db:seed
 
 后端启动时会读取 `.env`：
 
-1. `DATA_SOURCE=json`：接口优先从 `backend/data-jsondb` 读取；若未找到则回退到 `backend/data`。
+1. `DATA_SOURCE=json`：接口从 `backend/data-jsondb` 读取（当前唯一默认 JSON 数据源，26 条建筑）。
 2. `DATA_SOURCE=postgres`：接口从 PostgreSQL 读取（Phase 2 已完成）。
 
 新增配置：
 
 1. `DATA_JSON_DB_DIR`：JSON 数据库目录，默认值为 `data-jsondb`。
+2. `ENABLE_LEGACY_JSON_FALLBACK`：是否允许回退到 `backend/data`（默认 `false`，不建议开启）。
 
 当前结论（2026-03-28）：
 

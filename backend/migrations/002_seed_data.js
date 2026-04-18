@@ -23,6 +23,14 @@ const CONFIG = {
   truncateBeforeInsert: String(process.env.SEED_TRUNCATE || 'true').toLowerCase() === 'true'
 };
 
+const allowLegacySeed = String(process.env.ALLOW_LEGACY_SEED || 'false').trim().toLowerCase() === 'true';
+
+if (!allowLegacySeed) {
+  console.error('[ERROR] 已禁用 legacy seed（backend/data 小数据集）。');
+  console.error('[ERROR] 若确需执行，请显式设置 ALLOW_LEGACY_SEED=true 后重试。');
+  process.exit(1);
+}
+
 // ==================== 日志工具 ====================
 const logger = {
   info: (msg) => console.log(`[INFO] ${msg}`),

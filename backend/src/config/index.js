@@ -26,7 +26,8 @@ const port = toNumber(process.env.PORT, 9527);
 const config = {
   port,
   nodeEnv: process.env.NODE_ENV || 'development',
-  dataSource: String(process.env.DATA_SOURCE || 'json').trim().toLowerCase(),
+  dataSource: String(process.env.DATA_SOURCE || 'postgres').trim().toLowerCase(),
+  forcePostgres: toBoolean(process.env.FORCE_POSTGRES, true),
   corsOrigin: process.env.CORS_ORIGIN || '*',
   questionMaxLength: toNumber(process.env.QUESTION_MAX_LENGTH, 500),
   publicBaseUrl: process.env.PUBLIC_BASE_URL || `http://localhost:${port}`,

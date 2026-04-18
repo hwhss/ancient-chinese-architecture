@@ -8,7 +8,8 @@
 
 1. `migrations/001_initial_schema.sql`：建表与索引
 2. `migrations/000_apply_migration.js`：执行 SQL 迁移
-3. `migrations/002_seed_data.js`：从 `backend/data/*.json` 全量导入
+3. `migrations/005_import_jsondb.js`：从 `backend/data-jsondb/**` 全量导入（默认）
+4. `migrations/002_seed_data.js`：旧小数据集导入（legacy，默认禁用）
 
 ## 2. 一次性初始化（推荐）
 
@@ -54,7 +55,22 @@ SEED_TRUNCATE=true
 
 ## 5. 导入范围
 
-`002_seed_data.js` 已覆盖：
+`005_import_jsondb.js` 已覆盖：
+
+1. `buildings`
+2. `building_profiles`
+3. `knowledge_base`
+4. `info_graphics`
+5. `mg_animations`
+6. `model_3d`
+7. `chart_data`
+
+## 5.1 legacy 脚本说明（已作废默认链路）
+
+`002_seed_data.js` 对应 `backend/data/*.json` 旧小数据集，默认不允许执行。
+仅在显式设置 `ALLOW_LEGACY_SEED=true` 时可运行，用于历史回放/排障。
+
+legacy 脚本覆盖：
 
 1. `buildings`
 2. `building_profiles`

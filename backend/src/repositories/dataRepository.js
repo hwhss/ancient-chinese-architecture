@@ -5,6 +5,7 @@ const { query } = require('../config/database');
 const legacyDataDir = path.join(__dirname, '..', '..', 'data');
 const defaultJsonDbDir = path.join(__dirname, '..', '..', 'data-jsondb');
 const dataSource = String(process.env.DATA_SOURCE || 'json').trim().toLowerCase();
+const enableLegacyJsonFallback = String(process.env.ENABLE_LEGACY_JSON_FALLBACK || 'false').trim().toLowerCase() === 'true';
 const dataJsonDbDir = (() => {
   const raw = String(process.env.DATA_JSON_DB_DIR || '').trim();
   if (!raw) {
@@ -157,7 +158,20 @@ function loadJsonDbData() {
 }
 
 const jsonDbData = loadJsonDbData();
-const selectedJsonData = jsonDbData || loadLegacyJsonData();
+let selectedJsonData = jsonDbData;
+
+if (!selectedJsonData) {
+  if (enableLegacyJsonFallback) {
+    console.warn('[WARN] data-jsondb 不可用，已启用旧数据目录 fallback（backend/data）。');
+    selectedJsonData = loadLegacyJsonData();
+  } else {
+    throw new Error(
+      'JSON 数据源初始化失败：未找到 data-jsondb/index.json。' +
+      '已禁用 backend/data 的默认 fallback。' +
+      '请修复 DATA_JSON_DB_DIR，或临时设置 ENABLE_LEGACY_JSON_FALLBACK=true。'
+    );
+  }
+}
 
 const knowledgeBase = toArray(selectedJsonData.knowledgeBase, []);
 const materialLinks = toArray(selectedJsonData.materialLinks, []);
