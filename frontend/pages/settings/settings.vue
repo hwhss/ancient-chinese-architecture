@@ -159,7 +159,7 @@ export default {
     return {
       // 通知
       notificationsEnabled: true,
-      imageSource: 'object',
+      imageSource: 'server',
 
       // 缓存
       cacheSize: '0 MB',
@@ -209,15 +209,17 @@ export default {
     },
 
     chooseImageSource() {
-      const itemList = ['对象存储（七牛）', '本地存储']
+      const itemList = ['服务器映射（后端决定）', '对象存储（七牛）', '本地存储']
       uni.showActionSheet({
         itemList,
         success: (res) => {
-          const next = res.tapIndex === 1 ? 'local' : 'object'
+          const next = res.tapIndex === 0 ? 'server' : (res.tapIndex === 1 ? 'object' : 'local')
           this.imageSource = next
           this.saveSettings()
           uni.showToast({
-            title: next === 'local' ? '已切换到本地存储' : '已切换到对象存储',
+            title: next === 'server'
+              ? '已切换到服务器映射'
+              : (next === 'local' ? '已切换到本地存储' : '已切换到对象存储'),
             icon: 'none',
             duration: 1500
           })
@@ -331,6 +333,10 @@ export default {
 
   computed: {
     imageSourceText() {
+      if (this.imageSource === 'server') {
+        return '服务器映射'
+      }
+
       return this.imageSource === 'local' ? '本地存储' : '对象存储'
     }
   }

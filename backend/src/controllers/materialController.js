@@ -20,8 +20,8 @@ async function getMaterialById(req, res, next) {
       return sendError(res, 404, '素材不存在');
     }
 
-    const allowLocalFallback = requester.imageSource === 'local' && Boolean(String(material.url || '').trim());
-    if ((!material.assetVerification || !material.assetVerification.verified) && !allowLocalFallback) {
+    const isMappedMode = requester.imageSource === 'local' || requester.imageSource === 'server';
+    if (!isMappedMode && (!material.assetVerification || !material.assetVerification.verified)) {
       return sendError(res, 422, '素材图片未通过后端命名校验', material.assetVerification || null);
     }
 

@@ -12,12 +12,16 @@ const { getLocalImageByMaterialId } = require('../config/localImageMap');
 
 function normalizeImageSourceMode(mode) {
   const value = String(mode || '').trim().toLowerCase();
-  return value === 'local' ? 'local' : 'object';
+  if (value === 'local' || value === 'object' || value === 'server') {
+    return value;
+  }
+  return 'object';
 }
 
 function getImageSourceMode(requester) {
-  if (requester && requester.imageSource) {
-    return normalizeImageSourceMode(requester.imageSource);
+  const fromRequester = normalizeImageSourceMode(requester && requester.imageSource);
+  if (fromRequester === 'local' || fromRequester === 'object' || fromRequester === 'server') {
+    return fromRequester;
   }
   return normalizeImageSourceMode(config.imageSourceMode);
 }
@@ -101,7 +105,7 @@ function ensureSignedUrl(url, options = {}, requester = null) {
   }
 
   const mode = getImageSourceMode(requester);
-  if (mode === 'local') {
+  if (mode === 'local' || mode === 'server') {
     return buildLocalAssetUrl(value);
   }
 
@@ -123,6 +127,8 @@ async function getMaterial(materialId, requester = null) {
     return null;
   }
 
+  const mode = getImageSourceMode(requester);
+  const isMappedMode = mode === 'local' || mode === 'server';
   const building = await getBuildingById(materialId);
   const materialRecord = await getMaterialById(materialId);
   const material = materialRecord || {
@@ -148,40 +154,17 @@ async function getMaterial(materialId, requester = null) {
     explicitOwnerId: materialId
   });
 
-  const localImageRelList = getImageSourceMode(requester) === 'local'
+  const localImageRelList = isMappedMode
     ? getLocalImageRelativeList(materialId)
     : [];
   let localImageUrlList = localImageRelList
     .map((rel) => ensureSignedUrl(rel, {}, requester))
     .filter(Boolean);
 
-  // 保证前端能展示 6 张图，不足则补位 (使用唯美古建图)
-  if (localImageUrlList.length > 0 && localImageUrlList.length < 6) {
-    const placeholders = [
-      'https://images.unsplash.com/photo-1548013146-72479768bbaa?w=800&q=80',
-      'https://images.unsplash.com/photo-1599571234909-29ed5d13c1d6?w=800&q=80',
-      'https://images.unsplash.com/photo-1528659556828-569cae771cc4?w=800&q=80',
-      'https://images.unsplash.com/photo-1590714793617-57321683457a?w=800&q=80',
-      'https://images.unsplash.com/photo-1505994838632-f04044933913?w=800&q=80',
-      'https://images.unsplash.com/photo-1582234032338-4e76831fb60c?w=800&q=80'
-    ];
-    const needed = 6 - localImageUrlList.length;
-    for (let i = 0; i < needed; i++) {
-      localImageUrlList.push(placeholders[i % placeholders.length]);
-    }
-  } else if (localImageUrlList.length === 0) {
-    localImageUrlList = [
-      'https://images.unsplash.com/photo-1548013146-72479768bbaa?w=800&q=80',
-      'https://images.unsplash.com/photo-1599571234909-29ed5d13c1d6?w=800&q=80',
-      'https://images.unsplash.com/photo-1528659556828-569cae771cc4?w=800&q=80',
-      'https://images.unsplash.com/photo-1590714793617-57321683457a?w=800&q=80',
-      'https://images.unsplash.com/photo-1505994838632-f04044933913?w=800&q=80',
-      'https://images.unsplash.com/photo-1582234032338-4e76831fb60c?w=800&q=80'
-    ];
-  }
-
-  const fallbackUrl = localImageRelList.length ? localImageRelList[0] : (localImageUrlList[0] || '');
-  const resolvedUrl = String(assetVerification.url || '').trim() || fallbackUrl;
+  const mappedPrimary = localImageRelList.length ? localImageRelList[0] : '';
+  const resolvedUrl = isMappedMode
+    ? mappedPrimary
+    : (String(assetVerification.url || '').trim() || (localImageUrlList[0] || ''));
   const finalVerification = verifyAssetOwnership(resolvedUrl, {
     id: building && building.id ? building.id : materialId,
     materialId,
@@ -201,7 +184,9 @@ async function getMaterial(materialId, requester = null) {
 
   return {
     ...material,
-    url: ensureSignedUrl(resolvedUrl, {}, requester) || localImageUrlList[0],
+    url: isMappedMode
+      ? (ensureSignedUrl(resolvedUrl, {}, requester) || '')
+      : (ensureSignedUrl(resolvedUrl, {}, requester) || localImageUrlList[0]),
     images: localImageUrlList,
     assetVerification: finalVerification,
     fallbackGenerated: !materialRecord
@@ -216,6 +201,8 @@ async function listMaterials(query = {}, requester = null) {
     list
       .filter((item) => !type || item.type === type)
       .map(async (item) => {
+        const mode = getImageSourceMode(requester);
+        const isMappedMode = mode === 'local' || mode === 'server';
         const building = item.materialId ? await getBuildingById(item.materialId) : null;
         const assetVerification = verifyAssetOwnership(item.url, {
           id: building && building.id ? building.id : item.materialId,
@@ -236,10 +223,12 @@ async function listMaterials(query = {}, requester = null) {
 
         // 列表页使用缩略图优化
         const urlOptions = item.type === 'image' ? { width: 400, quality: 60 } : {};
-        const fallbackUrl = getImageSourceMode(requester) === 'local'
+        const fallbackUrl = isMappedMode
           ? getLocalImageByMaterialId(item.materialId)
           : '';
-        const resolvedUrl = String(assetVerification.url || '').trim() || fallbackUrl;
+        const resolvedUrl = isMappedMode
+          ? fallbackUrl
+          : (String(assetVerification.url || '').trim() || fallbackUrl);
 
         return {
           ...item,

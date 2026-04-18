@@ -1,6 +1,6 @@
 const DEFAULT_API_BASE_URL = "http://39.106.6.53";
 const IMAGE_SOURCE_STORAGE_KEY = "IMAGE_SOURCE_SETTING";
-const DEFAULT_IMAGE_SOURCE = "local";
+const DEFAULT_IMAGE_SOURCE = "server";
 
 function normalizeBaseUrl(url) {
   const value = String(url || "").trim();
@@ -38,7 +38,10 @@ function isHttpUrl(url) {
 
 function normalizeImageSource(value) {
   const mode = String(value || "").trim().toLowerCase();
-  return mode === "local" ? "local" : "object";
+  if (mode === "local" || mode === "object" || mode === "server") {
+    return mode;
+  }
+  return "object";
 }
 
 function getRuntimeImageSource() {

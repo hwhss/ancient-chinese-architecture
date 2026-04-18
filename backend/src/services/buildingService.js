@@ -13,12 +13,15 @@ const { getLocalImageByBuildingId } = require('../config/localImageMap');
 
 function normalizeImageSourceMode(mode) {
   const value = String(mode || '').trim().toLowerCase();
-  return value === 'local' ? 'local' : 'object';
+  if (value === 'local' || value === 'object' || value === 'server') {
+    return value;
+  }
+  return 'object';
 }
 
 function getImageSourceMode(requester) {
   const fromRequester = normalizeImageSourceMode(requester && requester.imageSource);
-  if (requester && requester.imageSource) {
+  if (fromRequester === 'local' || fromRequester === 'object' || fromRequester === 'server') {
     return fromRequester;
   }
   return normalizeImageSourceMode(config.imageSourceMode);
@@ -57,7 +60,7 @@ function ensureSignedUrl(url, options = {}, requester = null) {
   }
 
   const mode = getImageSourceMode(requester);
-  if (mode === 'local') {
+  if (mode === 'local' || mode === 'server') {
     return buildLocalAssetUrl(value);
   }
 
@@ -189,11 +192,14 @@ function getPreferredLocalBuildingImage(buildingId) {
 }
 
 function resolveBuildingImageResource(item, assetVerification, requester) {
-  if (getImageSourceMode(requester) === 'local') {
+  const mode = getImageSourceMode(requester);
+  if (mode === 'local' || mode === 'server') {
     const localMapped = getPreferredLocalBuildingImage(item && item.id);
     if (localMapped) {
       return localMapped;
     }
+
+    return '';
   }
 
   const verifiedUrl = assetVerification && assetVerification.verified
