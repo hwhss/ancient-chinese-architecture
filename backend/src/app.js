@@ -22,6 +22,13 @@ if (config.localAssetDir) {
   }));
 }
 
+if (config.localModelDir) {
+  app.use('/models', express.static(config.localModelDir, {
+    fallthrough: true,
+    maxAge: '10m'
+  }));
+}
+
 app.use(routes);
 app.use(notFoundHandler);
 app.use(errorHandler);

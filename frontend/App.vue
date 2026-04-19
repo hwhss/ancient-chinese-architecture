@@ -45,36 +45,11 @@ export default {
 /* 引入设计系统令牌 */
 @import './styles/design-tokens.css';
 
-/* ========== 中式字体引入 ========== */
-/* 
-  字体说明：
-  - 思源宋体 (Source Han Serif CN)：Adobe开源字体，免费商用，用于正文
-  - 仓耳今楷：免费商用楷体，用于标题
-  - 使用 CDN 加速，确保多端兼容
+/* ========== 字体策略 ========== */
+/*
+  开发态不再依赖跨域远端字体，避免第三方 CDN CORS 导致页面报错。
+  统一使用系统可用中文字体栈，线上若需要自托管字体可改为本地 /static/fonts 路径。
 */
-
-/* 思源宋体 - 正文用 */
-@font-face {
-  font-family: 'Source Han Serif CN';
-  src: url('https://chinese-font.netlify.app/packages/syst/dist/SourceHanSerifCN/result.woff2') format('woff2');
-  font-weight: 400;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Source Han Serif CN';
-  src: url('https://chinese-font.netlify.app/packages/syst/dist/SourceHanSerifCN-Bold/result.woff2') format('woff2');
-  font-weight: 700;
-  font-display: swap;
-}
-
-/* 仓耳今楷 - 标题用 */
-@font-face {
-  font-family: 'TsangerJinKai';
-  src: url('https://chinese-font.netlify.app/packages/tcjr/dist/%E4%BB%93%E8%80%B3%E4%BB%8A%E5%96%9C02-6753/result.woff2') format('woff2');
-  font-weight: 400;
-  font-display: swap;
-}
 
 /* ========== CSS 变量定义 ========== */
 page {

@@ -3,9 +3,20 @@
     <view class="topbar">
       <view class="page-container">
         <view class="topbar-inner">
-          <button class="back" @click="goBack">← 返回</button>
-          <text class="title">3D 导览</text>
-          <view class="topbar-gap"></view>
+          <button class="back" @click="goBack">
+            <text class="back-arrow">←</text>
+            <view class="back-copy">
+              <text class="back-label">返回</text>
+              <text class="back-subtitle">建筑列表</text>
+            </view>
+          </button>
+          <view class="title-block">
+            <text class="title">3D 导览</text>
+            <text class="subtitle">{{ buildingName }}</text>
+          </view>
+          <view class="topbar-badge">
+            <text class="topbar-badge-label">{{ activeModeLabel }}</text>
+          </view>
         </view>
       </view>
     </view>
@@ -20,55 +31,55 @@
       </view>
 
       <view v-else class="viewer-shell">
-        <view class="viewer-stage">
-          <image
-            v-if="stageCover"
-            class="stage-cover"
-            :src="stageCover"
-            mode="aspectFill"
-            lazy-load="true"
-          />
-          <view class="stage-mask"></view>
-
-          <view class="stage-chip-row">
-            <text class="stage-chip">{{ activeModeLabel }}</text>
-            <text class="stage-chip ghost">{{ manifest.activeVersion || "无可用版本" }}</text>
-          </view>
-
-          <view v-if="activeMode === 'model'" class="model-host-wrapper">
-            <view id="three-host" class="three-host"></view>
-            <view v-if="modelLoading" class="model-overlay">
-              <text class="model-overlay-text">three.js 正在加载模型...</text>
-            </view>
-            <view v-if="modelError" class="model-overlay model-overlay-error">
-              <text class="model-overlay-text">{{ modelError }}</text>
-            </view>
-            <view v-if="!isH5" class="model-overlay model-overlay-error">
-              <text class="model-overlay-text">当前环境不支持 three.js 实时渲染，请切换到 H5 预览。</text>
-            </view>
-            <view v-if="selectedHotspotInfo" class="hotspot-popup">
-              <view class="hotspot-popup-header">
-                <text class="hotspot-popup-title">{{ selectedHotspotInfo.title }}</text>
-                <button class="hotspot-popup-close" @click="closeHotspotPopup">×</button>
-              </view>
-              <text class="hotspot-popup-body">{{ selectedHotspotInfo.narration || "暂无讲解内容" }}</text>
-            </view>
-          </view>
-
-          <view v-else class="panorama-wrapper">
+        <view class="page-container viewer-container">
+          <view class="viewer-stage">
             <image
-              class="panorama-image"
-              :src="panoramaUrl || stageCover"
+              v-if="stageCover"
+              class="stage-cover"
+              :src="stageCover"
               mode="aspectFill"
               lazy-load="true"
             />
-            <view class="panorama-overlay">
-              <text class="panorama-label">PANORAMA PREVIEW</text>
+            <view class="stage-mask"></view>
+
+            <view class="stage-chip-row">
+              <text class="stage-chip">{{ activeModeLabel }}</text>
+              <text class="stage-chip ghost">{{ manifest.activeVersion || "无可用版本" }}</text>
+            </view>
+
+            <view v-if="activeMode === 'model'" class="model-host-wrapper">
+              <view id="three-host" class="three-host"></view>
+              <view v-if="modelLoading" class="model-overlay">
+                <text class="model-overlay-text">three.js 正在加载模型...</text>
+              </view>
+              <view v-if="modelError" class="model-overlay model-overlay-error">
+                <text class="model-overlay-text">{{ modelError }}</text>
+              </view>
+              <view v-if="!isH5" class="model-overlay model-overlay-error">
+                <text class="model-overlay-text">当前环境不支持 three.js 实时渲染，请切换到 H5 预览。</text>
+              </view>
+              <view v-if="selectedHotspotInfo" class="hotspot-popup">
+                <view class="hotspot-popup-header">
+                  <text class="hotspot-popup-title">{{ selectedHotspotInfo.title }}</text>
+                  <button class="hotspot-popup-close" @click="closeHotspotPopup">×</button>
+                </view>
+                <text class="hotspot-popup-body">{{ selectedHotspotInfo.narration || "暂无讲解内容" }}</text>
+              </view>
+            </view>
+
+            <view v-else class="panorama-wrapper">
+              <image
+                class="panorama-image"
+                :src="panoramaUrl || stageCover"
+                mode="aspectFill"
+                lazy-load="true"
+              />
+              <view class="panorama-overlay">
+                <text class="panorama-label">PANORAMA PREVIEW</text>
+              </view>
             </view>
           </view>
-        </view>
 
-        <view class="page-container">
           <view class="mode-switch" role="tablist">
             <button
               class="mode-btn"
@@ -90,19 +101,22 @@
           <view class="meta-card">
             <text class="meta-title">场景说明</text>
             <text class="meta-line">{{ manifest.preload.uiHint || "先加载占位资源，再切换高清资源" }}</text>
+            <text v-if="hasLodAvailable" class="meta-line">已启用 LOD 分级加载：先显示轻量模型，再切换高清模型。</text>
+            <text v-else class="meta-line">当前仅提供基础 3D 模型，LOD 分级加载与点击式热点讲解暂未开放。</text>
+            <text v-if="isFallbackGuide" class="meta-line">已提供赵州桥文本讲解，可先用于演示和内容校对。</text>
             <text class="meta-line">资源格式：{{ manifest.scene.format || "glb" }}</text>
             <text class="meta-line">过期时间：{{ expireText }}</text>
-            <text class="meta-line">LOD阶段：{{ lodPhaseText }}</text>
+            <text class="meta-line">加载状态：{{ lodPhaseText }}</text>
           </view>
   
           <view class="guide-card">
-            <text class="guide-title">热点讲解</text>
-            <view v-if="!hotspotGuide.length" class="guide-empty">
-              <text>当前版本暂无热点讲解</text>
+            <text class="guide-title">{{ guideTitle }}</text>
+            <view v-if="!displayGuide.length" class="guide-empty">
+              <text>当前建筑的热点讲解仍在开发中，赵州桥已支持文本讲解。</text>
             </view>
             <view v-else>
               <view
-                v-for="item in hotspotGuide"
+                v-for="item in displayGuide"
                 :key="item.id"
                 class="guide-item"
                 :class="{ selected: selectedHotspotId === item.id }"
@@ -218,6 +232,48 @@ function pickLodUrl(item) {
   return item && (item.modelUrl || item.url) ? String(item.modelUrl || item.url).trim() : "";
 }
 
+const FALLBACK_TEXT_GUIDE = {
+  zhaozhou_bridge: [
+    {
+      id: "zhaozhou-arch",
+      title: "一、敞肩拱总体结构",
+      narration:
+        "赵州桥采用单孔敞肩石拱，主拱上方开设小拱，既减轻自重，也提升泄洪能力，是古代桥梁结构创新的关键。",
+    },
+    {
+      id: "zhaozhou-force",
+      title: "二、受力与稳定性",
+      narration:
+        "主拱将荷载沿拱线向两侧桥台传递，形成稳定受力路径。石拱桥在材料抗压特性下表现优异，这也是其历经千年仍保持良好状态的重要原因。",
+    },
+    {
+      id: "zhaozhou-hydrology",
+      title: "三、水文适应能力",
+      narration:
+        "敞肩设计让洪水期水流更容易通过，减小桥体阻水压力。桥面、拱圈与泄洪关系的综合处理体现了古代工程对自然条件的精准适配。",
+    },
+    {
+      id: "zhaozhou-value",
+      title: "四、工程与文化价值",
+      narration:
+        "赵州桥不仅是交通设施，更是中国古代工程智慧的代表。它将结构效率、施工工艺与长期耐久性统一，是桥梁史上的里程碑。",
+    },
+  ],
+};
+
+const FALLBACK_GUIDE_ALIAS_MAP = {
+  zhaozhou_bridge: "zhaozhou_bridge",
+  zhaozhoubridge: "zhaozhou_bridge",
+  "赵州桥": "zhaozhou_bridge",
+};
+
+const TABBAR_PAGES = [
+  "/pages/home/home",
+  "/pages/map/map",
+  "/pages/index/index",
+  "/pages/favorites/favorites",
+];
+
 export default {
   data() {
     return {
@@ -311,6 +367,46 @@ export default {
         : [];
     },
 
+    hasLodAvailable() {
+      const preloadLod0 = String((this.manifest.preload && this.manifest.preload.lod0ModelUrl) || "").trim();
+      const lodList = Array.isArray(this.manifest.scene && this.manifest.scene.lod)
+        ? this.manifest.scene.lod
+        : [];
+      return Boolean(preloadLod0) || lodList.length > 0;
+    },
+
+    displayGuide() {
+      if (this.hotspotGuide.length) {
+        return this.hotspotGuide;
+      }
+
+      const candidateKeys = [
+        this.materialId,
+        this.manifest.buildingId,
+        this.manifest.buildingName,
+        this.materialName,
+      ]
+        .map((item) => String(item || "").trim())
+        .filter(Boolean)
+        .map((item) => FALLBACK_GUIDE_ALIAS_MAP[item] || item);
+
+      const matchedKey = candidateKeys.find((key) => Array.isArray(FALLBACK_TEXT_GUIDE[key]));
+      const guideById = matchedKey ? FALLBACK_TEXT_GUIDE[matchedKey] : [];
+      if (guideById.length) {
+        return guideById;
+      }
+
+      return [];
+    },
+
+    isFallbackGuide() {
+      return !this.hotspotGuide.length && this.displayGuide.length > 0;
+    },
+
+    guideTitle() {
+      return this.isFallbackGuide ? "赵州桥讲解（文本版）" : "热点讲解";
+    },
+
     expireText() {
       return formatExpireText(this.manifest.scene && this.manifest.scene.expiresAt);
     },
@@ -383,8 +479,9 @@ export default {
           this.activeMode = "model";
         }
 
-        if (this.hotspotGuide.length) {
-          this.selectedHotspotId = this.hotspotGuide[0].id;
+        if (this.displayGuide.length) {
+          this.selectedHotspotId = this.displayGuide[0].id;
+          this.selectedHotspotInfo = this.displayGuide[0];
         }
 
         if (this.activeMode === "model") {
@@ -583,7 +680,7 @@ export default {
 
       const hotspotId = hotspotMeshes.get(object.uuid);
       if (hotspotId) {
-        const hotspot = this.hotspotGuide.find((h) => h.id === hotspotId);
+        const hotspot = this.displayGuide.find((h) => h.id === hotspotId);
         if (hotspot) {
           this.selectedHotspotId = hotspotId;
           this.selectedHotspotInfo = hotspot;
@@ -772,7 +869,7 @@ export default {
       this.lodActiveUrl = `L${lodLevel}`;
 
       this.renderState.hotspotMeshes.clear();
-      this.hotspotGuide.forEach((hotspot) => {
+      this.displayGuide.forEach((hotspot) => {
         if (hotspot.meshName || hotspot.targetName) {
           const targetName = hotspot.meshName || hotspot.targetName;
           model.traverse((node) => {
@@ -869,8 +966,41 @@ export default {
       this.selectedHotspotInfo = null;
     },
 
+    goBackWithFallback() {
+      const target = this.materialId
+        ? `/pages/detail/detail?materialId=${encodeURIComponent(this.materialId)}`
+        : "/pages/home/home";
+
+      if (TABBAR_PAGES.includes(target)) {
+        uni.switchTab({
+          url: target,
+          fail: () => {
+            uni.switchTab({ url: "/pages/home/home" });
+          },
+        });
+        return;
+      }
+
+      uni.redirectTo({
+        url: target,
+        fail: () => {
+          uni.switchTab({ url: "/pages/home/home" });
+        },
+      });
+    },
+
     goBack() {
-      uni.navigateBack();
+      const pages = getCurrentPages();
+      if (pages.length > 1) {
+        uni.navigateBack({
+          fail: () => {
+            this.goBackWithFallback();
+          },
+        });
+        return;
+      }
+
+      this.goBackWithFallback();
     },
   },
 };
@@ -879,48 +1009,125 @@ export default {
 <style>
 .page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #f5efe4 0%, #efe2ce 100%);
+  background:
+    radial-gradient(circle at top, rgba(255, 248, 233, 0.95) 0%, rgba(245, 238, 224, 0.82) 35%, rgba(234, 222, 199, 1) 100%);
 }
 
 .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: 20rpx 0 18rpx;
+  background: linear-gradient(180deg, rgba(110, 63, 34, 0.98) 0%, rgba(95, 53, 27, 0.94) 100%);
+  box-shadow: 0 10rpx 28rpx rgba(71, 39, 18, 0.18);
+}
+
+.topbar-inner {
   display: flex;
   align-items: center;
-  padding: 30rpx 24rpx 36rpx;
-  background: #6e3f22;
+  gap: 18rpx;
 }
 
 .back {
-  padding: 12rpx 22rpx;
-  border-radius: 24rpx;
-  border: 1rpx solid rgba(255, 255, 255, 0.45);
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 16rpx 20rpx 16rpx 18rpx;
+  border-radius: 999rpx;
+  border: 1rpx solid rgba(255, 241, 220, 0.26);
+  background: rgba(255, 247, 233, 0.12);
+  color: #fff6e6;
+  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.15), 0 10rpx 22rpx rgba(48, 24, 8, 0.14);
+}
+
+.back-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 245, 228, 0.16);
+  font-size: 28rpx;
+  line-height: 1;
+}
+
+.back-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.1;
+}
+
+.back-label {
   font-size: 26rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+}
+
+.back-subtitle {
+  margin-top: 4rpx;
+  font-size: 18rpx;
+  color: rgba(255, 243, 224, 0.72);
+}
+
+.title-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6rpx;
+  min-width: 0;
 }
 
 .title {
-  flex: 1;
   text-align: center;
   color: #fff4de;
-  font-size: 34rpx;
+  font-size: 36rpx;
+  font-weight: 700;
+  letter-spacing: 4rpx;
+  line-height: 1.1;
+}
+
+.subtitle {
+  text-align: center;
+  color: rgba(255, 242, 220, 0.78);
+  font-size: 20rpx;
+  letter-spacing: 1rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topbar-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 140rpx;
+  padding: 14rpx 18rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 247, 233, 0.12);
+  border: 1rpx solid rgba(255, 241, 220, 0.16);
+}
+
+.topbar-badge-label {
+  color: #fff6e8;
+  font-size: 22rpx;
   font-weight: 600;
   letter-spacing: 2rpx;
 }
 
-.topbar-gap {
-  width: 120rpx;
-}
-
 .body {
-  padding: 24rpx;
+  padding: 28rpx 24rpx 40rpx;
 }
 
 .state-card {
-  padding: 90rpx 28rpx;
-  border-radius: 18rpx;
+  padding: 110rpx 28rpx;
+  border-radius: 28rpx;
   border: 1rpx solid #d9c3a5;
   background: #fff9f0;
   text-align: center;
+  box-shadow: 0 18rpx 42rpx rgba(77, 54, 31, 0.08);
 }
 
 .state-text {
@@ -939,16 +1146,21 @@ export default {
 .viewer-shell {
   display: flex;
   flex-direction: column;
-  gap: 18rpx;
+  gap: 24rpx;
+}
+
+.viewer-container {
+  max-width: 900px;
 }
 
 .viewer-stage {
   position: relative;
-  min-height: 420rpx;
-  border-radius: 18rpx;
+  min-height: 700rpx;
+  border-radius: 30rpx;
   overflow: hidden;
-  background: #1f1913;
-  border: 1rpx solid #cfb38f;
+  background: linear-gradient(180deg, #241b14 0%, #17100c 100%);
+  border: 1rpx solid rgba(207, 179, 143, 0.75);
+  box-shadow: 0 28rpx 60rpx rgba(51, 31, 17, 0.18);
 }
 
 .stage-cover {
@@ -961,22 +1173,25 @@ export default {
 .stage-mask {
   position: absolute;
   inset: 0;
-  background: linear-gradient(150deg, rgba(42, 26, 12, 0.75) 0%, rgba(18, 10, 4, 0.48) 100%);
+  background:
+    radial-gradient(circle at 20% 15%, rgba(255, 196, 120, 0.16) 0%, transparent 35%),
+    linear-gradient(150deg, rgba(42, 26, 12, 0.78) 0%, rgba(18, 10, 4, 0.44) 100%);
 }
 
 .stage-chip-row {
   position: absolute;
-  top: 18rpx;
-  left: 18rpx;
-  right: 18rpx;
+  top: 22rpx;
+  left: 22rpx;
+  right: 22rpx;
   display: flex;
-  gap: 10rpx;
+  gap: 12rpx;
+  flex-wrap: wrap;
 }
 
 .stage-chip {
-  padding: 6rpx 14rpx;
+  padding: 10rpx 16rpx;
   border-radius: 999rpx;
-  font-size: 22rpx;
+  font-size: 20rpx;
   color: #fff7ea;
   background: rgba(131, 80, 41, 0.82);
 }
@@ -988,12 +1203,12 @@ export default {
 .model-placeholder {
   position: relative;
   z-index: 2;
-  min-height: 420rpx;
+  min-height: 700rpx;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: flex-start;
-  padding: 30rpx;
+  padding: 42rpx 34rpx;
 }
 
 .placeholder-badge {
@@ -1007,15 +1222,15 @@ export default {
 }
 
 .placeholder-title {
-  font-size: 42rpx;
+  font-size: 50rpx;
   font-weight: 700;
   color: #fff5df;
-  margin-bottom: 12rpx;
+  margin-bottom: 14rpx;
 }
 
 .placeholder-desc {
-  width: 90%;
-  font-size: 26rpx;
+  width: 78%;
+  font-size: 28rpx;
   line-height: 1.6;
   color: #f5debd;
 }
@@ -1023,12 +1238,12 @@ export default {
 .model-host-wrapper {
   position: relative;
   z-index: 2;
-  min-height: 420rpx;
+  min-height: 700rpx;
 }
 
 .three-host {
   width: 100%;
-  height: 420rpx;
+  height: 700rpx;
 }
 
 .model-overlay {
@@ -1054,17 +1269,16 @@ export default {
 
 .hotspot-popup {
   position: absolute;
-  right: 18rpx;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 280rpx;
-  max-height: 300rpx;
+  right: 22rpx;
+  top: 22rpx;
+  width: min(340rpx, 42%);
+  max-height: 54%;
   background: rgba(248, 244, 233, 0.95);
   border: 2rpx solid #c82506;
-  border-radius: 12rpx;
-  padding: 20rpx;
+  border-radius: 18rpx;
+  padding: 22rpx;
   z-index: 10;
-  box-shadow: 0 4rpx 20rpx rgba(200, 37, 6, 0.3);
+  box-shadow: 0 16rpx 36rpx rgba(200, 37, 6, 0.18);
 }
 
 .hotspot-popup-header {
@@ -1077,7 +1291,7 @@ export default {
 }
 
 .hotspot-popup-title {
-  font-size: 28rpx;
+  font-size: 30rpx;
   font-weight: 600;
   color: var(--secondary);
   flex: 1;
@@ -1099,7 +1313,7 @@ export default {
 }
 
 .hotspot-popup-body {
-  font-size: 24rpx;
+  font-size: 25rpx;
   color: #5e4530;
   line-height: 1.6;
 }
@@ -1107,41 +1321,43 @@ export default {
 .panorama-wrapper {
   position: relative;
   z-index: 2;
-  min-height: 420rpx;
+  min-height: 700rpx;
 }
 
 .panorama-image {
   width: 100%;
-  height: 420rpx;
+  height: 700rpx;
 }
 
 .panorama-overlay {
   position: absolute;
-  left: 20rpx;
-  bottom: 20rpx;
+  left: 22rpx;
+  bottom: 22rpx;
 }
 
 .panorama-label {
-  padding: 8rpx 14rpx;
-  border-radius: 8rpx;
-  font-size: 20rpx;
+  padding: 10rpx 16rpx;
+  border-radius: 999rpx;
+  font-size: 18rpx;
   color: #f7ebd5;
   background: rgba(44, 24, 10, 0.7);
+  letter-spacing: 2rpx;
 }
 
 .mode-switch {
   display: flex;
-  gap: 12rpx;
+  gap: 14rpx;
 }
 
 .mode-btn {
   flex: 1;
-  padding: 18rpx 12rpx;
-  border-radius: 14rpx;
+  padding: 22rpx 14rpx;
+  border-radius: 18rpx;
   border: 1rpx solid #d0b590;
   background: #f8efde;
   color: #69452b;
-  font-size: 26rpx;
+  font-size: 27rpx;
+  box-shadow: 0 8rpx 20rpx rgba(92, 61, 32, 0.06);
 }
 
 .mode-btn.active {
@@ -1158,36 +1374,37 @@ export default {
 .guide-card {
   background: #fff9ef;
   border: 1rpx solid #dfc9aa;
-  border-radius: 16rpx;
-  padding: 20rpx;
+  border-radius: 22rpx;
+  padding: 24rpx;
+  box-shadow: 0 12rpx 28rpx rgba(85, 58, 31, 0.05);
 }
 
 .meta-title,
 .guide-title {
   display: block;
-  margin-bottom: 10rpx;
-  font-size: 30rpx;
+  margin-bottom: 12rpx;
+  font-size: 32rpx;
   color: #3f2818;
   font-weight: 700;
 }
 
 .meta-line {
   display: block;
-  margin-top: 8rpx;
-  font-size: 25rpx;
+  margin-top: 10rpx;
+  font-size: 26rpx;
   color: #5e4530;
   line-height: 1.6;
 }
 
 .guide-empty {
-  font-size: 25rpx;
+  font-size: 26rpx;
   color: #866a52;
 }
 
 .guide-item {
-  margin-top: 10rpx;
-  padding: 14rpx;
-  border-radius: 12rpx;
+  margin-top: 12rpx;
+  padding: 16rpx;
+  border-radius: 16rpx;
   border: 1rpx solid #e3cfb2;
   background: #fdf5e8;
 }
@@ -1201,15 +1418,48 @@ export default {
 .guide-item-title {
   display: block;
   margin-bottom: 8rpx;
-  font-size: 27rpx;
+  font-size: 28rpx;
   color: #3f2a1a;
   font-weight: 600;
 }
 
 .guide-item-body {
   display: block;
-  font-size: 24rpx;
+  font-size: 25rpx;
   color: #6a4e3a;
   line-height: 1.55;
+}
+
+.back::after,
+.mode-btn::after,
+.hotspot-popup-close::after {
+  border: none;
+}
+
+@media screen and (min-width: 768px) {
+  .body {
+    padding: 36rpx 32rpx 52rpx;
+  }
+
+  .viewer-stage {
+    min-height: 820rpx;
+  }
+
+  .model-placeholder,
+  .model-host-wrapper,
+  .three-host,
+  .panorama-wrapper,
+  .panorama-image {
+    min-height: 820rpx;
+    height: 820rpx;
+  }
+
+  .placeholder-desc {
+    width: 64%;
+  }
+
+  .hotspot-popup {
+    width: 360rpx;
+  }
 }
 </style>

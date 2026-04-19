@@ -10,6 +10,7 @@ const { buildSignedAssetUrl } = require('../utils/signedAsset');
 const { verifyAssetOwnership } = require('./assetVerification');
 const { getOptimizedSignedUrl } = require('./qiniuService');
 const { getLocalImageByBuildingId } = require('../config/localImageMap');
+const { getLocalModelLodUrlsByBuildingId } = require('../config/localModelMap');
 
 function normalizeImageSourceMode(mode) {
   const value = String(mode || '').trim().toLowerCase();
@@ -287,6 +288,58 @@ function normalizeModelVersions(model3d) {
   return [];
 }
 
+function injectLocalModelFallback(buildingId, profile) {
+  const safeProfile = profile && typeof profile === 'object' ? profile : {};
+  const currentModel3d = safeProfile.model3d && typeof safeProfile.model3d === 'object'
+    ? safeProfile.model3d
+    : {};
+
+  const currentVersions = normalizeModelVersions(currentModel3d);
+  if (currentVersions.length > 0) {
+    return safeProfile;
+  }
+
+  const localModel = getLocalModelLodUrlsByBuildingId(buildingId);
+  if (!localModel.hdUrl) {
+    return safeProfile;
+  }
+
+  const basePreload = currentModel3d.preload || {};
+  const lodItems = localModel.hasLod
+    ? [{ level: 0, modelUrl: localModel.lod0Url, label: 'LOD0 占位' }]
+    : [];
+
+  const fallbackNote = localModel.hasLod
+    ? '本地GLB模型（支持 LOD0 先加载，再切换高清）'
+    : '本地GLB模型（PG无版本时兜底）';
+
+  return {
+    ...safeProfile,
+    model3d: {
+      ...currentModel3d,
+      status: currentModel3d.status || 'ready',
+      viewerType: currentModel3d.viewerType || 'model-viewer',
+      note: currentModel3d.note || fallbackNote,
+      versions: [{
+        version: 'v1',
+        label: '默认版本',
+        modelUrl: localModel.hdUrl,
+        format: 'glb',
+        allowedRoles: ['viewer', 'admin'],
+        draco: false,
+        ktx2: false,
+        lod: lodItems,
+        preload: {
+          ...basePreload,
+          lod0ModelUrl: localModel.hasLod ? localModel.lod0Url : (basePreload.lod0ModelUrl || '')
+        },
+        hotspots: [],
+        camera: currentModel3d.camera || null
+      }]
+    }
+  };
+}
+
 function normalizeRequester(requester) {
   const role = String(requester && requester.role ? requester.role : 'viewer').trim().toLowerCase();
   return {
@@ -543,7 +596,8 @@ async function getBuildingModel3d(id, requester) {
     return null;
   }
 
-  const profile = await getBuildingProfileById(id) || {};
+  const rawProfile = await getBuildingProfileById(id) || {};
+  const profile = injectLocalModelFallback(id, rawProfile);
   const versions = normalizeModelVersions(profile.model3d || null);
   const filteredVersions = versions.filter((versionItem) => canRequesterAccessVersion(requester, versionItem));
   const signedVersions = filteredVersions.map((versionItem) => buildSignedVersion(versionItem, id, requester));
@@ -570,7 +624,8 @@ async function getBuildingModel3dManifest(id, requester) {
     return null;
   }
 
-  const profile = await getBuildingProfileById(id) || {};
+  const rawProfile = await getBuildingProfileById(id) || {};
+  const profile = injectLocalModelFallback(id, rawProfile);
   const model3d = buildModel3d(profile, item.image, requester);
   const versions = normalizeModelVersions(profile.model3d || null)
     .filter((versionItem) => canRequesterAccessVersion(requester, versionItem))

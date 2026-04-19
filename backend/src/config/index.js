@@ -59,6 +59,8 @@ const config = {
   imageSourceMode: String(process.env.IMAGE_SOURCE_MODE || 'object').trim().toLowerCase(),
   localAssetBaseUrl: String(process.env.LOCAL_ASSET_BASE_URL || '').trim().replace(/\/$/, ''),
   localAssetDir: String(process.env.LOCAL_ASSET_DIR || '').trim(),
+  localModelDir: String(process.env.LOCAL_MODEL_DIR || '').trim(),
+  localModelBaseUrl: String(process.env.LOCAL_MODEL_BASE_URL || '').trim().replace(/\/$/, ''),
   embeddingProvider: String(process.env.EMBEDDING_PROVIDER || 'dashscope').trim().toLowerCase(),
   embeddingApiUrl: String(process.env.EMBEDDING_API_URL || 'https://dashscope.aliyuncs.com/compatible-mode/v1').trim(),
   embeddingApiKey: String(process.env.EMBEDDING_API_KEY || String(process.env.DASHSCOPE_API_KEY || '')).trim(),

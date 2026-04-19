@@ -1,5 +1,29 @@
 const crypto = require('crypto');
 
+function normalizeIp(value) {
+  const text = String(value || '').trim().toLowerCase();
+  if (!text) {
+    return '';
+  }
+
+  const first = text.split(',')[0].trim();
+  const noZone = first.replace(/%.+$/, '');
+
+  if (noZone === '::1' || noZone === '127.0.0.1' || noZone === 'localhost') {
+    return 'loopback';
+  }
+
+  if (noZone.startsWith('::ffff:')) {
+    const mappedIpv4 = noZone.slice('::ffff:'.length);
+    if (mappedIpv4 === '127.0.0.1') {
+      return 'loopback';
+    }
+    return mappedIpv4;
+  }
+
+  return noZone;
+}
+
 function hashText(value) {
   return crypto.createHash('sha256').update(String(value || '')).digest('hex');
 }
@@ -71,7 +95,9 @@ function verifySignedToken(token, secret, context = {}) {
   const requestIp = String(context.ip || '').trim();
   const requestUserAgent = String(context.userAgent || '').trim();
 
-  if (payload.bindIp && requestIp && payload.bindIp !== requestIp) {
+  const payloadIp = normalizeIp(payload.bindIp);
+  const currentIp = normalizeIp(requestIp);
+  if (payloadIp && currentIp && payloadIp !== currentIp) {
     return { ok: false, message: '签名使用环境不匹配(IP)' };
   }
 
@@ -107,7 +133,7 @@ function buildSignedAssetUrl(options) {
     version,
     userId,
     role,
-    bindIp: bindIp || '',
+    bindIp: normalizeIp(bindIp),
     bindUaHash: userAgent ? hashText(userAgent) : '',
     exp
   };
