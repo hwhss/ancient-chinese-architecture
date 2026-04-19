@@ -644,6 +644,8 @@ export default {
   height: 100%;
   position: relative;
   z-index: 2;
+  padding-bottom: calc(120rpx + env(safe-area-inset-bottom));
+  box-sizing: border-box;
 }
 
 .view-transition-container {

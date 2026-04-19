@@ -585,6 +585,6 @@ export default {
 
 /* 底部占位 */
 .bottom-spacer {
-  height: 40rpx;
+  height: 120rpx;
 }
 </style>

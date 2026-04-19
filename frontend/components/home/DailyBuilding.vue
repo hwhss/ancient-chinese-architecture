@@ -13,7 +13,7 @@
       </view>
 
       <view v-if="building" class="daily-card-wrapper">
-        <view class="daily-card rice-paper card-ink" @click="onCardClick">
+        <view class="daily-card card-ink" @click="onCardClick">
           <!-- 整体背景图片 -->
           <view v-if="hasImage" class="daily-image-bg" :style="{ backgroundImage: 'url(' + building.image + ')' }">
             <view class="daily-overlay"></view>

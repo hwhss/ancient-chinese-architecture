@@ -1,6 +1,6 @@
 <template>
   <view class="section-preview" :class="{ 'visible': visible }">
-    <view class="page-container">
+    <view class="page-container" style="overflow: visible;">
       <view class="section-header">
         <view class="title-with-icon">
           <TraditionalIcon name="garden" size="44" style="color: var(--secondary)" />
@@ -15,7 +15,7 @@
         <view 
           v-for="(building, index) in buildings" 
           :key="building.id"
-          class="preview-card rice-paper card-ink" 
+          class="preview-card card-ink" 
           :class="{ 'visible': visibleCards[index] }"
           @click="onGoToDetail(building)"
         >
@@ -76,10 +76,11 @@ export default {
 <style scoped>
 .section-preview {
   padding: 60rpx 32rpx;
-  opacity: 0;
-  transform: translateY(30px);
+  opacity: 1;
+  transform: translateY(0);
   transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   will-change: transform, opacity;
+  overflow: visible;
 }
 
 .section-preview.visible {
@@ -150,6 +151,8 @@ export default {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 20rpx;
+  width: 100%;
+  overflow: visible;
 }
 
 @media (min-width: 768px) {
@@ -170,13 +173,15 @@ export default {
 .preview-card {
   background: var(--bg-card);
   border-radius: 12rpx;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 8rpx 24rpx rgba(44, 30, 19, 0.08);
   border: 1rpx solid var(--border);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
-  opacity: 0;
-  transform: translateY(20px);
+  opacity: 1;
+  transform: translateY(0);
+  display: flex;
+  flex-direction: column;
 }
 
 .preview-card.visible {
@@ -202,6 +207,8 @@ export default {
   background-position: center;
   transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  overflow: hidden;
+  border-radius: 12rpx 12rpx 0 0;
 }
 
 .card-overlay {
@@ -237,6 +244,8 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 6rpx;
+  flex-shrink: 0;
+  min-height: auto;
 }
 
 .card-name {
